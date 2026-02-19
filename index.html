@@ -91,9 +91,6 @@ async function loadJournal(endpoint, coverId, newsId) {
     const response = await fetch(endpoint);
     const data = await response.json();
 
-    // CAPA
-    document.getElementById(coverId).src = data.cover;
-
     // NOTÍCIAS
     const container = document.getElementById(newsId);
     container.innerHTML = "";

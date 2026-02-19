@@ -1,27 +1,40 @@
 export default async function handler(req, res) {
   try {
-    const response = await fetch(
-      "https://news.google.com/rss/search?q=Sporting+site:ojogo.pt&hl=pt-PT&gl=PT&ceid=PT:pt"
+    const cover = "https://www.ojogo.pt/assets/img/ojogo-logo.png";
+    const coverLink = "https://www.ojogo.pt/";
+
+    const newsResponse = await fetch(
+      "https://news.google.com/rss/search?q=Sporting+site:ojogo.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
+      { headers: { "User-Agent": "Mozilla/5.0" } }
     );
 
-    const xml = await response.text();
+    const xml = await newsResponse.text();
+    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
 
-    const cover = "https://www.ojogo.pt/assets/img/ojogo-logo.png";
+    const news = items.slice(0, 3).map(item => {
+      const titleMatch = item[1].match(/<title>(.*?)<\/title>/);
+      const linkMatch = item[1].match(/<link>(.*?)<\/link>/);
 
-    const news = [];
+      const title = titleMatch
+        ? titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "")
+        : "Sem título";
 
-    const items = xml.split("<item>").slice(0, 4);
+      const link = linkMatch ? linkMatch[1] : "#";
 
-    items.forEach(item => {
-      const title = item.split("<title>")[1]?.split("</title>")[0] || "Sem título";
-      const link = item.split("<link>")[1]?.split("</link>")[0] || "#";
-
-      news.push({ title, link });
+      return { title, link };
     });
 
-    res.status(200).json({ cover, news });
+    res.status(200).json({
+      cover,
+      coverLink,
+      news
+    });
 
   } catch (error) {
-    res.status(500).json({ error: "Erro O Jogo" });
+    res.status(200).json({
+      cover: "/ojogo.png",
+      coverLink: "https://www.ojogo.pt/",
+      news: []
+    });
   }
 }

@@ -26,11 +26,11 @@ h1 {
 }
 
 .column {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 300px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  cursor: pointer;
 }
 
 .column h2 {
@@ -91,10 +91,16 @@ async function loadJournal(endpoint, coverId, newsId) {
     const response = await fetch(endpoint);
     const data = await response.json();
  
-    // CAPA
+// CAPA
 if (data.cover) {
-  document.getElementById(coverId).src = data.cover;
+  const img = document.getElementById(coverId);
+  img.src = data.cover;
+
+  img.onclick = () => {
+    window.open(data.cover, "_blank");
+  };
 }
+
 
     // NOTÍCIAS
     const container = document.getElementById(newsId);

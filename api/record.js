@@ -1,23 +1,25 @@
 module.exports = async (req, res) => {
   try {
-    // CAPA DO DIA
+    // Buscar página das capas
     const coverResponse = await fetch("https://www.record.pt/capas", {
       headers: { "User-Agent": "Mozilla/5.0" }
     });
 
-    const coverHtml = await coverResponse.text();
+    const html = await coverResponse.text();
 
-    const coverMatch = coverHtml.match(/<img[^>]+src="([^"]+)"[^>]+capa/i);
+    // Procurar imagem da capa
+    const match = html.match(/img_80x100uu([^"]+)\.jpg/);
+
     let cover = "/record.png";
 
-    if (coverMatch) {
-      cover = coverMatch[1];
-      if (!cover.startsWith("http")) {
-        cover = "https://www.record.pt" + cover;
-      }
+    if (match) {
+      const imageId = match[1];
+
+      // Construir versão grande
+      cover = `https://cdn.record.pt/images/2026-02/img_1200x1200uu${imageId}.jpg`;
     }
 
-    // NOTÍCIAS (Google RSS)
+    // NOTÍCIAS via Google RSS
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:record.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }

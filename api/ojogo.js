@@ -1,6 +1,5 @@
 module.exports = async (req, res) => {
   try {
-    // Buscar página oficial da capa
     const coverResponse = await fetch(
       "https://www.vercapas.com/capa/o-jogo.html",
       { headers: { "User-Agent": "Mozilla/5.0" } }
@@ -8,8 +7,8 @@ module.exports = async (req, res) => {
 
     const html = await coverResponse.text();
 
-    // Extrair imagem através da meta og:image (mais fiável)
-    const match = html.match(/<meta property="og:image" content="([^"]+)"/);
+    // Procurar imagem principal da capa
+    const match = html.match(/<img[^>]+src="([^"]+)"[^>]*class="img-fluid"/);
 
     let cover = "/ojogo.png";
 

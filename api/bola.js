@@ -1,24 +1,5 @@
 module.exports = async (req, res) => {
   try {
-    // CAPA A BOLA
-    const coverResponse = await fetch("https://www.abola.pt/capas", {
-      headers: { "User-Agent": "Mozilla/5.0" }
-    });
-
-    const html = await coverResponse.text();
-
-    const match = html.match(/img.*?src="([^"]+)"[^>]*capa/i);
-
-    let cover = "/abola.png";
-
-    if (match) {
-      cover = match[1];
-      if (!cover.startsWith("http")) {
-        cover = "https://www.abola.pt" + cover;
-      }
-    }
-
-    // NOTÍCIAS (Google RSS)
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }
@@ -38,7 +19,7 @@ module.exports = async (req, res) => {
     });
 
     res.status(200).json({
-      cover,
+      cover: "/abola.png",
       news
     });
 

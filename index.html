@@ -124,16 +124,18 @@ async function loadJournal(endpoint, coverId, newsId, dynamicCover = false) {
       const img = document.getElementById(coverId);
       img.src = data.cover;
 
-      img.onclick = () => {
-      if (endpoint.includes("record")) {
+    img.onclick = () => {
+      if (coverId === "record-cover") {
         window.open("https://www.record.pt/capas", "_blank");
-      } else if (endpoint.includes("bola")) {
-        window.open("https://www.abola.pt/capas", "_blank");
-      } else if (endpoint.includes("ojogo")) {
-        window.open("https://www.ojogo.pt/capas", "_blank");
+      } 
+      else if (coverId === "bola-cover") {
+        window.open("https://www.abola.pt/noticias/19-de-fevereiro-de-2026-2026021823521685096", "_blank");
+      } 
+      else if (coverId === "ojogo-cover") {
+        window.open("https://loja.ojogo.pt/edicao-do-dia", "_blank");
       }
-      };
-    }
+    };
+
 
     // NOTÍCIAS
     if (data.news && data.news.length > 0) {

@@ -1,7 +1,8 @@
 export default async function handler(req, res) {
   try {
-    const cover = "https://www.ojogo.pt/assets/img/ojogo-logo.png";
-    const coverLink = "https://www.ojogo.pt/";
+
+    const cover = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/O_Jogo_logo.svg/1200px-O_Jogo_logo.svg.png";
+    const coverLink = "https://loja.ojogo.pt/edicao-do-dia";
 
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:ojogo.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
@@ -33,7 +34,7 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(200).json({
       cover: "/ojogo.png",
-      coverLink: "https://www.ojogo.pt/",
+      coverLink: "https://loja.ojogo.pt/edicao-do-dia",
       news: []
     });
   }

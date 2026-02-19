@@ -36,56 +36,46 @@ a {
 a:hover {
   text-decoration: underline;
 }
-
-.loading {
-  text-align: center;
-  margin-top: 20px;
-}
 </style>
 </head>
 
 <body>
 
 <h1>Canal Sporting - Notícias</h1>
-
-<div id="news" class="loading">A carregar notícias...</div>
+<div id="news">A carregar notícias...</div>
 
 <script>
 
-// Feed Google News Sporting
-const rssFeed = "https://news.google.com/rss/search?q=Sporting+CP&hl=pt-PT&gl=PT&ceid=PT:pt";
+const feedURL = "https://api.allorigins.win/get?url=" +
+encodeURIComponent("https://news.google.com/rss/search?q=Sporting+CP&hl=pt-PT&gl=PT&ceid=PT:pt");
 
-// Converter RSS para JSON
-const apiURL = "https://api.rss2json.com/v1/api.json?rss_url=" + encodeURIComponent(rssFeed);
-
-fetch(apiURL)
+fetch(feedURL)
   .then(response => response.json())
   .then(data => {
+
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(data.contents, "text/xml");
+    const items = xml.querySelectorAll("item");
 
     const container = document.getElementById("news");
     container.innerHTML = "";
 
-    if (!data.items) {
-      container.innerHTML = "Erro a carregar notícias.";
-      return;
-    }
+    items.forEach((item, index) => {
+      if (index < 15) {
 
-    data.items.slice(0, 20).forEach(item => {
+        const title = item.querySelector("title").textContent;
+        const link = item.querySelector("link").textContent;
 
-      const div = document.createElement("div");
-      div.className = "card";
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `<a href="${link}" target="_blank">${title}</a>`;
 
-      div.innerHTML = `
-        <a href="${item.link}" target="_blank">
-          ${item.title}
-        </a>
-      `;
-
-      container.appendChild(div);
+        container.appendChild(div);
+      }
     });
 
   })
-  .catch(() => {
+  .catch(error => {
     document.getElementById("news").innerHTML =
       "Erro a carregar notícias.";
   });

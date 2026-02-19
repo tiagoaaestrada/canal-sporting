@@ -1,14 +1,16 @@
 export default async function handler(req, res) {
   try {
-    const response = await fetch("https://www.abola.pt/rss");
+    const response = await fetch(
+      "https://news.google.com/rss/search?q=Sporting+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt"
+    );
+
     const xml = await response.text();
 
-    // 🔵 Imagem real que funciona
     const cover = "https://cdn.abola.pt/images/2026-02/abola_capa.jpg";
 
     const news = [];
 
-    const items = xml.split("<item>").slice(1, 4);
+    const items = xml.split("<item>").slice(0, 4);
 
     items.forEach(item => {
       const title = item.split("<title>")[1]?.split("</title>")[0] || "Sem título";

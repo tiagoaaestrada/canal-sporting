@@ -12,13 +12,13 @@ module.exports = async (req, res) => {
     const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
 
     const news = items.slice(0, 3).map(item => {
-      const title = item[1].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/);
-      const link = item[1].match(/<link>(.*?)<\/link>/);
+      const titleMatch = item[1].match(/<title>(.*?)<\/title>/);
+      const linkMatch = item[1].match(/<link>(.*?)<\/link>/);
 
-      return {
-        title: title ? title[1] : "Sem título",
-        link: link ? link[1] : "#"
-      };
+      const title = titleMatch ? titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "") : "Sem título";
+      const link = linkMatch ? linkMatch[1] : "#";
+
+      return { title, link };
     });
 
     res.status(200).json({

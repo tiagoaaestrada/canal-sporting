@@ -1,10 +1,10 @@
 export default async function handler(req, res) {
   try {
-    // CAPA (url direta)
-    const cover = "https://cdn.abola.pt/images/2026-02/abola_capa.jpg";
+
+    // Usamos logo estável para evitar bloqueio de hotlink
+    const cover = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/A_Bola_logo.svg/1200px-A_Bola_logo.svg.png";
     const coverLink = "https://www.abola.pt/";
 
-    // RSS notícias
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }

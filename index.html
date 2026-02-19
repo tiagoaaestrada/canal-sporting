@@ -1,24 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Canal Sporting</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    h1 {
+      color: #0a5c2a;
+      margin: 40px 0;
+    }
+
+    .container {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 20px;
+      flex-wrap: wrap;
+    }
+
+    .column {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      width: 300px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .column h2 {
+      color: #0a5c2a;
+      margin-bottom: 15px;
+    }
+
+    .column img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      cursor: pointer;
+    }
+
+    .news {
+      text-align: left;
+    }
+
+    .news a {
+      display: block;
+      margin-bottom: 10px;
+      color: #0a5c2a;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .news a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Canal Sporting</h1>
+
+  <div class="container">
+
+    <div class="column">
+      <h2>Record</h2>
+      <img id="record-cover" src="/record.png" />
+      <div id="record-news" class="news"></div>
+    </div>
+
+    <div class="column">
+      <h2>A Bola</h2>
+      <img id="bola-cover" src="/abola.png" />
+      <div id="bola-news" class="news"></div>
+    </div>
+
+    <div class="column">
+      <h2>O Jogo</h2>
+      <img id="ojogo-cover" src="/ojogo.png" />
+      <div id="ojogo-news" class="news"></div>
+    </div>
+
+  </div>
+
 <script>
-async function loadJournal(endpoint, coverId, newsId) {
+async function loadJournal(endpoint, coverId, newsId, dynamicCover = false) {
   try {
     const response = await fetch(endpoint);
     const data = await response.json();
 
-    // ===== CAPA =====
-    if (data.cover) {
+    const container = document.getElementById(newsId);
+    container.innerHTML = "";
+
+    // CAPA DINÂMICA (só Record)
+    if (dynamicCover && data.cover) {
       const img = document.getElementById(coverId);
       img.src = data.cover;
 
-      // abrir capa em nova aba ao clicar
       img.onclick = () => {
         window.open(data.cover, "_blank");
       };
     }
 
-    // ===== NOTÍCIAS =====
-    const container = document.getElementById(newsId);
-    container.innerHTML = "";
-
+    // NOTÍCIAS
     if (data.news && data.news.length > 0) {
       data.news.forEach(item => {
         const link = document.createElement("a");
@@ -27,8 +119,6 @@ async function loadJournal(endpoint, coverId, newsId) {
         link.textContent = item.title;
         container.appendChild(link);
       });
-    } else {
-      container.innerHTML = "<p>Sem notícias disponíveis.</p>";
     }
 
   } catch (error) {
@@ -36,9 +126,14 @@ async function loadJournal(endpoint, coverId, newsId) {
   }
 }
 
-// Carregar os 3 jornais
-loadJournal("/api/record", "record-cover", "record-news");
+// Record com capa dinâmica
+loadJournal("/api/record", "record-cover", "record-news", true);
+
+// Bola e O Jogo normais
 loadJournal("/api/bola", "bola-cover", "bola-news");
 loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
+
 </script>
 
+</body>
+</html>

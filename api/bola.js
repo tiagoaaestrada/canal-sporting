@@ -1,9 +1,24 @@
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   try {
 
-    const cover = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/A_Bola_logo.svg/1200px-A_Bola_logo.svg.png";
-    const coverLink = "https://www.abola.pt/noticias/19-de-fevereiro-de-2026-2026021823521685096";
+    // Buscar página da edição do dia
+    const coverResponse = await fetch(
+      "https://www.abola.pt/edicao-do-dia",
+      { headers: { "User-Agent": "Mozilla/5.0" } }
+    );
 
+    const html = await coverResponse.text();
+
+    // Procurar imagem da capa (ajustável se necessário)
+    const match = html.match(/https:\/\/cdn\.abola\.pt\/images\/[^"]+\.jpg/);
+
+    let cover = "/abola.png";
+
+    if (match) {
+      cover = match[0];
+    }
+
+    // RSS notícias
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }
@@ -27,15 +42,15 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       cover,
-      coverLink,
+      coverLink: "https://www.abola.pt/edicao-do-dia",
       news
     });
 
   } catch (error) {
     res.status(200).json({
       cover: "/abola.png",
-      coverLink: "https://www.abola.pt/noticias/19-de-fevereiro-de-2026-2026021823521685096",
+      coverLink: "https://www.abola.pt/",
       news: []
     });
   }
-}
+};

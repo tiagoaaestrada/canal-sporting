@@ -1,15 +1,15 @@
 module.exports = async (req, res) => {
   try {
-    // Buscar página mobile da Vercapas
+    // Buscar página da Vercapas
     const coverResponse = await fetch(
-      "https://m.vercapas.com/capa/o-jogo-html",
+      "https://www.vercapas.com/capa/o-jogo.html",
       { headers: { "User-Agent": "Mozilla/5.0" } }
     );
 
     const html = await coverResponse.text();
 
-    // Extrair primeira imagem JPG
-    const match = html.match(/https:\/\/[^"]+\.jpg/);
+    // Extrair imagem da capa (procura imagem grande)
+    const match = html.match(/https:\/\/www\.vercapas\.com\/storage\/capa\/[^"]+\.jpg/);
 
     let cover = "/ojogo.png";
 

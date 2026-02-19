@@ -1,6 +1,5 @@
 module.exports = async (req, res) => {
   try {
-
     // Buscar página da edição do dia
     const coverResponse = await fetch(
       "https://www.abola.pt/edicao-do-dia",
@@ -9,7 +8,7 @@ module.exports = async (req, res) => {
 
     const html = await coverResponse.text();
 
-    // Procurar imagem da capa (ajustável se necessário)
+    // Procurar imagem da capa no HTML
     const match = html.match(/https:\/\/cdn\.abola\.pt\/images\/[^"]+\.jpg/);
 
     let cover = "/abola.png";
@@ -18,7 +17,7 @@ module.exports = async (req, res) => {
       cover = match[0];
     }
 
-    // RSS notícias
+    // NOTÍCIAS via Google RSS
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }
@@ -49,7 +48,7 @@ module.exports = async (req, res) => {
   } catch (error) {
     res.status(200).json({
       cover: "/abola.png",
-      coverLink: "https://www.abola.pt/",
+      coverLink: "https://www.abola.pt/edicao-do-dia",
       news: []
     });
   }

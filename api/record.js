@@ -10,7 +10,10 @@ module.exports = async (req, res) => {
       return res.status(500).json({ error: "Capa não encontrada" });
     }
 
-    const coverUrl = match[0];
+    let cover = match[1];
+
+// substituir versão pequena por maior
+cover = cover.replace("80x100", "748x933");
 
     res.status(200).json({
       cover: coverUrl

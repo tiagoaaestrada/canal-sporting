@@ -1,89 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
 <title>Canal Sporting</title>
 
 <style>
 body {
-  font-family: Arial;
-  max-width: 1000px;
-  margin: auto;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  margin: 0;
   padding: 20px;
-  background: #f4f4f4;
+  text-align: center;
 }
 
 h1 {
-  text-align: center;
-  color: #0a7d32;
+  color: #006600;
+  margin-bottom: 30px;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1200px;
+  margin: auto;
 }
 
 .jornal {
   background: white;
-  padding: 20px;
-  margin-bottom: 30px;
+  padding: 15px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.jornal h2 {
+  color: #006600;
 }
 
 .jornal img {
-  width: 200px;
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
   margin-bottom: 15px;
 }
 
-a {
+.jornal a {
   display: block;
-  margin: 8px 0;
+  color: #006600;
   text-decoration: none;
-  color: #0a7d32;
+  margin: 8px 0;
   font-weight: bold;
+  text-align: left;
 }
 
-a:hover {
+.jornal a:hover {
   text-decoration: underline;
+}
+
+/* Responsivo para telemóvel */
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<h1>📰 Canal Sporting</h1>
+<h1>Canal Sporting</h1>
 
-<div class="jornal">
-  <img src="https://www.record.pt/img/layout/logo.svg">
-  <div id="record"></div>
-</div>
+<div class="container">
 
-<div class="jornal">
-  <img src="https://www.abola.pt/img/logo.svg">
-  <div id="bola"></div>
-</div>
+  <!-- RECORD -->
+  <div class="jornal">
+    <h2>Record</h2>
+    <img src="https://www.record.pt/resources/img/capas/record.jpg" alt="Capa Record">
+    <div id="record-noticias"></div>
+  </div>
 
-<div class="jornal">
-  <img src="https://www.ojogo.pt/assets/img/logo.svg">
-  <div id="ojogo"></div>
+  <!-- A BOLA -->
+  <div class="jornal">
+    <h2>A Bola</h2>
+    <img src="https://www.abola.pt/img/capas/abola.jpg" alt="Capa A Bola">
+    <div id="bola-noticias"></div>
+  </div>
+
+  <!-- O JOGO -->
+  <div class="jornal">
+    <h2>O Jogo</h2>
+    <img src="https://www.ojogo.pt/img/capas/ojogo.jpg" alt="Capa O Jogo">
+    <div id="ojogo-noticias"></div>
+  </div>
+
 </div>
 
 <script>
-async function carregar(endpoint, elemento) {
-  const res = await fetch(endpoint);
-  const data = await res.json();
+async function carregarNoticias(apiUrl, containerId) {
+  try {
+    const res = await fetch(apiUrl);
+    const noticias = await res.json();
 
-  const container = document.getElementById(elemento);
-  container.innerHTML = "";
+    const container = document.getElementById(containerId);
 
-  data.forEach(n => {
-    const link = document.createElement("a");
-    link.href = n.link;
-    link.target = "_blank";
-    link.innerText = n.title;
-    container.appendChild(link);
-  });
+    noticias.forEach(noticia => {
+      const link = document.createElement("a");
+      link.href = noticia.link;
+      link.target = "_blank";
+      link.textContent = noticia.title;
+      container.appendChild(link);
+    });
+
+  } catch (error) {
+    document.getElementById(containerId).innerHTML = "Erro a carregar notícias.";
+  }
 }
 
-carregar("/api/record", "record");
-carregar("/api/bola", "bola");
-carregar("/api/ojogo", "ojogo");
+carregarNoticias("/api/record", "record-noticias");
+carregarNoticias("/api/bola", "bola-noticias");
+carregarNoticias("/api/ojogo", "ojogo-noticias");
 </script>
 
 </body>

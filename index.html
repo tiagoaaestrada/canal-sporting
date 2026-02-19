@@ -121,13 +121,14 @@ async function loadJournal(endpoint, coverId, newsId) {
     const img = document.getElementById(coverId);
     const newsContainer = document.getElementById(newsId);
 
-    // Atualizar capa
+    // Atualizar imagem
     if (data.cover) {
       img.src = data.cover;
     }
 
-    // Link da capa (vem da API)
+    // Clique abre o link vindo da API
     if (data.coverLink) {
+      img.style.cursor = "pointer";
       img.onclick = () => {
         window.open(data.coverLink, "_blank");
       };
@@ -152,12 +153,11 @@ async function loadJournal(endpoint, coverId, newsId) {
   }
 }
 
-// Carregar todos os jornais
 loadJournal("/api/record", "record-cover", "record-news");
 loadJournal("/api/bola", "bola-cover", "bola-news");
 loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
-
 </script>
+
 
 </body>
 </html>

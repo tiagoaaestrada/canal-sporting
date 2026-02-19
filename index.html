@@ -32,7 +32,7 @@ h1 {
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  width: 340px;
+  width: 360px;
 }
 
 .column h2 {
@@ -40,13 +40,15 @@ h1 {
   margin-bottom: 20px;
 }
 
+/* 🔥 CAPAS COM MESMO TAMANHO E SEM CORTE */
 .column img {
   width: 100%;
   height: auto;
-  display: block;
-  margin-bottom: 20px;
-  border-radius: 6px;
+  max-height: 520px;
   object-fit: contain;
+  display: block;
+  margin: 0 auto 20px auto;
+  border-radius: 6px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
@@ -121,23 +123,18 @@ async function loadJournal(endpoint, coverId, newsId) {
     const img = document.getElementById(coverId);
     const newsContainer = document.getElementById(newsId);
 
-    // Atualizar imagem
     if (data.cover) {
       img.src = data.cover;
     }
 
-    // Clique abre o link vindo da API
     if (data.coverLink) {
-      img.style.cursor = "pointer";
       img.onclick = () => {
         window.open(data.coverLink, "_blank");
       };
     }
 
-    // Limpar notícias antigas
     newsContainer.innerHTML = "";
 
-    // Inserir notícias
     if (data.news && data.news.length > 0) {
       data.news.forEach(item => {
         const link = document.createElement("a");
@@ -157,7 +154,6 @@ loadJournal("/api/record", "record-cover", "record-news");
 loadJournal("/api/bola", "bola-cover", "bola-news");
 loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
 </script>
-
 
 </body>
 </html>

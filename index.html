@@ -125,7 +125,13 @@ async function loadJournal(endpoint, coverId, newsId, dynamicCover = false) {
       img.src = data.cover;
 
       img.onclick = () => {
-        window.open(data.cover, "_blank");
+      if (endpoint.includes("record")) {
+        window.open("https://www.record.pt/capas", "_blank");
+      } else if (endpoint.includes("bola")) {
+        window.open("https://www.abola.pt/capas", "_blank");
+      } else if (endpoint.includes("ojogo")) {
+        window.open("https://www.ojogo.pt/capas", "_blank");
+      }
       };
     }
 

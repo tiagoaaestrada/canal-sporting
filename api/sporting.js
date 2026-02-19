@@ -1,28 +1,25 @@
 export default async function handler(req, res) {
   try {
-    const rssUrl = "https://www.record.pt/rss/futebol/futebol-nacional/liga-betclic/sporting";
+    const rssUrl =
+      "https://news.google.com/rss/search?q=Sporting+CP&hl=pt-PT&gl=PT&ceid=PT:pt";
 
     const response = await fetch(rssUrl);
     const text = await response.text();
 
-    const items = text.match(/<item>([\s\S]*?)<\/item>/);
+    const titleMatch = text.match(/<title>(.*?)<\/title>/g);
 
-    if (!items) {
-      return res.status(200).json({ error: "Sem notícias encontradas." });
+    if (!titleMatch || titleMatch.length < 2) {
+      return res.status(500).json({ error: "Sem notícias" });
     }
 
-    const titleMatch = items[0].match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/);
-    const linkMatch = items[0].match(/<link>(.*?)<\/link>/);
-
-    const title = titleMatch ? titleMatch[1] : "Sem título";
-    const link = linkMatch ? linkMatch[1] : "#";
+    const latestTitle = titleMatch[1]
+      .replace("<title>", "")
+      .replace("</title>", "");
 
     res.status(200).json({
-      title,
-      link
+      title: latestTitle,
     });
-
   } catch (error) {
-    res.status(500).json({ error: "Erro a obter RSS." });
+    res.status(500).json({ error: "Erro ao carregar notícia." });
   }
 }

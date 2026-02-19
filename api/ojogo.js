@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   try {
 
-    const cover = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/O_Jogo_logo.svg/1200px-O_Jogo_logo.svg.png";
+    const coverUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/O_Jogo_logo.svg/1200px-O_Jogo_logo.svg.png";
     const coverLink = "https://loja.ojogo.pt/edicao-do-dia";
 
     const newsResponse = await fetch(
@@ -26,14 +26,14 @@ export default async function handler(req, res) {
     });
 
     res.status(200).json({
-      cover,
+      cover: coverUrl,
       coverLink,
       news
     });
 
   } catch (error) {
     res.status(200).json({
-      cover: "/ojogo.png",
+      cover: null,
       coverLink: "https://loja.ojogo.pt/edicao-do-dia",
       news: []
     });

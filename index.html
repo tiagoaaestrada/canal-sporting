@@ -4,66 +4,84 @@
   <meta charset="UTF-8">
   <title>Canal Sporting</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f2f2f2;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+  }
 
-    h1 {
-      color: #0a5c2a;
-      margin: 40px 0;
-    }
+  h1 {
+    color: #0a5c2a;
+    margin: 40px 0;
+  }
 
+  .container {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    padding: 20px;
+    flex-wrap: wrap;
+    align-items: flex-start; /* alinha pelo topo */
+  }
+
+  .column {
+    background: #f3f3f3;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+
+    width: 340px;       /* largura fixa elegante */
+  }
+
+  .column h2 {
+    color: #0a5c2a;
+    margin-bottom: 20px;
+  }
+
+  .column img {
+    width: 100%;
+    height: auto;            /* mantém proporção real */
+    display: block;
+    margin-bottom: 20px;
+    border-radius: 6px;
+
+    object-fit: contain;     /* nunca corta */
+  }
+
+  .news {
+    text-align: left;
+  }
+
+  .news a {
+    display: block;
+    margin-bottom: 12px;
+    color: #0a5c2a;
+    text-decoration: none;
+    font-weight: bold;
+    line-height: 1.4;
+  }
+
+  .news a:hover {
+    text-decoration: underline;
+  }
+
+  /* Responsivo para telemóvel */
+  @media (max-width: 1100px) {
     .container {
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      padding: 20px;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
     }
+
     .column {
-      background: #f3f3f3;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-      
-      /* MUITO IMPORTANTE */
-      height: auto;
-      overflow: visible;
+      width: 90%;
+      max-width: 420px;
     }
-    .column h2 {
-      color: #0a5c2a;
-      margin-bottom: 15px;
-    }
-    .column img {
-      width: 100%;
-      height: auto;          /* deixa a altura ajustar sozinha */
-      display: block;
-      margin-bottom: 15px;
-      border-radius: 6px;
-    
-      object-fit: contain;   /* nunca corta */
-    }
-    .news {
-      text-align: left;
-    }
+  }
+</style>
 
-    .news a {
-      display: block;
-      margin-bottom: 10px;
-      color: #0a5c2a;
-      text-decoration: none;
-      font-weight: bold;
-    }
-
-    .news a:hover {
-      text-decoration: underline;
-    }
-  </style>
 </head>
 
 <body>

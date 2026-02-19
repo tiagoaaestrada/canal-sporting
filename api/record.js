@@ -1,6 +1,6 @@
 module.exports = (req, res) => {
   res.status(200).json({
-    cover: "https://static.globalnoticias.pt/record/image.jpg",
+    cover: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Record_logo.png",
     news: [
       {
         title: "Operação Renovações: Sporting tem (quase) todo o plantel seguro...",

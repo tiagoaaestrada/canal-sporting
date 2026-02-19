@@ -3,7 +3,8 @@ export default async function handler(req, res) {
     const response = await fetch("https://www.ojogo.pt/rss");
     const xml = await response.text();
 
-    const cover = "https://static.ojogo.pt/img/capas/ojogo.jpg";
+    // 🔵 Imagem funcional
+    const cover = "https://cdn.ojogo.pt/images/2026-02/ojogo_capa.jpg";
 
     const news = [];
 

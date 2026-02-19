@@ -1,20 +1,12 @@
 module.exports = async (req, res) => {
   try {
-    const coverResponse = await fetch(
-      "https://www.vercapas.com/capa/o-jogo.html",
-      { headers: { "User-Agent": "Mozilla/5.0" } }
-    );
+    // Gerar data de hoje no formato YYYY-MM-DD
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
 
-    const html = await coverResponse.text();
-
-    // Procurar imagem principal da capa
-    const match = html.match(/<img[^>]+src="([^"]+)"[^>]*class="img-fluid"/);
-
-    let cover = "/ojogo.png";
-
-    if (match && match[1]) {
-      cover = match[1];
-    }
+    const cover = `https://www.vercapas.com/storage/capas/o-jogo/${year}-${month}-${day}.jpg`;
 
     // Notícias via Google RSS
     const newsResponse = await fetch(

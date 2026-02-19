@@ -1,9 +1,8 @@
 export default async function handler(req, res) {
   try {
 
-    // Usamos logo estável para evitar bloqueio de hotlink
     const cover = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/A_Bola_logo.svg/1200px-A_Bola_logo.svg.png";
-    const coverLink = "https://www.abola.pt/";
+    const coverLink = "https://www.abola.pt/noticias/19-de-fevereiro-de-2026-2026021823521685096";
 
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
@@ -35,7 +34,7 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(200).json({
       cover: "/abola.png",
-      coverLink: "https://www.abola.pt/",
+      coverLink: "https://www.abola.pt/noticias/19-de-fevereiro-de-2026-2026021823521685096",
       news: []
     });
   }

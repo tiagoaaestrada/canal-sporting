@@ -3,26 +3,6 @@ module.exports = async (req, res) => {
     const response = await fetch("https://www.record.pt/rss/sporting");
     const xml = await response.text();
 
-    // =============================
-    // CAPA DO DIA
-    // =============================
-    const coverPage = await fetch("https://www.record.pt/capas");
-    const coverHtml = await coverPage.text();
-
-    const coverMatch = coverHtml.match(/(https:\/\/cdn\.record\.pt\/images\/\d{4}-\d{2}\/img_.*?\.jpg)/);
-
-    let cover = null;
-
-    if (coverMatch) {
-      cover = coverMatch[1];
-
-      // substituir thumbnail por versão grande
-      cover = cover.replace("80x100", "748x933");
-    }
-
-    // =============================
-    // NOTÍCIAS (RSS)
-    // =============================
     const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
 
     const news = items.slice(0, 3).map(item => {
@@ -36,11 +16,14 @@ module.exports = async (req, res) => {
     });
 
     res.status(200).json({
-      cover,
+      cover: "/record.png", // usa a tua imagem estável
       news
     });
 
   } catch (error) {
-    res.status(500).json({ error: "Erro ao carregar Record." });
+    res.status(500).json({
+      cover: "/record.png",
+      news: []
+    });
   }
 };

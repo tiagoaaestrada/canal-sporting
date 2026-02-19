@@ -26,11 +26,14 @@
       flex-wrap: wrap;
     }
     .column {
-      background: white;
+      background: #f3f3f3;
       padding: 20px;
       border-radius: 12px;
-      width: 350px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      
+      /* MUITO IMPORTANTE */
+      height: auto;
+      overflow: visible;
     }
     .column h2 {
       color: #0a5c2a;
@@ -38,11 +41,12 @@
     }
     .column img {
       width: 100%;
-      height: auto;
+      height: auto;          /* deixa a altura ajustar sozinha */
       display: block;
-      object-fit: contain;
       margin-bottom: 15px;
-      cursor: pointer;
+      border-radius: 6px;
+    
+      object-fit: contain;   /* nunca corta */
     }
     .news {
       text-align: left;

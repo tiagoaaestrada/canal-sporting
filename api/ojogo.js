@@ -1,14 +1,15 @@
 module.exports = async (req, res) => {
   try {
-
+    // Buscar página mobile da Vercapas
     const coverResponse = await fetch(
-      "https://loja.ojogo.pt/edicao-do-dia",
+      "https://m.vercapas.com/capa/o-jogo-html",
       { headers: { "User-Agent": "Mozilla/5.0" } }
     );
 
     const html = await coverResponse.text();
 
-    const match = html.match(/https:\/\/cdn\.ojogo\.pt\/images\/[^"]+\.jpg/);
+    // Extrair primeira imagem JPG
+    const match = html.match(/https:\/\/[^"]+\.jpg/);
 
     let cover = "/ojogo.png";
 
@@ -16,6 +17,7 @@ module.exports = async (req, res) => {
       cover = match[0];
     }
 
+    // Notícias via Google RSS
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:ojogo.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }
@@ -46,7 +48,7 @@ module.exports = async (req, res) => {
   } catch (error) {
     res.status(200).json({
       cover: "/ojogo.png",
-      coverLink: "https://loja.ojogo.pt/",
+      coverLink: "https://loja.ojogo.pt/edicao-do-dia",
       news: []
     });
   }

@@ -94,16 +94,21 @@ h1 {
   </div>
 
 </div>
-
+  
 <script>
 async function carregarNoticias(apiUrl, containerId) {
   try {
     const res = await fetch(apiUrl);
-    const noticias = await res.json();
+    const data = await res.json();
 
     const container = document.getElementById(containerId);
 
-    noticias.forEach(noticia => {
+    // Capa
+    const img = container.parentElement.querySelector("img");
+    img.src = data.cover;
+
+    // Notícias
+    data.news.forEach(noticia => {
       const link = document.createElement("a");
       link.href = noticia.link;
       link.target = "_blank";
@@ -112,7 +117,7 @@ async function carregarNoticias(apiUrl, containerId) {
     });
 
   } catch (error) {
-    document.getElementById(containerId).innerHTML = "Erro a carregar notícias.";
+    document.getElementById(containerId).innerHTML = "Erro a carregar.";
   }
 }
 
@@ -120,6 +125,7 @@ carregarNoticias("/api/record", "record-noticias");
 carregarNoticias("/api/bola", "bola-noticias");
 carregarNoticias("/api/ojogo", "ojogo-noticias");
 </script>
+
 
 </body>
 </html>

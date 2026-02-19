@@ -1,27 +1,14 @@
 export default async function handler(req, res) {
   try {
-    const response = await fetch(
-      "https://news.google.com/rss/search?q=Sporting+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt"
-    );
+    const imageUrl = "https://cdn.abola.pt/images/2026-02/abola_capa.jpg";
 
-    const xml = await response.text();
+    const imageResponse = await fetch(imageUrl);
+    const imageBuffer = await imageResponse.arrayBuffer();
 
-    const cover = "https://cdn.abola.pt/images/2026-02/abola_capa.jpg";
-
-    const news = [];
-
-    const items = xml.split("<item>").slice(0, 4);
-
-    items.forEach(item => {
-      const title = item.split("<title>")[1]?.split("</title>")[0] || "Sem título";
-      const link = item.split("<link>")[1]?.split("</link>")[0] || "#";
-
-      news.push({ title, link });
-    });
-
-    res.status(200).json({ cover, news });
+    res.setHeader("Content-Type", "image/jpeg");
+    res.status(200).send(Buffer.from(imageBuffer));
 
   } catch (error) {
-    res.status(500).json({ error: "Erro A Bola" });
+    res.status(500).json({ error: "Erro ao carregar capa A Bola" });
   }
 }

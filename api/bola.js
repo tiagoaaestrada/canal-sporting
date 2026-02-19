@@ -1,6 +1,6 @@
 module.exports = (req, res) => {
   res.status(200).json({
-    cover: "https://static.abola.pt/img/capas/abola.jpg",
+    cover: "https://upload.wikimedia.org/wikipedia/commons/1/1b/A_Bola_logo.png",
     news: [
       {
         title: "Eleições Sporting: Varandas apresenta programa",

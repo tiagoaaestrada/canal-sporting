@@ -1,19 +1,22 @@
-module.exports = (req, res) => {
-  res.status(200).json({
-    cover: "https://upload.wikimedia.org/wikipedia/commons/5/5e/Record_logo.png",
-    news: [
-      {
-        title: "Operação Renovações: Sporting tem (quase) todo o plantel seguro...",
-        link: "https://www.record.pt/futebol/futebol-nacional/liga-betclic/sporting"
-      },
-      {
-        title: "Sporting com dois jogos à segunda-feira",
-        link: "https://www.record.pt/futebol/futebol-nacional/liga-betclic/sporting"
-      },
-      {
-        title: "Sporting regressa aos treinos com quatro reforços",
-        link: "https://www.record.pt/futebol/futebol-nacional/liga-betclic/sporting"
-      }
-    ]
-  });
+module.exports = async (req, res) => {
+  try {
+    const response = await fetch("https://www.record.pt/capas");
+    const html = await response.text();
+
+    // Procurar a imagem da capa no HTML
+    const match = html.match(/https:\/\/.*?\.jpg/);
+
+    if (!match) {
+      return res.status(500).json({ error: "Capa não encontrada" });
+    }
+
+    const coverUrl = match[0];
+
+    res.status(200).json({
+      cover: coverUrl
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: "Erro ao buscar capa" });
+  }
 };

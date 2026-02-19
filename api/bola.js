@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
   } catch (error) {
     res.status(200).json({
       cover: "/abola.png",
-      coverLink: "https://www.abola.pt/edicao-do-dia",
+      coverLink: "https://www.abola.pt/capas",
       news: []
     });
   }

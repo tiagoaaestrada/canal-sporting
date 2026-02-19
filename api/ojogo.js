@@ -1,14 +1,16 @@
 export default async function handler(req, res) {
   try {
-    const response = await fetch("https://www.ojogo.pt/rss");
+    const response = await fetch(
+      "https://news.google.com/rss/search?q=Sporting+site:ojogo.pt&hl=pt-PT&gl=PT&ceid=PT:pt"
+    );
+
     const xml = await response.text();
 
-    // 🔵 Imagem funcional
-    const cover = "https://cdn.ojogo.pt/images/2026-02/ojogo_capa.jpg";
+    const cover = "https://www.ojogo.pt/assets/img/ojogo-logo.png";
 
     const news = [];
 
-    const items = xml.split("<item>").slice(1, 4);
+    const items = xml.split("<item>").slice(0, 4);
 
     items.forEach(item => {
       const title = item.split("<title>")[1]?.split("</title>")[0] || "Sem título";

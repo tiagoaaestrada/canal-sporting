@@ -119,22 +119,22 @@ async function loadJournal(endpoint, coverId, newsId) {
     const data = await response.json();
 
     const img = document.getElementById(coverId);
-    const container = document.getElementById(newsId);
+    const newsContainer = document.getElementById(newsId);
 
     // Atualizar capa
     if (data.cover) {
       img.src = data.cover;
     }
 
-    // Link da capa
+    // Link da capa (vem da API)
     if (data.coverLink) {
       img.onclick = () => {
         window.open(data.coverLink, "_blank");
       };
     }
 
-    // Limpar notícias anteriores
-    container.innerHTML = "";
+    // Limpar notícias antigas
+    newsContainer.innerHTML = "";
 
     // Inserir notícias
     if (data.news && data.news.length > 0) {
@@ -143,7 +143,7 @@ async function loadJournal(endpoint, coverId, newsId) {
         link.href = item.link;
         link.target = "_blank";
         link.textContent = item.title;
-        container.appendChild(link);
+        newsContainer.appendChild(link);
       });
     }
 

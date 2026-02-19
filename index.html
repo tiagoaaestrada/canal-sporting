@@ -157,8 +157,15 @@ async function loadJournal(endpoint, coverId, newsId, dynamicCover = false) {
 
 // Todas com capa dinâmica
 loadJournal("/api/record", "record-cover", "record-news", true);
-loadJournal("/api/bola", "bola-cover", "bola-news", true);
-loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news", true);
+
+  // Carregar capas diretamente do API (imagem)
+document.getElementById("bola-cover").src = "/api/bola";
+document.getElementById("ojogo-cover").src = "/api/ojogo";
+
+// Carregar apenas as notícias (mantém os teus endpoints de notícias se existirem)
+loadJournal("/api/bolaNews", "bola-cover", "bola-news");
+loadJournal("/api/ojogoNews", "ojogo-cover", "ojogo-news");
+
 </script>
 
 </body>

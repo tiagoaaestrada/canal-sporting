@@ -90,6 +90,11 @@ async function loadJournal(endpoint, coverId, newsId) {
   try {
     const response = await fetch(endpoint);
     const data = await response.json();
+ 
+    // CAPA
+if (data.cover) {
+  document.getElementById(coverId).src = data.cover;
+}
 
     // NOTÍCIAS
     const container = document.getElementById(newsId);

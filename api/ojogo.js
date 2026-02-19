@@ -1,8 +1,20 @@
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   try {
 
-    const coverUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/32/O_Jogo_logo.svg/1200px-O_Jogo_logo.svg.png";
-    const coverLink = "https://loja.ojogo.pt/edicao-do-dia";
+    const coverResponse = await fetch(
+      "https://loja.ojogo.pt/edicao-do-dia",
+      { headers: { "User-Agent": "Mozilla/5.0" } }
+    );
+
+    const html = await coverResponse.text();
+
+    const match = html.match(/https:\/\/cdn\.ojogo\.pt\/images\/[^"]+\.jpg/);
+
+    let cover = "/ojogo.png";
+
+    if (match) {
+      cover = match[0];
+    }
 
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:ojogo.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
@@ -26,16 +38,16 @@ export default async function handler(req, res) {
     });
 
     res.status(200).json({
-      cover: coverUrl,
-      coverLink,
+      cover,
+      coverLink: "https://loja.ojogo.pt/edicao-do-dia",
       news
     });
 
   } catch (error) {
     res.status(200).json({
-      cover: null,
-      coverLink: "https://loja.ojogo.pt/edicao-do-dia",
+      cover: "/ojogo.png",
+      coverLink: "https://loja.ojogo.pt/",
       news: []
     });
   }
-}
+};

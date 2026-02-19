@@ -43,12 +43,14 @@ module.exports = async (req, res) => {
 
     res.status(200).json({
       cover,
+      coverLink: "https://www.record.pt/capas",
       news
     });
 
   } catch (error) {
     res.status(200).json({
       cover: "/record.png",
+      coverLink: "https://www.record.pt/capas",
       news: []
     });
   }

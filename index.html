@@ -1,145 +1,142 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <title>Canal Sporting</title>
+<meta charset="UTF-8" />
+<title>Canal Sporting</title>
 
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f2f2f2;
-    margin: 0;
-    padding: 0;
-    text-align: center;
-  }
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
 
-  h1 {
-    color: #0a5c2a;
-    margin: 40px 0;
-  }
+h1 {
+  color: #0a5c2a;
+  margin: 40px 0;
+}
 
+.container {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  padding: 20px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.column {
+  background: #f3f3f3;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  width: 340px;
+}
+
+.column h2 {
+  color: #0a5c2a;
+  margin-bottom: 20px;
+}
+
+.column img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 20px;
+  border-radius: 6px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.column img:hover {
+  transform: scale(1.02);
+}
+
+.news {
+  text-align: left;
+}
+
+.news a {
+  display: block;
+  margin-bottom: 12px;
+  color: #0a5c2a;
+  text-decoration: none;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.news a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1100px) {
   .container {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    padding: 20px;
-    flex-wrap: wrap;
-    align-items: flex-start; /* alinha pelo topo */
+    flex-direction: column;
+    align-items: center;
   }
 
   .column {
-    background: #f3f3f3;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-
-    width: 340px;       /* largura fixa elegante */
+    width: 90%;
+    max-width: 420px;
   }
-
-  .column h2 {
-    color: #0a5c2a;
-    margin-bottom: 20px;
-  }
-
-  .column img {
-    width: 100%;
-    height: auto;            /* mantém proporção real */
-    display: block;
-    margin-bottom: 20px;
-    border-radius: 6px;
-
-    object-fit: contain;     /* nunca corta */
-  }
-
-  .news {
-    text-align: left;
-  }
-
-  .news a {
-    display: block;
-    margin-bottom: 12px;
-    color: #0a5c2a;
-    text-decoration: none;
-    font-weight: bold;
-    line-height: 1.4;
-  }
-
-  .news a:hover {
-    text-decoration: underline;
-  }
-
-  /* Responsivo para telemóvel */
-  @media (max-width: 1100px) {
-    .container {
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .column {
-      width: 90%;
-      max-width: 420px;
-    }
-  }
+}
 </style>
-
 </head>
 
 <body>
 
-  <h1>Canal Sporting</h1>
+<h1>Canal Sporting</h1>
 
-  <div class="container">
+<div class="container">
 
-    <div class="column">
-      <h2>Record</h2>
-      <img id="record-cover" src="/record.png" />
-      <div id="record-news" class="news"></div>
-    </div>
-
-    <div class="column">
-      <h2>A Bola</h2>
-      <img id="bola-cover" src="/abola.png" />
-      <div id="bola-news" class="news"></div>
-    </div>
-
-    <div class="column">
-      <h2>O Jogo</h2>
-      <img id="ojogo-cover" src="/ojogo.png" />
-      <div id="ojogo-news" class="news"></div>
-    </div>
-
+  <div class="column">
+    <h2>Record</h2>
+    <img id="record-cover" src="/record.png" />
+    <div id="record-news" class="news"></div>
   </div>
 
+  <div class="column">
+    <h2>A Bola</h2>
+    <img id="bola-cover" src="/abola.png" />
+    <div id="bola-news" class="news"></div>
+  </div>
+
+  <div class="column">
+    <h2>O Jogo</h2>
+    <img id="ojogo-cover" src="/ojogo.png" />
+    <div id="ojogo-news" class="news"></div>
+  </div>
+
+</div>
+
 <script>
-async function loadJournal(endpoint, coverId, newsId, dynamicCover = false) {
+async function loadJournal(endpoint, coverId, newsId) {
   try {
     const response = await fetch(endpoint);
     const data = await response.json();
 
-    const container = document.getElementById(newsId);
-    container.innerHTML = "";
-
     const img = document.getElementById(coverId);
+    const container = document.getElementById(newsId);
 
-    // CAPA
-    if (dynamicCover && data.cover) {
+    // Atualizar capa
+    if (data.cover) {
       img.src = data.cover;
     }
 
-    // Clique na capa
-    img.onclick = () => {
-      if (coverId === "record-cover") {
-        window.open("https://www.record.pt/capas", "_blank");
-      } 
-      else if (coverId === "bola-cover") {
-        window.open("https://www.abola.pt/noticias/19-de-fevereiro-de-2026-2026021823521685096", "_blank");
-      } 
-      else if (coverId === "ojogo-cover") {
-        window.open("https://loja.ojogo.pt/edicao-do-dia", "_blank");
-      }
-    };
+    // Link da capa
+    if (data.coverLink) {
+      img.onclick = () => {
+        window.open(data.coverLink, "_blank");
+      };
+    }
 
-    // NOTÍCIAS
+    // Limpar notícias anteriores
+    container.innerHTML = "";
+
+    // Inserir notícias
     if (data.news && data.news.length > 0) {
       data.news.forEach(item => {
         const link = document.createElement("a");
@@ -151,20 +148,14 @@ async function loadJournal(endpoint, coverId, newsId, dynamicCover = false) {
     }
 
   } catch (error) {
-    console.error("Erro:", error);
+    console.error("Erro ao carregar:", endpoint, error);
   }
 }
 
-// Todas com capa dinâmica
-loadJournal("/api/record", "record-cover", "record-news", true);
-
-  // Carregar capas diretamente do API (imagem)
-document.getElementById("bola-cover").src = "/api/bola";
-document.getElementById("ojogo-cover").src = "/api/ojogo";
-
-// Carregar apenas as notícias (mantém os teus endpoints de notícias se existirem)
-loadJournal("/api/bolaNews", "bola-cover", "bola-news");
-loadJournal("/api/ojogoNews", "ojogo-cover", "ojogo-news");
+// Carregar todos os jornais
+loadJournal("/api/record", "record-cover", "record-news");
+loadJournal("/api/bola", "bola-cover", "bola-news");
+loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
 
 </script>
 

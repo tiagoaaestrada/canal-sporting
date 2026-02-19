@@ -3,7 +3,8 @@ export default async function handler(req, res) {
     const response = await fetch("https://www.abola.pt/rss");
     const xml = await response.text();
 
-    const cover = "https://static.abola.pt/img/capas/abola.jpg";
+    // 🔵 Imagem real que funciona
+    const cover = "https://cdn.abola.pt/images/2026-02/abola_capa.jpg";
 
     const news = [];
 

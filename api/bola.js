@@ -1,15 +1,15 @@
 module.exports = async (req, res) => {
   try {
-    // Buscar página da edição do dia
+    // Buscar página mobile da Vercapas (mais simples de extrair)
     const coverResponse = await fetch(
-      "https://www.abola.pt/edicao-do-dia",
+      "https://m.vercapas.com/capa/a-bola-html",
       { headers: { "User-Agent": "Mozilla/5.0" } }
     );
 
     const html = await coverResponse.text();
 
-    // Procurar imagem da capa no HTML
-    const match = html.match(/https:\/\/cdn\.abola\.pt\/images\/[^"]+\.jpg/);
+    // Extrair primeira imagem JPG da página
+    const match = html.match(/https:\/\/[^"]+\.jpg/);
 
     let cover = "/abola.png";
 
@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
       cover = match[0];
     }
 
-    // NOTÍCIAS via Google RSS
+    // Notícias via Google RSS
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }

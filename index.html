@@ -2,32 +2,31 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Canal Sporting - Notícias</title>
+<title>Canal Sporting</title>
 
 <style>
 body {
   font-family: Arial, sans-serif;
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
+  text-align: center;
+  padding: 40px;
   background: #f4f4f4;
 }
 
 h1 {
   color: #0a7d32;
-  text-align: center;
 }
 
-.card {
+.news {
   background: white;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin-top: 30px;
+  border-radius: 10px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.1);
 }
 
 a {
   text-decoration: none;
+  font-size: 18px;
   color: #333;
   font-weight: bold;
 }
@@ -40,36 +39,29 @@ a:hover {
 
 <body>
 
-<h1>Canal Sporting - Notícias</h1>
-<div id="news">A carregar notícias...</div>
+<h1>Última notícia do Sporting</h1>
+
+<div id="news" class="news">
+A carregar...
+</div>
 
 <script>
-const proxy = "https://api.allorigins.win/get?url=";
-const rss = encodeURIComponent("https://news.google.com/rss/search?q=Sporting+CP&hl=pt-PT&gl=PT&ceid=PT:pt");
+const feedURL = "https://api.rss2json.com/v1/api.json?rss_url=https://news.google.com/rss/search?q=Sporting+CP&hl=pt-PT&gl=PT&ceid=PT:pt";
 
-fetch(proxy + rss)
+fetch(feedURL)
   .then(response => response.json())
   .then(data => {
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(data.contents, "text/xml");
-    const items = xml.querySelectorAll("item");
-    const container = document.getElementById("news");
-    container.innerHTML = "";
+    const first = data.items[0];
 
-    items.forEach((el, index) => {
-      if (index < 15) {
-        const title = el.querySelector("title").textContent;
-        const link = el.querySelector("link").textContent;
-
-        const div = document.createElement("div");
-        div.className = "card";
-        div.innerHTML = `<a href="${link}" target="_blank">${title}</a>`;
-        container.appendChild(div);
-      }
-    });
+    document.getElementById("news").innerHTML = `
+      <a href="${first.link}" target="_blank">
+        ${first.title}
+      </a>
+      <p><small>${first.pubDate}</small></p>
+    `;
   })
   .catch(error => {
-    document.getElementById("news").innerHTML = "Erro a carregar notícias.";
+    document.getElementById("news").innerHTML = "Erro a carregar notícia.";
   });
 </script>
 

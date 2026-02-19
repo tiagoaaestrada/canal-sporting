@@ -119,11 +119,14 @@ async function loadJournal(endpoint, coverId, newsId, dynamicCover = false) {
     const container = document.getElementById(newsId);
     container.innerHTML = "";
 
-    // CAPA DINÂMICA (só Record)
-    if (dynamicCover && data.cover) {
-      const img = document.getElementById(coverId);
-      img.src = data.cover;
+    const img = document.getElementById(coverId);
 
+    // ===== CAPA =====
+    if (dynamicCover && data.cover) {
+      img.src = data.cover;
+    }
+
+    // Clique na capa (funciona para todos)
     img.onclick = () => {
       if (coverId === "record-cover") {
         window.open("https://www.record.pt/capas", "_blank");
@@ -136,8 +139,7 @@ async function loadJournal(endpoint, coverId, newsId, dynamicCover = false) {
       }
     };
 
-
-    // NOTÍCIAS
+    // ===== NOTÍCIAS =====
     if (data.news && data.news.length > 0) {
       data.news.forEach(item => {
         const link = document.createElement("a");
@@ -156,10 +158,9 @@ async function loadJournal(endpoint, coverId, newsId, dynamicCover = false) {
 // Record com capa dinâmica
 loadJournal("/api/record", "record-cover", "record-news", true);
 
-// Bola e O Jogo normais
+// Bola e O Jogo com capa fixa
 loadJournal("/api/bola", "bola-cover", "bola-news");
 loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
-
 </script>
 
 </body>

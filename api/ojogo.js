@@ -1,6 +1,5 @@
 module.exports = async (req, res) => {
   try {
-    // Buscar página da capa no vercapas
     const response = await fetch(
       "https://www.vercapas.com/capa/o-jogo.html",
       { headers: { "User-Agent": "Mozilla/5.0" } }
@@ -8,16 +7,16 @@ module.exports = async (req, res) => {
 
     const html = await response.text();
 
-    // Extrair URL real da imagem
-    const match = html.match(/https:\/\/www\.vercapas\.com\/storage\/capas\/o-jogo\/[^"]+\.jpg/);
+    // Procurar caminho relativo da imagem
+    const match = html.match(/\/storage\/capas\/o-jogo\/[^"]+\.jpg/);
 
     let cover = "/ojogo.png";
 
     if (match) {
-      cover = match[0];
+      cover = "https://www.vercapas.com" + match[0];
     }
 
-    // Notícias via Google RSS
+    // Notícias via RSS
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:ojogo.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }

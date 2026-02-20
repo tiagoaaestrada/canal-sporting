@@ -35,7 +35,7 @@ module.exports = async (req, res) => {
       coverLink: "https://loja.ojogo.pt/edicao-do-dia",
       news
     });
-
+    
   } catch (error) {
     res.status(200).json({
       cover: "/ojogo.png",

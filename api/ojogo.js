@@ -1,12 +1,21 @@
 module.exports = async (req, res) => {
   try {
-    // Gerar data de hoje no formato YYYY-MM-DD
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
+    // Buscar página da capa no vercapas
+    const response = await fetch(
+      "https://www.vercapas.com/capa/o-jogo.html",
+      { headers: { "User-Agent": "Mozilla/5.0" } }
+    );
 
-    const cover = `https://www.vercapas.com/storage/capas/o-jogo/${year}-${month}-${day}.jpg`;
+    const html = await response.text();
+
+    // Extrair URL real da imagem
+    const match = html.match(/https:\/\/www\.vercapas\.com\/storage\/capas\/o-jogo\/[^"]+\.jpg/);
+
+    let cover = "/ojogo.png";
+
+    if (match) {
+      cover = match[0];
+    }
 
     // Notícias via Google RSS
     const newsResponse = await fetch(
@@ -35,7 +44,7 @@ module.exports = async (req, res) => {
       coverLink: "https://loja.ojogo.pt/edicao-do-dia",
       news
     });
-    
+
   } catch (error) {
     res.status(200).json({
       cover: "/ojogo.png",

@@ -1,22 +1,32 @@
 module.exports = async (req, res) => {
   try {
-    const response = await fetch(
-      "https://www.vercapas.com/capa/o-jogo.html",
-      { headers: { "User-Agent": "Mozilla/5.0" } }
-    );
+    const baseUrl = "https://www.vercapas.com/storage/capas/o-jogo/";
 
-    const html = await response.text();
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
 
-    // Procurar caminho relativo da imagem
-    const match = html.match(/\/storage\/capas\/o-jogo\/[^"]+\.jpg/);
+    const formatDate = (date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}.jpg`;
+    };
 
-    let cover = "/ojogo.png";
+    const todayUrl = baseUrl + formatDate(today);
+    const yesterdayUrl = baseUrl + formatDate(yesterday);
 
-    if (match) {
-      cover = "https://www.vercapas.com" + match[0];
+    // Testar se imagem de hoje existe
+    let cover = todayUrl;
+
+    const testToday = await fetch(todayUrl, { method: "HEAD" });
+
+    if (!testToday.ok) {
+      // Se não existir, usar ontem
+      cover = yesterdayUrl;
     }
 
-    // Notícias via RSS
+    // Notícias
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:ojogo.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }

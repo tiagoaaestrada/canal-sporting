@@ -1,6 +1,5 @@
 module.exports = async (req, res) => {
   try {
-    // Buscar página mobile da Vercapas (mais simples de extrair)
     const coverResponse = await fetch(
       "https://m.vercapas.com/capa/o-jogo-html",
       { headers: { "User-Agent": "Mozilla/5.0" } }
@@ -8,8 +7,8 @@ module.exports = async (req, res) => {
 
     const html = await coverResponse.text();
 
-    // Extrair primeira imagem JPG da página
-    const match = html.match(/https:\/\/[^"]+\.jpg/);
+    // Procurar especificamente imagem da pasta o-jogo
+    const match = html.match(/https:\/\/[^"]*storage\/capas\/o-jogo\/[^"]+\.jpg/);
 
     let cover = "/ojogo.png";
 
@@ -17,7 +16,7 @@ module.exports = async (req, res) => {
       cover = match[0];
     }
 
-    // Notícias via Google RSS
+    // Notícias
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:ojogo.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }

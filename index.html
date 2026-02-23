@@ -15,7 +15,31 @@ body {
 
 h1 {
   color: #0a5c2a;
-  margin: 40px 0;
+  margin: 30px 0 10px 0;
+}
+
+.top-bar {
+  margin-bottom: 20px;
+}
+
+#last-update {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 8px 16px;
+  background-color: #0a5c2a;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  opacity: 0.9;
 }
 
 .container {
@@ -37,10 +61,15 @@ h1 {
 
 .column h2 {
   color: #0a5c2a;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
-/* 🔥 CAPAS COM MESMO TAMANHO E SEM CORTE */
+.edition-date {
+  font-size: 13px;
+  color: #777;
+  margin-bottom: 15px;
+}
+
 .column img {
   width: 100%;
   height: auto;
@@ -73,18 +102,6 @@ h1 {
 .news a:hover {
   text-decoration: underline;
 }
-
-@media (max-width: 1100px) {
-  .container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .column {
-    width: 90%;
-    max-width: 420px;
-  }
-}
 </style>
 </head>
 
@@ -92,22 +109,30 @@ h1 {
 
 <h1>Canal Sporting</h1>
 
+<div class="top-bar">
+  <div id="last-update"></div>
+  <button onclick="reloadAll()">🔄 Atualizar agora</button>
+</div>
+
 <div class="container">
 
   <div class="column">
     <h2>Record</h2>
+    <div class="edition-date" id="record-date"></div>
     <img id="record-cover" src="/record.png" />
     <div id="record-news" class="news"></div>
   </div>
 
   <div class="column">
     <h2>A Bola</h2>
+    <div class="edition-date" id="bola-date"></div>
     <img id="bola-cover" src="/abola.png" />
     <div id="bola-news" class="news"></div>
   </div>
 
   <div class="column">
     <h2>O Jogo</h2>
+    <div class="edition-date" id="ojogo-date"></div>
     <img id="ojogo-cover" src="/ojogo.png" />
     <div id="ojogo-news" class="news"></div>
   </div>
@@ -115,13 +140,38 @@ h1 {
 </div>
 
 <script>
-async function loadJournal(endpoint, coverId, newsId) {
+
+function getTodayFormatted() {
+  const today = new Date();
+  return today.toLocaleDateString("pt-PT", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
+}
+
+function updateLastUpdateTime() {
+  const now = new Date();
+  const time = now.toLocaleTimeString("pt-PT", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+
+  document.getElementById("last-update").textContent =
+    "Última atualização: " + time;
+}
+
+async function loadJournal(endpoint, coverId, newsId, dateId) {
   try {
-    const response = await fetch(endpoint);
+    const response = await fetch(endpoint + "?t=" + new Date().getTime());
     const data = await response.json();
 
     const img = document.getElementById(coverId);
     const newsContainer = document.getElementById(newsId);
+    const dateElement = document.getElementById(dateId);
+
+    // Data da edição (hoje)
+    dateElement.textContent = "Edição de " + getTodayFormatted();
 
     if (data.cover) {
       img.src = data.cover;
@@ -150,9 +200,20 @@ async function loadJournal(endpoint, coverId, newsId) {
   }
 }
 
-loadJournal("/api/record", "record-cover", "record-news");
-loadJournal("/api/bola", "bola-cover", "bola-news");
-loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
+function reloadAll() {
+  loadAll();
+}
+
+function loadAll() {
+  loadJournal("/api/record", "record-cover", "record-news", "record-date");
+  loadJournal("/api/bola", "bola-cover", "bola-news", "bola-date");
+  loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news", "ojogo-date");
+  updateLastUpdateTime();
+}
+
+// Inicial
+loadAll();
+
 </script>
 
 </body>

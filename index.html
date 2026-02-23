@@ -8,169 +8,128 @@
 <style>
 body {
   font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-  background: linear-gradient(to bottom, #f5f7f6, #e8ecea);
+  background: #f5f7f6;
   margin: 0;
   padding: 0;
-  text-align: center;
-}
-
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 6px;
-  background: #0a5c2a;
 }
 
 h1 {
+  text-align: center;
   color: #0a5c2a;
-  margin: 40px 0 5px 0;
+  margin-top: 30px;
 }
 
-.last-update {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 30px;
-}
-
-.section-title {
-  color: #0a5c2a;
-  margin: 40px 0 20px 0;
-}
-
-.container {
+.layout {
   display: flex;
-  justify-content: center;
-  gap: 40px;
+  gap: 20px;
   padding: 20px;
-  flex-wrap: wrap;
-  align-items: stretch;
 }
 
-.column {
-  background: #ffffff;
-  padding: 25px;
-  border-radius: 18px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-  width: 360px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+/* ===== COLUNA ESQUERDA ===== */
+
+.sidebar {
+  width: 260px;
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  height: fit-content;
 }
 
-.column:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
-}
-
-.column h3 {
+.sidebar h3 {
   color: #0a5c2a;
-  margin-bottom: 20px;
-  font-size: 20px;
-  font-weight: 700;
+  margin-top: 0;
 }
 
-.column h3::after {
-  content: "";
+.market-section {
+  margin-bottom: 25px;
+}
+
+.market-section h4 {
+  margin-bottom: 10px;
+  color: #0a5c2a;
+}
+
+.market-section a {
   display: block;
-  width: 40px;
-  height: 3px;
-  background: #0a5c2a;
-  margin: 8px auto 0 auto;
-  border-radius: 2px;
-}
-
-/* ===== Instagram ===== */
-
-.ig-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.ig-logo {
-  width: 40px;
-  margin-bottom: 15px;
-}
-
-.ig-username {
-  font-size: 18px;
-  font-weight: bold;
-  color: #0a5c2a;
-  margin-bottom: 8px;
-}
-
-.ig-description {
   font-size: 14px;
-  color: #555;
-  margin-bottom: 20px;
-  padding: 0 10px;
-}
-
-.ig-button {
-  background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
-  color: white;
-  padding: 10px 18px;
-  border-radius: 25px;
+  margin-bottom: 6px;
   text-decoration: none;
-  font-weight: bold;
-  transition: opacity 0.2s ease;
+  color: #333;
 }
 
-.ig-button:hover {
-  opacity: 0.85;
+.market-section a:hover {
+  color: #0a5c2a;
 }
 
-/* ===== Jornais ===== */
+/* ===== CONTEÚDO PRINCIPAL ===== */
 
-.cover {
+.main {
+  flex: 1;
+}
+
+.covers {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.cover-box {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  width: 260px;
+  text-align: center;
+}
+
+.cover-box img {
   width: 100%;
-  max-height: 520px;
-  object-fit: contain;
-  margin-bottom: 20px;
   border-radius: 10px;
   cursor: pointer;
 }
 
-.news {
-  text-align: left;
+/* ===== FEED GERAL ===== */
+
+.feed {
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
-.news a {
-  display: block;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  background: #f7f9f8;
-  border-radius: 10px;
+.feed-item {
+  border-bottom: 1px solid #eee;
+  padding: 12px 0;
+}
+
+.feed-item:last-child {
+  border-bottom: none;
+}
+
+.source {
+  font-size: 12px;
+  font-weight: bold;
   color: #0a5c2a;
+}
+
+.feed-item a {
   text-decoration: none;
+  color: #222;
   font-weight: 600;
-  font-size: 14px;
-  line-height: 1.4;
-  transition: all 0.2s ease;
 }
 
-.news a:hover {
-  background: #e2efe8;
-  transform: translateX(4px);
+.feed-item a:hover {
+  color: #0a5c2a;
 }
 
-.loading {
-  color: #999;
-  font-size: 14px;
-  font-style: italic;
-}
-
-@media (max-width: 1100px) {
-  .container {
+@media (max-width: 1000px) {
+  .layout {
     flex-direction: column;
-    align-items: center;
   }
-
-  .column {
-    width: 90%;
-    max-width: 420px;
+  .sidebar {
+    width: 100%;
   }
 }
 </style>
@@ -179,118 +138,111 @@ h1 {
 <body>
 
 <h1>Canal Sporting</h1>
-<p class="last-update">
-  Atualizado automaticamente • <span id="update-time"></span>
-</p>
 
-<!-- ================= INSTAGRAM ================= -->
+<div class="layout">
 
-<h2 class="section-title">Canais Instagram</h2>
+  <!-- COLUNA ESQUERDA MERCADO -->
+  <div class="sidebar">
+    <h3>Mercado</h3>
 
-<div class="container">
-
-  <div class="column ig-card">
-    <img src="/instagram.png" class="ig-logo" alt="Instagram">
-    <div class="ig-username">@sportingcp.adeptos1906</div>
-    <div class="ig-description">
-      Comunidade dedicada aos adeptos leoninos.
+    <div class="market-section">
+      <h4>Sporting</h4>
+      <div id="mercado-sporting"></div>
     </div>
-    <a href="https://www.instagram.com/sportingcp.adeptos1906/" target="_blank" class="ig-button">
-      Ver no Instagram
-    </a>
-  </div>
 
-    <div class="column ig-card">
-    <img src="/instagram.png" class="ig-logo" alt="Instagram">
-    <div class="ig-username">@sportingcp</div>
-    <div class="ig-description">
-      Página oficial do Sporting Clube de Portugal.
+    <div class="market-section">
+      <h4>Nacional</h4>
+      <div id="mercado-nacional"></div>
     </div>
-    <a href="https://www.instagram.com/sportingcp/" target="_blank" class="ig-button">
-      Ver no Instagram
-    </a>
-  </div>
-  
-  <div class="column ig-card">
-    <img src="/instagram.png" class="ig-logo" alt="Instagram">
-    <div class="ig-username">@sporting1906orgulho</div>
-    <div class="ig-description">
-      Conteúdos e partilhas sobre o universo leonino.
+
+    <div class="market-section">
+      <h4>Internacional</h4>
+      <div id="mercado-internacional"></div>
     </div>
-    <a href="https://www.instagram.com/sporting1906orgulho/" target="_blank" class="ig-button">
-      Ver no Instagram
-    </a>
   </div>
 
-</div>
+  <!-- CONTEÚDO PRINCIPAL -->
+  <div class="main">
 
-<!-- ================= JORNAIS ================= -->
+    <!-- CAPAS -->
+    <div class="covers">
 
-<h2 class="section-title">Jornais</h2>
+      <div class="cover-box">
+        <h3>A Bola</h3>
+        <img id="bola-cover" src="/abola.png">
+      </div>
 
-<div class="container">
+      <div class="cover-box">
+        <h3>Record</h3>
+        <img id="record-cover" src="/record.png">
+      </div>
 
-  <div class="column">
-    <h3>A Bola</h3>
-    <img id="bola-cover" class="cover" src="/abola.png" />
-    <div id="bola-news" class="news loading">A carregar notícias...</div>
+      <div class="cover-box">
+        <h3>O Jogo</h3>
+        <img id="ojogo-cover" src="/ojogo.png">
+      </div>
+
+    </div>
+
+    <!-- FEED GERAL -->
+    <div class="feed">
+      <h2>Feed Geral Sporting</h2>
+      <div id="feed-container">A carregar...</div>
+    </div>
+
   </div>
-
-  <div class="column">
-    <h3>Record</h3>
-    <img id="record-cover" class="cover" src="/record.png" />
-    <div id="record-news" class="news loading">A carregar notícias...</div>
-  </div>
-  
-  <div class="column">
-    <h3>O Jogo</h3>
-    <img id="ojogo-cover" class="cover" src="/ojogo.png" />
-    <div id="ojogo-news" class="news loading">A carregar notícias...</div>
-  </div>
-
 </div>
 
 <script>
-document.getElementById("update-time").textContent =
-  new Date().toLocaleTimeString("pt-PT");
-
-async function loadJournal(endpoint, coverId, newsId) {
-  try {
-    const response = await fetch(endpoint + "?t=" + new Date().getTime());
-    const data = await response.json();
-
-    const img = document.getElementById(coverId);
-    const newsContainer = document.getElementById(newsId);
-
-    if (data.cover) img.src = data.cover;
-
-    if (data.coverLink) {
-      img.onclick = () => window.open(data.coverLink, "_blank");
-    }
-
-    newsContainer.innerHTML = "";
-
-    if (data.news && data.news.length > 0) {
-      data.news.slice(0, 3).forEach(item => {
-        const link = document.createElement("a");
-        link.href = item.link;
-        link.target = "_blank";
-        link.textContent = item.title;
-        newsContainer.appendChild(link);
-      });
-    } else {
-      newsContainer.innerHTML = "<p class='loading'>Sem notícias disponíveis</p>";
-    }
-
-  } catch (error) {
-    document.getElementById(newsId).innerHTML =
-      "<p class='loading'>Erro ao carregar</p>";
-  }
+async function loadCover(endpoint, imgId) {
+  const res = await fetch(endpoint);
+  const data = await res.json();
+  const img = document.getElementById(imgId);
+  img.src = data.cover;
+  img.onclick = () => window.open(data.coverLink, "_blank");
 }
-  
-loadJournal("/api/bola", "bola-cover", "bola-news");
-loadJournal("/api/record", "record-cover", "record-news");
-loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
+
+loadCover("/api/bola", "bola-cover");
+loadCover("/api/record", "record-cover");
+loadCover("/api/ojogo", "ojogo-cover");
+
+async function loadFeed() {
+  const res = await fetch("/api/feed");
+  const data = await res.json();
+  const container = document.getElementById("feed-container");
+  container.innerHTML = "";
+
+  data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "feed-item";
+    div.innerHTML = `
+      <div class="source">${item.source}</div>
+      <a href="${item.link}" target="_blank">${item.title}</a>
+    `;
+    container.appendChild(div);
+  });
+}
+
+loadFeed();
+
+async function loadMercado() {
+  const res = await fetch("/api/mercado");
+  const data = await res.json();
+
+  ["sporting","nacional","internacional"].forEach(section => {
+    const container = document.getElementById("mercado-"+section);
+    container.innerHTML = "";
+    data[section].forEach(item => {
+      const a = document.createElement("a");
+      a.href = item.link;
+      a.target = "_blank";
+      a.textContent = item.title;
+      container.appendChild(a);
+    });
+  });
+}
+
+loadMercado();
 </script>
 
 </body>

@@ -1,27 +1,5 @@
 module.exports = async (req, res) => {
 
-  function formatTransfer(title) {
-    // Remove fonte no final
-    title = title.split("|")[0].trim();
-
-    // Tentar capturar valores tipo 20M, 5 milhões, etc.
-    const valueMatch = title.match(/(\d+\s?M|milhões?|\d+\s?milhões?)/i);
-    const value = valueMatch ? valueMatch[0] : "";
-
-    // Simplificação básica
-    title = title
-      .replace(/oficial|confirmado|segundo.*|revela.*|garante.*/i, "")
-      .replace(/\s+/g, " ")
-      .trim();
-
-    // Limitar tamanho
-    if (title.length > 80) {
-      title = title.substring(0, 77) + "...";
-    }
-
-    return value ? `${title} (${value})` : title;
-  }
-
   async function fetchRSS(query) {
     try {
       const response = await fetch(
@@ -32,14 +10,25 @@ module.exports = async (req, res) => {
       const xml = await response.text();
       const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
 
-      return items.slice(0, 5).map(item => {
+      return items.slice(0,5).map(item => {
+
         const rawTitle = item[1].match(/<title>(.*?)<\/title>/)?.[1] || "";
         const link = item[1].match(/<link>(.*?)<\/link>/)?.[1] || "#";
+        const pubDate = item[1].match(/<pubDate>(.*?)<\/pubDate>/)?.[1];
 
-        const cleanTitle = rawTitle.replace(/<!\[CDATA\[|\]\]>/g, "");
-        const shortTitle = formatTransfer(cleanTitle);
+        const dateObj = pubDate ? new Date(pubDate) : null;
 
-        return { title: shortTitle, link };
+        const formattedDate = dateObj
+          ? dateObj.toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit" }) +
+            " - " +
+            dateObj.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })
+          : "";
+
+        return {
+          title: rawTitle.replace(/<!\[CDATA\[|\]\]>/g, ""),
+          link,
+          formattedDate
+        };
       });
 
     } catch {
@@ -48,8 +37,8 @@ module.exports = async (req, res) => {
   }
 
   res.status(200).json({
-    sporting: await fetchRSS("Sporting transferência confirmado"),
-    nacional: await fetchRSS("Liga Portugal transferência confirmado"),
-    internacional: await fetchRSS("transferência internacional confirmado futebol")
+    sporting: await fetchRSS("Sporting transferência"),
+    nacional: await fetchRSS("Liga Portugal transferência"),
+    internacional: await fetchRSS("transferência internacional futebol")
   });
 };

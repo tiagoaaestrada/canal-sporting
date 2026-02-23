@@ -26,34 +26,40 @@ module.exports = async (req, res) => {
 
         if (!title || !link || !pubDate) return;
 
+        const cleanTitle = title
+          .replace(/<!\[CDATA\[|\]\]>/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+
         const dateObj = new Date(pubDate);
 
         allNews.push({
-          title: title.replace(/<!\[CDATA\[|\]\]>/g, ""),
+          title: cleanTitle,
           link,
           source: source.name,
           timestamp: dateObj.getTime(),
           formattedDate:
-            dateObj.toLocaleDateString("pt-PT", {
-              day: "2-digit",
-              month: "2-digit"
-            }) +
+            dateObj.toLocaleDateString("pt-PT", { day: "2-digit", month: "2-digit" }) +
             " - " +
-            dateObj.toLocaleTimeString("pt-PT", {
-              hour: "2-digit",
-              minute: "2-digit"
-            })
+            dateObj.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })
         });
 
       });
 
-    } catch (err) {
-      console.log("Erro em:", source.name);
-    }
+    } catch {}
   }
 
-  // ordenar por timestamp real
+  // ordenar
   allNews.sort((a, b) => b.timestamp - a.timestamp);
 
-  res.status(200).json(allNews.slice(0, 20));
+  // 🔥 REMOVER DUPLICADOS (por título normalizado)
+  const seen = new Set();
+  const filtered = allNews.filter(item => {
+    const key = item.title.toLowerCase().substring(0, 80);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  res.status(200).json(filtered.slice(0, 20));
 };

@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
 
     res.status(200).json({
       cover,
-      coverLink: "https://loja.record.pt/edicao-do-dia",
+      coverLink: "https://www.record.pt/capas",
       news
     });
 

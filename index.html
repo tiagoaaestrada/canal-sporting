@@ -9,7 +9,6 @@
 <meta name="theme-color" content="#0a5c2a">
 
 <style>
-
 body {
   font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
   background: #f5f7f6;
@@ -20,16 +19,31 @@ body {
 h1 {
   text-align: center;
   color: #0a5c2a;
-  margin-top: 20px;
+  margin: 20px 0 10px 0;
 }
+
+/* ===== MOBILE TOP NAV ===== */
+
+.mobile-nav {
+  display: none;
+}
+
+.mobile-nav button {
+  background: none;
+  border: none;
+  font-weight: 600;
+  color: #0a5c2a;
+  padding: 10px;
+  font-size: 14px;
+}
+
+/* ===== DESKTOP LAYOUT ===== */
 
 .layout {
   display: flex;
   gap: 20px;
   padding: 20px;
 }
-
-/* ===== SIDEBAR (MERCADO) ===== */
 
 .sidebar {
   width: 240px;
@@ -72,8 +86,6 @@ h1 {
   color: #0a5c2a;
   font-weight: bold;
 }
-
-/* ===== MAIN ===== */
 
 .main {
   flex: 1;
@@ -147,56 +159,34 @@ h1 {
   font-weight: 600;
 }
 
-/* ===== MOBILE VERSION ===== */
-
-.mobile-nav {
-  display: none;
-}
+/* ===== MOBILE BEHAVIOUR ===== */
 
 @media (max-width: 768px) {
 
   .layout {
     flex-direction: column;
-    padding-bottom: 70px;
+    padding: 15px;
   }
 
   .sidebar {
-    order: 3;
     width: 100%;
-  }
-
-  .covers {
-    order: 2;
-  }
-
-  .feed {
-    order: 1;
   }
 
   .mobile-nav {
     display: flex;
     justify-content: space-around;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
+    border-bottom: 1px solid #eee;
     background: white;
-    border-top: 1px solid #eee;
-    padding: 10px 0;
-    z-index: 1000;
   }
 
-  .mobile-nav button {
-    background: none;
-    border: none;
-    font-weight: 600;
-    color: #0a5c2a;
+  .mobile-nav button.active {
+    border-bottom: 3px solid #0a5c2a;
   }
 
-  .hidden-mobile {
-    display: none !important;
-  }
+}
 
+.hidden {
+  display: none !important;
 }
 
 </style>
@@ -206,8 +196,15 @@ h1 {
 
 <h1>Canal Sporting</h1>
 
+<div class="mobile-nav">
+  <button id="tab-feed" class="active" onclick="showSection('feed')">Feed</button>
+  <button id="tab-capas" onclick="showSection('capas')">Capas</button>
+  <button id="tab-mercado" onclick="showSection('mercado')">Transferências</button>
+</div>
+
 <div class="layout">
 
+  <!-- MERCADO -->
   <div class="sidebar" id="mercadoSection">
     <h3>
       <a href="https://www.transfermarkt.pt" target="_blank">
@@ -260,52 +257,35 @@ h1 {
 
 </div>
 
-<!-- MOBILE NAVIGATION -->
-<div class="mobile-nav">
-  <button onclick="showMobile('feed')">Feed</button>
-  <button onclick="showMobile('capas')">Capas</button>
-  <button onclick="showMobile('mercado')">Transferências</button>
-</div>
-
 <script>
 
-// MOBILE TAB CONTROL
-function showMobile(section) {
+function showSection(section) {
 
-  document.getElementById("feedSection").classList.remove("hidden-mobile");
-  document.getElementById("capasSection").classList.remove("hidden-mobile");
-  document.getElementById("mercadoSection").classList.remove("hidden-mobile");
+  document.getElementById("feedSection").classList.add("hidden");
+  document.getElementById("capasSection").classList.add("hidden");
+  document.getElementById("mercadoSection").classList.add("hidden");
+
+  document.getElementById("tab-feed").classList.remove("active");
+  document.getElementById("tab-capas").classList.remove("active");
+  document.getElementById("tab-mercado").classList.remove("active");
 
   if (section === "feed") {
-    document.getElementById("capasSection").classList.add("hidden-mobile");
-    document.getElementById("mercadoSection").classList.add("hidden-mobile");
+    document.getElementById("feedSection").classList.remove("hidden");
+    document.getElementById("tab-feed").classList.add("active");
   }
 
   if (section === "capas") {
-    document.getElementById("feedSection").classList.add("hidden-mobile");
-    document.getElementById("mercadoSection").classList.add("hidden-mobile");
+    document.getElementById("capasSection").classList.remove("hidden");
+    document.getElementById("tab-capas").classList.add("active");
   }
 
   if (section === "mercado") {
-    document.getElementById("feedSection").classList.add("hidden-mobile");
-    document.getElementById("capasSection").classList.add("hidden-mobile");
+    document.getElementById("mercadoSection").classList.remove("hidden");
+    document.getElementById("tab-mercado").classList.add("active");
   }
 }
 
-// CAPAS
-async function loadCover(endpoint, imgId) {
-  const res = await fetch(endpoint);
-  const data = await res.json();
-  const img = document.getElementById(imgId);
-  img.src = data.cover;
-  img.onclick = () => window.open(data.coverLink, "_blank");
-}
-
-loadCover("/api/bola","bola-cover");
-loadCover("/api/record","record-cover");
-loadCover("/api/ojogo","ojogo-cover");
-
-// FEED
+/* FEED */
 async function loadFeed() {
   const res = await fetch("/api/feed");
   const data = await res.json();
@@ -327,7 +307,20 @@ async function loadFeed() {
 
 document.getElementById("refreshBtn").addEventListener("click", loadFeed);
 
-// MERCADO
+/* CAPAS */
+async function loadCover(endpoint, imgId) {
+  const res = await fetch(endpoint);
+  const data = await res.json();
+  const img = document.getElementById(imgId);
+  img.src = data.cover;
+  img.onclick = () => window.open(data.coverLink, "_blank");
+}
+
+loadCover("/api/bola","bola-cover");
+loadCover("/api/record","record-cover");
+loadCover("/api/ojogo","ojogo-cover");
+
+/* MERCADO */
 async function loadMercado() {
   const res = await fetch("/api/mercado");
   const data = await res.json();

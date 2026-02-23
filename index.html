@@ -18,7 +18,7 @@ h1 {
   margin: 40px 0 5px 0;
 }
 
-h2.section-title {
+.section-title {
   color: #0a5c2a;
   margin: 40px 0 20px 0;
 }
@@ -40,7 +40,12 @@ h2.section-title {
   width: 360px;
 }
 
-.column img.cover {
+.column h3 {
+  color: #0a5c2a;
+  margin-bottom: 15px;
+}
+
+.cover {
   width: 100%;
   height: auto;
   max-height: 520px;
@@ -143,11 +148,13 @@ h2.section-title {
         @Sporting_CPAdep
       </a>
     </div>
-    <a class="twitter-timeline"
-       data-height="500"
-       data-theme="light"
-       href="https://twitter.com/Sporting_CPAdep">
-    </a>
+
+    <blockquote class="twitter-timeline"
+      data-height="500"
+      data-chrome="noheader nofooter noborders"
+      href="https://twitter.com/Sporting_CPAdep">
+      Tweets by Sporting_CPAdep
+    </blockquote>
   </div>
 
   <!-- Sporting Oficial -->
@@ -158,11 +165,13 @@ h2.section-title {
         @SportingCP
       </a>
     </div>
-    <a class="twitter-timeline"
-       data-height="500"
-       data-theme="light"
-       href="https://twitter.com/SportingCP">
-    </a>
+
+    <blockquote class="twitter-timeline"
+      data-height="500"
+      data-chrome="noheader nofooter noborders"
+      href="https://twitter.com/SportingCP">
+      Tweets by SportingCP
+    </blockquote>
   </div>
 
   <!-- Sporting Orgulho -->
@@ -173,16 +182,19 @@ h2.section-title {
         @SportingOrgulho
       </a>
     </div>
-    <a class="twitter-timeline"
-       data-height="500"
-       data-theme="light"
-       href="https://twitter.com/SportingOrgulho">
-    </a>
+
+    <blockquote class="twitter-timeline"
+      data-height="500"
+      data-chrome="noheader nofooter noborders"
+      href="https://twitter.com/SportingOrgulho">
+      Tweets by SportingOrgulho
+    </blockquote>
   </div>
 
 </div>
 
-<script async src="https://platform.twitter.com/widgets.js"></script>
+<!-- Script oficial do X -->
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 
 <script>
 async function loadJournal(endpoint, coverId, newsId) {

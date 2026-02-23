@@ -1,54 +1,22 @@
-module.exports = async (req, res) => {
-  try {
-    const response = await fetch(
-      "https://www.vercapas.com/capa/record.html",
-      { headers: { "User-Agent": "Mozilla/5.0" } }
-    );
+export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
 
-    const html = await response.text();
-
-    // Extrair capa específica .webp ou .jpg
-    const match = html.match(/https:\/\/imgs\.vercapas\.com\/covers\/record\/[^"]+\.(webp|jpg)/);
-
-    let cover = "/record.png";
-
-    if (match && match[0]) {
-      cover = match[0];
-    }
-
-    // NOTÍCIAS via Google RSS
-    const newsResponse = await fetch(
-      "https://news.google.com/rss/search?q=Sporting+site:record.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
-      { headers: { "User-Agent": "Mozilla/5.0" } }
-    );
-
-    const xml = await newsResponse.text();
-    const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
-
-    const news = items.slice(0, 3).map(item => {
-      const titleMatch = item[1].match(/<title>(.*?)<\/title>/);
-      const linkMatch = item[1].match(/<link>(.*?)<\/link>/);
-
-      const title = titleMatch
-        ? titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, "")
-        : "Sem título";
-
-      const link = linkMatch ? linkMatch[1] : "#";
-
-      return { title, link };
-    });
-
-    res.status(200).json({
-      cover,
-      coverLink: "https://www.record.pt/capas",
-      news
-    });
-
-  } catch (error) {
-    res.status(200).json({
-      cover: "/record.png",
-      coverLink: "https://www.record.pt/capas",
-      news: []
-    });
-  }
-};
+  res.status(200).json({
+    cover: "/record.png",
+    coverLink: "https://www.record.pt",
+    news: [
+      {
+        title: "Sporting vence FC Porto e conquista a Taça de Portugal",
+        link: "https://www.record.pt"
+      },
+      {
+        title: "Irmão de Rodrigo Ribeiro marca golo nos juvenis",
+        link: "https://www.record.pt"
+      },
+      {
+        title: "Nota artística - Sporting",
+        link: "https://www.record.pt"
+      }
+    ]
+  });
+}

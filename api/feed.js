@@ -21,12 +21,23 @@ module.exports = async (req, res) => {
       items.slice(0, 5).forEach(item => {
         const titleMatch = item[1].match(/<title>(.*?)<\/title>/);
         const linkMatch = item[1].match(/<link>(.*?)<\/link>/);
+        const pubDateMatch = item[1].match(/<pubDate>(.*?)<\/pubDate>/);
 
         if (titleMatch && linkMatch) {
+
+          const date = pubDateMatch
+            ? new Date(pubDateMatch[1])
+            : null;
+
+          const hour = date
+            ? date.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })
+            : "";
+
           allNews.push({
             title: titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, ""),
             link: linkMatch[1],
-            source: source.name
+            source: source.name,
+            hour
           });
         }
       });
@@ -34,5 +45,8 @@ module.exports = async (req, res) => {
     } catch {}
   }
 
-  res.status(200).json(allNews.slice(0, 15));
+  // Ordenar por mais recente
+  allNews.sort((a, b) => (b.hour || "").localeCompare(a.hour || ""));
+
+  res.status(200).json(allNews.slice(0, 20));
 };

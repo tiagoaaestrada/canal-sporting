@@ -260,9 +260,9 @@ async function loadFeed() {
       const div = document.createElement("div");
       div.className = "feed-item";
       div.innerHTML = `
-        <div class="source">
-          ${item.source}${item.hour ? " • " + item.hour : ""}
-        </div>
+      <div class="source">
+        ${item.source} • ${item.formattedDate}
+      </div>
         <a href="${item.link}" target="_blank">${item.title}</a>
       `;
       container.appendChild(div);

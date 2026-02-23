@@ -29,17 +29,19 @@ h1 {
 }
 
 button {
-  padding: 8px 16px;
+  padding: 8px 14px;
   background-color: #0a5c2a;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  margin: 5px;
+  font-size: 13px;
 }
 
-button:hover {
-  opacity: 0.9;
+button.active {
+  background-color: #083d1c;
 }
 
 .container {
@@ -61,13 +63,6 @@ button:hover {
 
 .column h2 {
   color: #0a5c2a;
-  margin-bottom: 10px;
-}
-
-.edition-date {
-  font-size: 13px;
-  color: #777;
-  margin-bottom: 15px;
 }
 
 .column img {
@@ -75,15 +70,9 @@ button:hover {
   height: auto;
   max-height: 520px;
   object-fit: contain;
-  display: block;
   margin: 0 auto 20px auto;
   border-radius: 6px;
   cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.column img:hover {
-  transform: scale(1.02);
 }
 
 .news {
@@ -92,11 +81,11 @@ button:hover {
 
 .news a {
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
   color: #0a5c2a;
   text-decoration: none;
   font-weight: bold;
-  line-height: 1.4;
+  font-size: 14px;
 }
 
 .news a:hover {
@@ -111,28 +100,30 @@ button:hover {
 
 <div class="top-bar">
   <div id="last-update"></div>
-  <button onclick="reloadAll()">🔄 Atualizar agora</button>
+
+  <button onclick="setFilter('all')" id="btn-all" class="active">Todas</button>
+  <button onclick="setFilter('futebol')" id="btn-futebol">Futebol</button>
+  <button onclick="setFilter('andebol')" id="btn-andebol">Andebol</button>
+  <button onclick="setFilter('futsal')" id="btn-futsal">Futsal</button>
+  <button onclick="setFilter('outros')" id="btn-outros">Outros</button>
 </div>
 
 <div class="container">
 
   <div class="column">
     <h2>Record</h2>
-    <div class="edition-date" id="record-date"></div>
     <img id="record-cover" src="/record.png" />
     <div id="record-news" class="news"></div>
   </div>
 
   <div class="column">
     <h2>A Bola</h2>
-    <div class="edition-date" id="bola-date"></div>
     <img id="bola-cover" src="/abola.png" />
     <div id="bola-news" class="news"></div>
   </div>
 
   <div class="column">
     <h2>O Jogo</h2>
-    <div class="edition-date" id="ojogo-date"></div>
     <img id="ojogo-cover" src="/ojogo.png" />
     <div id="ojogo-news" class="news"></div>
   </div>
@@ -141,13 +132,15 @@ button:hover {
 
 <script>
 
-function getTodayFormatted() {
-  const today = new Date();
-  return today.toLocaleDateString("pt-PT", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric"
-  });
+let currentFilter = "all";
+
+function setFilter(filter) {
+  currentFilter = filter;
+
+  document.querySelectorAll("button").forEach(btn => btn.classList.remove("active"));
+  document.getElementById("btn-" + filter).classList.add("active");
+
+  loadAll();
 }
 
 function updateLastUpdateTime() {
@@ -161,17 +154,32 @@ function updateLastUpdateTime() {
     "Última atualização: " + time;
 }
 
-async function loadJournal(endpoint, coverId, newsId, dateId) {
+function filterNews(news) {
+  if (currentFilter === "all") return news;
+
+  return news.filter(item => {
+    const title = item.title.toLowerCase();
+
+    const isFutebol = title.includes("futebol") || title.includes("liga") || title.includes("benfica") || title.includes("porto");
+    const isFutsal = title.includes("futsal");
+    const isAndebol = title.includes("andebol");
+
+    if (currentFilter === "futebol") return isFutebol;
+    if (currentFilter === "futsal") return isFutsal;
+    if (currentFilter === "andebol") return isAndebol;
+    if (currentFilter === "outros") return !isFutebol && !isFutsal && !isAndebol;
+
+    return true;
+  });
+}
+
+async function loadJournal(endpoint, coverId, newsId) {
   try {
     const response = await fetch(endpoint + "?t=" + new Date().getTime());
     const data = await response.json();
 
     const img = document.getElementById(coverId);
     const newsContainer = document.getElementById(newsId);
-    const dateElement = document.getElementById(dateId);
-
-    // Data da edição (hoje)
-    dateElement.textContent = "Edição de " + getTodayFormatted();
 
     if (data.cover) {
       img.src = data.cover;
@@ -185,8 +193,10 @@ async function loadJournal(endpoint, coverId, newsId, dateId) {
 
     newsContainer.innerHTML = "";
 
-    if (data.news && data.news.length > 0) {
-      data.news.forEach(item => {
+    const filteredNews = filterNews(data.news);
+
+    if (filteredNews && filteredNews.length > 0) {
+      filteredNews.forEach(item => {
         const link = document.createElement("a");
         link.href = item.link;
         link.target = "_blank";
@@ -200,18 +210,13 @@ async function loadJournal(endpoint, coverId, newsId, dateId) {
   }
 }
 
-function reloadAll() {
-  loadAll();
-}
-
 function loadAll() {
-  loadJournal("/api/record", "record-cover", "record-news", "record-date");
-  loadJournal("/api/bola", "bola-cover", "bola-news", "bola-date");
-  loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news", "ojogo-date");
+  loadJournal("/api/record", "record-cover", "record-news");
+  loadJournal("/api/bola", "bola-cover", "bola-news");
+  loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
   updateLastUpdateTime();
 }
 
-// Inicial
 loadAll();
 
 </script>

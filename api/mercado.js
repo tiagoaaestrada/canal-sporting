@@ -1,20 +1,25 @@
 module.exports = async (req, res) => {
 
-  function simplifyTitle(title) {
-    // Remove coisas entre pipes e partes longas
-    title = title.split("|")[0];
+  function formatTransfer(title) {
+    // Remove fonte no final
+    title = title.split("|")[0].trim();
 
-    // Remove expressões desnecessárias
+    // Tentar capturar valores tipo 20M, 5 milhões, etc.
+    const valueMatch = title.match(/(\d+\s?M|milhões?|\d+\s?milhões?)/i);
+    const value = valueMatch ? valueMatch[0] : "";
+
+    // Simplificação básica
     title = title
-      .replace(/oficialmente|confirmado|segundo.*|revela.*|garante.*/i, "")
+      .replace(/oficial|confirmado|segundo.*|revela.*|garante.*/i, "")
+      .replace(/\s+/g, " ")
       .trim();
 
-    // Limita tamanho
-    if (title.length > 70) {
-      title = title.substring(0, 67) + "...";
+    // Limitar tamanho
+    if (title.length > 80) {
+      title = title.substring(0, 77) + "...";
     }
 
-    return title;
+    return value ? `${title} (${value})` : title;
   }
 
   async function fetchRSS(query) {
@@ -32,7 +37,7 @@ module.exports = async (req, res) => {
         const link = item[1].match(/<link>(.*?)<\/link>/)?.[1] || "#";
 
         const cleanTitle = rawTitle.replace(/<!\[CDATA\[|\]\]>/g, "");
-        const shortTitle = simplifyTitle(cleanTitle);
+        const shortTitle = formatTransfer(cleanTitle);
 
         return { title: shortTitle, link };
       });
@@ -43,8 +48,8 @@ module.exports = async (req, res) => {
   }
 
   res.status(200).json({
-    sporting: await fetchRSS("Sporting mercado transferências"),
-    nacional: await fetchRSS("Liga Portugal mercado transferências"),
-    internacional: await fetchRSS("mercado transferências internacional futebol")
+    sporting: await fetchRSS("Sporting transferência confirmado"),
+    nacional: await fetchRSS("Liga Portugal transferência confirmado"),
+    internacional: await fetchRSS("transferência internacional confirmado futebol")
   });
 };

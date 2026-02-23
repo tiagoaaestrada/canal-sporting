@@ -2,20 +2,37 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Canal Sporting</title>
 
 <style>
 body {
   font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-  background: #f2f2f2;
+  background: linear-gradient(to bottom, #f5f7f6, #e8ecea);
   margin: 0;
   padding: 0;
   text-align: center;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: #0a5c2a;
+}
+
 h1 {
   color: #0a5c2a;
   margin: 40px 0 5px 0;
+}
+
+.last-update {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 30px;
 }
 
 .section-title {
@@ -34,8 +51,8 @@ h1 {
 
 .column {
   background: #ffffff;
-  padding: 20px;
-  border-radius: 16px;
+  padding: 25px;
+  border-radius: 18px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.08);
   width: 360px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -48,16 +65,27 @@ h1 {
 
 .column h3 {
   color: #0a5c2a;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.column h3::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 3px;
+  background: #0a5c2a;
+  margin: 8px auto 0 auto;
+  border-radius: 2px;
 }
 
 .cover {
   width: 100%;
-  height: auto;
   max-height: 520px;
   object-fit: contain;
   margin-bottom: 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
 }
 
@@ -67,58 +95,27 @@ h1 {
 
 .news a {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: #f7f9f8;
+  border-radius: 10px;
   color: #0a5c2a;
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 600;
   font-size: 14px;
   line-height: 1.4;
+  transition: all 0.2s ease;
 }
 
 .news a:hover {
-  text-decoration: underline;
+  background: #e2efe8;
+  transform: translateX(4px);
 }
 
-/* ====== INSTAGRAM CARDS ====== */
-
-.ig-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.ig-logo {
-  width: 40px;
-  margin-bottom: 15px;
-}
-
-.ig-username {
-  font-size: 18px;
-  font-weight: bold;
-  color: #0a5c2a;
-  margin-bottom: 8px;
-}
-
-.ig-description {
+.loading {
+  color: #999;
   font-size: 14px;
-  color: #555;
-  margin-bottom: 20px;
-  padding: 0 10px;
-}
-
-.ig-button {
-  background: linear-gradient(45deg, #f09433, #dc2743, #bc1888);
-  color: white;
-  padding: 10px 18px;
-  border-radius: 25px;
-  text-decoration: none;
-  font-weight: bold;
-  transition: opacity 0.2s ease;
-}
-
-.ig-button:hover {
-  opacity: 0.85;
+  font-style: italic;
 }
 
 @media (max-width: 1100px) {
@@ -138,53 +135,9 @@ h1 {
 <body>
 
 <h1>Canal Sporting</h1>
-
-<!-- ===================== -->
-<!--   CANAIS INSTAGRAM   -->
-<!-- ===================== -->
-
-<h2 class="section-title">Canais Instagram</h2>
-
-<div class="container">
-
-  <div class="column ig-card">
-    <img src="/instagram.png" class="ig-logo" alt="Instagram">
-    <div class="ig-username">@sportingcp</div>
-    <div class="ig-description">
-      Página oficial do Sporting Clube de Portugal.
-    </div>
-    <a href="https://www.instagram.com/sportingcp/" target="_blank" class="ig-button">
-      Ver no Instagram
-    </a>
-  </div>
-
-  <div class="column ig-card">
-    <img src="/instagram.png" class="ig-logo" alt="Instagram">
-    <div class="ig-username">@sportingcp.adeptos1906</div>
-    <div class="ig-description">
-      Comunidade dedicada aos adeptos leoninos.
-    </div>
-    <a href="https://www.instagram.com/sportingcp.adeptos1906/" target="_blank" class="ig-button">
-      Ver no Instagram
-    </a>
-  </div>
-
-  <div class="column ig-card">
-    <img src="/instagram.png" class="ig-logo" alt="Instagram">
-    <div class="ig-username">@sporting1906orgulho</div>
-    <div class="ig-description">
-      Conteúdos e partilhas sobre o universo leonino.
-    </div>
-    <a href="https://www.instagram.com/sporting1906orgulho/" target="_blank" class="ig-button">
-      Ver no Instagram
-    </a>
-  </div>
-
-</div>
-
-<!-- ===================== -->
-<!--       JORNAIS        -->
-<!-- ===================== -->
+<p class="last-update">
+  Atualizado automaticamente • <span id="update-time"></span>
+</p>
 
 <h2 class="section-title">Jornais</h2>
 
@@ -193,30 +146,34 @@ h1 {
   <div class="column">
     <h3>Record</h3>
     <img id="record-cover" class="cover" src="/record.png" />
-    <div id="record-news" class="news"></div>
+    <div id="record-news" class="news loading">A carregar notícias...</div>
   </div>
 
   <div class="column">
     <h3>A Bola</h3>
     <img id="bola-cover" class="cover" src="/abola.png" />
-    <div id="bola-news" class="news"></div>
+    <div id="bola-news" class="news loading">A carregar notícias...</div>
   </div>
 
   <div class="column">
     <h3>O Jogo</h3>
     <img id="ojogo-cover" class="cover" src="/ojogo.png" />
-    <div id="ojogo-news" class="news"></div>
+    <div id="ojogo-news" class="news loading">A carregar notícias...</div>
   </div>
 
 </div>
 
 <script>
+document.getElementById("update-time").textContent =
+  new Date().toLocaleTimeString("pt-PT");
+
 async function loadJournal(endpoint, coverId, newsId) {
   try {
     const response = await fetch(endpoint + "?t=" + new Date().getTime());
     const data = await response.json();
 
     const img = document.getElementById(coverId);
+    const newsContainer = document.getElementById(newsId);
 
     if (data.cover) img.src = data.cover;
 
@@ -224,21 +181,23 @@ async function loadJournal(endpoint, coverId, newsId) {
       img.onclick = () => window.open(data.coverLink, "_blank");
     }
 
-    const newsContainer = document.getElementById(newsId);
     newsContainer.innerHTML = "";
 
     if (data.news && data.news.length > 0) {
-      data.news.forEach(item => {
+      data.news.slice(0, 3).forEach(item => {
         const link = document.createElement("a");
         link.href = item.link;
         link.target = "_blank";
         link.textContent = item.title;
         newsContainer.appendChild(link);
       });
+    } else {
+      newsContainer.innerHTML = "<p class='loading'>Sem notícias disponíveis</p>";
     }
 
   } catch (error) {
-    console.error("Erro ao carregar:", endpoint, error);
+    document.getElementById(newsId).innerHTML =
+      "<p class='loading'>Erro ao carregar</p>";
   }
 }
 

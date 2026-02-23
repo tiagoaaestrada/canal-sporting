@@ -1,23 +1,22 @@
 module.exports = async (req, res) => {
   try {
-    // Buscar página mobile da Vercapas (mais simples de extrair)
-    const coverResponse = await fetch(
-      "https://m.vercapas.com/capa/a-bola-html",
+    const response = await fetch(
+      "https://www.vercapas.com/capa/a-bola.html",
       { headers: { "User-Agent": "Mozilla/5.0" } }
     );
 
-    const html = await coverResponse.text();
+    const html = await response.text();
 
-    // Extrair primeira imagem JPG da página
-    const match = html.match(/https:\/\/[^"]+\.jpg/);
+    // Extrair capa específica .webp ou .jpg
+    const match = html.match(/https:\/\/imgs\.vercapas\.com\/covers\/a-bola\/[^"]+\.(webp|jpg)/);
 
     let cover = "/abola.png";
 
-    if (match) {
+    if (match && match[0]) {
       cover = match[0];
     }
 
-    // Notícias via Google RSS
+    // NOTÍCIAS via Google RSS
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:abola.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }
@@ -41,14 +40,14 @@ module.exports = async (req, res) => {
 
     res.status(200).json({
       cover,
-      coverLink: "https://www.abola.pt/capas",
+      coverLink: "https://www.abola.pt/noticias",
       news
     });
 
   } catch (error) {
     res.status(200).json({
       cover: "/abola.png",
-      coverLink: "https://www.abola.pt/capas",
+      coverLink: "https://www.abola.pt/noticias",
       news: []
     });
   }

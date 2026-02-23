@@ -74,6 +74,31 @@ h1 {
   text-decoration: underline;
 }
 
+/* X HEADER */
+.x-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.x-header img {
+  width: 22px;
+  height: 22px;
+}
+
+.x-header a {
+  text-decoration: none;
+  color: #0a5c2a;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.x-header a:hover {
+  text-decoration: underline;
+}
+
 @media (max-width: 1100px) {
   .container {
     flex-direction: column;
@@ -119,20 +144,26 @@ h1 {
 <div class="container">
 
   <div class="column">
-    <h2>@SportingCP</h2>
-    <img id="cp-cover" src="/x.png" />
+    <div class="x-header">
+      <img src="/x.png" alt="X logo">
+      <a href="https://x.com/SportingCP" target="_blank">@SportingCP</a>
+    </div>
     <div id="cp-news" class="news"></div>
   </div>
 
   <div class="column">
-    <h2>@Sporting_CPAdep</h2>
-    <img id="adep-cover" src="/x.png" />
+    <div class="x-header">
+      <img src="/x.png" alt="X logo">
+      <a href="https://x.com/Sporting_CPAdep" target="_blank">@Sporting_CPAdep</a>
+    </div>
     <div id="adep-news" class="news"></div>
   </div>
 
   <div class="column">
-    <h2>@SportingOrgulho</h2>
-    <img id="orgulho-cover" src="/x.png" />
+    <div class="x-header">
+      <img src="/x.png" alt="X logo">
+      <a href="https://x.com/SportingOrgulho" target="_blank">@SportingOrgulho</a>
+    </div>
     <div id="orgulho-news" class="news"></div>
   </div>
 
@@ -144,19 +175,21 @@ async function loadJournal(endpoint, coverId, newsId) {
     const response = await fetch(endpoint + "?t=" + new Date().getTime());
     const data = await response.json();
 
-    const img = document.getElementById(coverId);
+    if (coverId) {
+      const img = document.getElementById(coverId);
+
+      if (data.cover) {
+        img.src = data.cover;
+      }
+
+      if (data.coverLink) {
+        img.onclick = () => {
+          window.open(data.coverLink, "_blank");
+        };
+      }
+    }
+
     const newsContainer = document.getElementById(newsId);
-
-    if (data.cover) {
-      img.src = data.cover;
-    }
-
-    if (data.coverLink) {
-      img.onclick = () => {
-        window.open(data.coverLink, "_blank");
-      };
-    }
-
     newsContainer.innerHTML = "";
 
     if (data.news && data.news.length > 0) {
@@ -178,9 +211,9 @@ loadJournal("/api/record", "record-cover", "record-news");
 loadJournal("/api/bola", "bola-cover", "bola-news");
 loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
 
-loadJournal("/api/sportingcp", "cp-cover", "cp-news");
-loadJournal("/api/sportingadep", "adep-cover", "adep-news");
-loadJournal("/api/sportingorgulho", "orgulho-cover", "orgulho-news");
+loadJournal("/api/sportingcp", null, "cp-news");
+loadJournal("/api/sportingadep", null, "adep-news");
+loadJournal("/api/sportingorgulho", null, "orgulho-news");
 </script>
 
 </body>

@@ -25,10 +25,10 @@ h1 {
   padding: 20px;
 }
 
-/* ===== COLUNA ESQUERDA (MERCADO) ===== */
+/* ===== MERCADO ===== */
 
 .sidebar {
-  width: 260px;
+  width: 240px;
   background: white;
   padding: 20px;
   border-radius: 16px;
@@ -37,21 +37,13 @@ h1 {
 }
 
 .sidebar h3 {
-  color: #0a5c2a;
+  text-align: center;
   margin-top: 0;
-  text-align: center;
 }
 
-.market-link {
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-.market-link a {
-  font-size: 13px;
-  color: #0a5c2a;
+.sidebar h3 a {
   text-decoration: none;
-  font-weight: 600;
+  color: #0a5c2a;
 }
 
 .market-section {
@@ -59,18 +51,20 @@ h1 {
 }
 
 .market-section h4 {
-  margin-bottom: 10px;
+  margin: 18px 0 8px 0;
   color: #0a5c2a;
+  font-size: 15px;
 }
 
 .market-section a {
   display: block;
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: 6px;
   text-decoration: none;
   color: #333;
   position: relative;
   padding-left: 12px;
+  line-height: 1.3;
 }
 
 .market-section a::before {
@@ -91,7 +85,7 @@ h1 {
   flex: 1;
 }
 
-/* CAPAS */
+/* CAPAS MAIORES */
 
 .covers {
   display: flex;
@@ -106,7 +100,7 @@ h1 {
   padding: 20px;
   border-radius: 16px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  width: 260px;
+  width: 320px;
   text-align: center;
 }
 
@@ -116,7 +110,7 @@ h1 {
   cursor: pointer;
 }
 
-/* FEED GERAL */
+/* FEED */
 
 .feed {
   background: white;
@@ -176,10 +170,10 @@ h1 {
 
 <div class="layout">
 
-  <!-- ===== MERCADO ===== -->
+  <!-- MERCADO -->
   <div class="sidebar">
     <h3>
-      <a href="https://www.transfermarkt.pt" target="_blank" style="text-decoration:none; color:#0a5c2a;">
+      <a href="https://www.transfermarkt.pt" target="_blank">
         Mercado de Transferências
       </a>
     </h3>
@@ -200,7 +194,7 @@ h1 {
     </div>
   </div>
 
-  <!-- ===== CONTEÚDO PRINCIPAL ===== -->
+  <!-- MAIN -->
   <div class="main">
 
     <!-- CAPAS -->
@@ -223,7 +217,7 @@ h1 {
 
     </div>
 
-    <!-- FEED GERAL -->
+    <!-- FEED -->
     <div class="feed">
       <h2>Feed Geral Sporting</h2>
       <div id="feed-container">A carregar...</div>
@@ -233,6 +227,8 @@ h1 {
 </div>
 
 <script>
+
+// CAPAS
 async function loadCover(endpoint, imgId) {
   try {
     const res = await fetch(endpoint);
@@ -247,6 +243,7 @@ loadCover("/api/bola", "bola-cover");
 loadCover("/api/record", "record-cover");
 loadCover("/api/ojogo", "ojogo-cover");
 
+// FEED GERAL
 async function loadFeed() {
   try {
     const res = await fetch("/api/feed");
@@ -258,9 +255,9 @@ async function loadFeed() {
       const div = document.createElement("div");
       div.className = "feed-item";
       div.innerHTML = `
-      <div class="source">
-        ${item.source} • ${item.formattedDate}
-      </div>
+        <div class="source">
+          ${item.source} • ${item.formattedDate}
+        </div>
         <a href="${item.link}" target="_blank">${item.title}</a>
       `;
       container.appendChild(div);
@@ -273,6 +270,7 @@ async function loadFeed() {
 
 loadFeed();
 
+// MERCADO
 async function loadMercado() {
   try {
     const res = await fetch("/api/mercado");
@@ -285,7 +283,9 @@ async function loadMercado() {
         const a = document.createElement("a");
         a.href = item.link;
         a.target = "_blank";
-        a.textContent = item.title;
+        a.textContent = item.formattedDate
+          ? `${item.title} (${item.formattedDate})`
+          : item.title;
         container.appendChild(a);
       });
     });
@@ -294,6 +294,7 @@ async function loadMercado() {
 }
 
 loadMercado();
+
 </script>
 
 </body>

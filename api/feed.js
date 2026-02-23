@@ -18,35 +18,43 @@ module.exports = async (req, res) => {
       const xml = await response.text();
       const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
 
-      items.slice(0, 5).forEach(item => {
+      items.slice(0, 6).forEach(item => {
         const titleMatch = item[1].match(/<title>(.*?)<\/title>/);
         const linkMatch = item[1].match(/<link>(.*?)<\/link>/);
         const pubDateMatch = item[1].match(/<pubDate>(.*?)<\/pubDate>/);
 
-        if (titleMatch && linkMatch) {
+        if (titleMatch && linkMatch && pubDateMatch) {
 
-          const date = pubDateMatch
-            ? new Date(pubDateMatch[1])
-            : null;
+          const rawDate = new Date(pubDateMatch[1]);
 
-          const hour = date
-            ? date.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })
-            : "";
+          const formattedDate =
+            rawDate.toLocaleDateString("pt-PT", {
+              day: "2-digit",
+              month: "2-digit"
+            }) +
+            " - " +
+            rawDate.toLocaleTimeString("pt-PT", {
+              hour: "2-digit",
+              minute: "2-digit"
+            });
 
           allNews.push({
             title: titleMatch[1].replace(/<!\[CDATA\[|\]\]>/g, ""),
             link: linkMatch[1],
             source: source.name,
-            hour
+            date: rawDate.getTime(), // para ordenar corretamente
+            formattedDate
           });
         }
       });
 
-    } catch {}
+    } catch (err) {
+      console.error("Erro feed:", source.name);
+    }
   }
 
-  // Ordenar por mais recente
-  allNews.sort((a, b) => (b.hour || "").localeCompare(a.hour || ""));
+  // 🔥 ORDENAR POR DATA REAL (mais recente primeiro)
+  allNews.sort((a, b) => b.date - a.date);
 
   res.status(200).json(allNews.slice(0, 20));
 };

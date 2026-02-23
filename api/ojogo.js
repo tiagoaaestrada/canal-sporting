@@ -1,22 +1,22 @@
 module.exports = async (req, res) => {
   try {
-    const coverResponse = await fetch(
-      "https://m.vercapas.com/capa/o-jogo-html",
+    const response = await fetch(
+      "https://www.vercapas.com/capa/o-jogo.html",
       { headers: { "User-Agent": "Mozilla/5.0" } }
     );
 
-    const html = await coverResponse.text();
+    const html = await response.text();
 
-    // Procurar especificamente imagem da pasta o-jogo
-    const match = html.match(/https:\/\/[^"]*storage\/capas\/o-jogo\/[^"]+\.jpg/);
+    // Procurar URL de imagem de capa (.webp ou .jpg)
+    const match = html.match(/https:\/\/imgs\.vercapas\.com\/covers\/o-jogo\/[^"]+\.(webp|jpg)/);
 
     let cover = "/ojogo.png";
 
-    if (match) {
+    if (match && match[0]) {
       cover = match[0];
     }
 
-    // Notícias
+    // NOTÍCIAS via Google RSS
     const newsResponse = await fetch(
       "https://news.google.com/rss/search?q=Sporting+site:ojogo.pt&hl=pt-PT&gl=PT&ceid=PT:pt",
       { headers: { "User-Agent": "Mozilla/5.0" } }

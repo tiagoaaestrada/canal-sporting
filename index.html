@@ -191,17 +191,6 @@ h1 {
 
   <div class="column ig-card">
     <img src="/instagram.png" class="ig-logo" alt="Instagram">
-    <div class="ig-username">@sportingcp</div>
-    <div class="ig-description">
-      Página oficial do Sporting Clube de Portugal.
-    </div>
-    <a href="https://www.instagram.com/sportingcp/" target="_blank" class="ig-button">
-      Ver no Instagram
-    </a>
-  </div>
-
-  <div class="column ig-card">
-    <img src="/instagram.png" class="ig-logo" alt="Instagram">
     <div class="ig-username">@sportingcp.adeptos1906</div>
     <div class="ig-description">
       Comunidade dedicada aos adeptos leoninos.
@@ -211,6 +200,17 @@ h1 {
     </a>
   </div>
 
+    <div class="column ig-card">
+    <img src="/instagram.png" class="ig-logo" alt="Instagram">
+    <div class="ig-username">@sportingcp</div>
+    <div class="ig-description">
+      Página oficial do Sporting Clube de Portugal.
+    </div>
+    <a href="https://www.instagram.com/sportingcp/" target="_blank" class="ig-button">
+      Ver no Instagram
+    </a>
+  </div>
+  
   <div class="column ig-card">
     <img src="/instagram.png" class="ig-logo" alt="Instagram">
     <div class="ig-username">@sporting1906orgulho</div>
@@ -231,17 +231,17 @@ h1 {
 <div class="container">
 
   <div class="column">
-    <h3>Record</h3>
-    <img id="record-cover" class="cover" src="/record.png" />
-    <div id="record-news" class="news loading">A carregar notícias...</div>
-  </div>
-
-  <div class="column">
     <h3>A Bola</h3>
     <img id="bola-cover" class="cover" src="/abola.png" />
     <div id="bola-news" class="news loading">A carregar notícias...</div>
   </div>
 
+  <div class="column">
+    <h3>Record</h3>
+    <img id="record-cover" class="cover" src="/record.png" />
+    <div id="record-news" class="news loading">A carregar notícias...</div>
+  </div>
+  
   <div class="column">
     <h3>O Jogo</h3>
     <img id="ojogo-cover" class="cover" src="/ojogo.png" />
@@ -287,9 +287,9 @@ async function loadJournal(endpoint, coverId, newsId) {
       "<p class='loading'>Erro ao carregar</p>";
   }
 }
-
-loadJournal("/api/record", "record-cover", "record-news");
+  
 loadJournal("/api/bola", "bola-cover", "bola-news");
+loadJournal("/api/record", "record-cover", "record-news");
 loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
 </script>
 

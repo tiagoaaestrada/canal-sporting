@@ -1,6 +1,6 @@
 module.exports = async (req, res) => {
   try {
-    const rssUrl = "https://nitter.net/SportingOrgulho/rss";
+    const rssUrl = "https://rsshub.app/twitter/user/SportingOrgulho";
 
     const response = await fetch(rssUrl);
     const xml = await response.text();
@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
       news
     });
 
-  } catch {
+  } catch (error) {
     res.status(200).json({
       cover: "/x.png",
       coverLink: "https://x.com/SportingOrgulho",

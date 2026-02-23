@@ -15,6 +15,11 @@ body {
 
 h1 {
   color: #0a5c2a;
+  margin: 40px 0 5px 0;
+}
+
+h2.section-title {
+  color: #0a5c2a;
   margin: 40px 0 20px 0;
 }
 
@@ -32,12 +37,13 @@ h1 {
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  width: 360px;
+  width: 340px;
 }
 
-.column h2 {
-  color: #0a5c2a;
-  margin-bottom: 15px;
+.column.highlight {
+  width: 400px;
+  background: #e8f5ec;
+  border: 2px solid #0a5c2a;
 }
 
 .column img {
@@ -45,15 +51,9 @@ h1 {
   height: auto;
   max-height: 520px;
   object-fit: contain;
-  display: block;
-  margin: 0 auto 20px auto;
+  margin-bottom: 20px;
   border-radius: 6px;
   cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.column img:hover {
-  transform: scale(1.02);
 }
 
 .news {
@@ -74,7 +74,7 @@ h1 {
   text-decoration: underline;
 }
 
-/* X HEADER */
+/* X header */
 .x-header {
   display: flex;
   align-items: center;
@@ -88,15 +88,16 @@ h1 {
   height: 22px;
 }
 
+.column.highlight .x-header img {
+  width: 28px;
+  height: 28px;
+}
+
 .x-header a {
   text-decoration: none;
   color: #0a5c2a;
   font-weight: bold;
   font-size: 18px;
-}
-
-.x-header a:hover {
-  text-decoration: underline;
 }
 
 @media (max-width: 1100px) {
@@ -105,7 +106,8 @@ h1 {
     align-items: center;
   }
 
-  .column {
+  .column,
+  .column.highlight {
     width: 90%;
     max-width: 420px;
   }
@@ -115,54 +117,65 @@ h1 {
 
 <body>
 
-<h1>Capas dos Jornais</h1>
+<h1>Canal Sporting</h1>
+
+<h2 class="section-title">Jornais</h2>
 
 <div class="container">
 
   <div class="column">
-    <h2>Record</h2>
+    <h3>Record</h3>
     <img id="record-cover" src="/record.png" />
     <div id="record-news" class="news"></div>
   </div>
 
   <div class="column">
-    <h2>A Bola</h2>
+    <h3>A Bola</h3>
     <img id="bola-cover" src="/abola.png" />
     <div id="bola-news" class="news"></div>
   </div>
 
   <div class="column">
-    <h2>O Jogo</h2>
+    <h3>O Jogo</h3>
     <img id="ojogo-cover" src="/ojogo.png" />
     <div id="ojogo-news" class="news"></div>
   </div>
 
 </div>
 
-<h1 style="margin-top:60px;">Canais X</h1>
+<h2 class="section-title">Canais X</h2>
 
 <div class="container">
 
+  <!-- Sporting Adeptos -->
   <div class="column">
     <div class="x-header">
-      <img src="/x.png" alt="X logo">
-      <a href="https://x.com/SportingCP" target="_blank">@SportingCP</a>
-    </div>
-    <div id="cp-news" class="news"></div>
-  </div>
-
-  <div class="column">
-    <div class="x-header">
-      <img src="/x.png" alt="X logo">
-      <a href="https://x.com/Sporting_CPAdep" target="_blank">@Sporting_CPAdep</a>
+      <img src="/x.png" alt="X">
+      <a href="https://x.com/Sporting_CPAdep" target="_blank">
+        @Sporting_CPAdep
+      </a>
     </div>
     <div id="adep-news" class="news"></div>
   </div>
 
+  <!-- Sporting Oficial (DESTAQUE) -->
+  <div class="column highlight">
+    <div class="x-header">
+      <img src="/x.png" alt="X">
+      <a href="https://x.com/SportingCP" target="_blank">
+        @SportingCP
+      </a>
+    </div>
+    <div id="cp-news" class="news"></div>
+  </div>
+
+  <!-- Sporting Orgulho -->
   <div class="column">
     <div class="x-header">
-      <img src="/x.png" alt="X logo">
-      <a href="https://x.com/SportingOrgulho" target="_blank">@SportingOrgulho</a>
+      <img src="/x.png" alt="X">
+      <a href="https://x.com/SportingOrgulho" target="_blank">
+        @SportingOrgulho
+      </a>
     </div>
     <div id="orgulho-news" class="news"></div>
   </div>
@@ -177,15 +190,9 @@ async function loadJournal(endpoint, coverId, newsId) {
 
     if (coverId) {
       const img = document.getElementById(coverId);
-
-      if (data.cover) {
-        img.src = data.cover;
-      }
-
+      if (data.cover) img.src = data.cover;
       if (data.coverLink) {
-        img.onclick = () => {
-          window.open(data.coverLink, "_blank");
-        };
+        img.onclick = () => window.open(data.coverLink, "_blank");
       }
     }
 
@@ -211,8 +218,8 @@ loadJournal("/api/record", "record-cover", "record-news");
 loadJournal("/api/bola", "bola-cover", "bola-news");
 loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
 
-loadJournal("/api/sportingcp", null, "cp-news");
 loadJournal("/api/sportingadep", null, "adep-news");
+loadJournal("/api/sportingcp", null, "cp-news");
 loadJournal("/api/sportingorgulho", null, "orgulho-news");
 </script>
 

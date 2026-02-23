@@ -33,14 +33,14 @@ h2.section-title {
 }
 
 .column {
-  background: #f3f3f3;
+  background: #ffffff;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-  width: 340px;
+  width: 360px;
 }
 
-.column img {
+.column img.cover {
   width: 100%;
   height: auto;
   max-height: 520px;
@@ -82,11 +82,6 @@ h2.section-title {
   height: 22px;
 }
 
-.column.highlight .x-header img {
-  width: 28px;
-  height: 28px;
-}
-
 .x-header a {
   text-decoration: none;
   color: #0a5c2a;
@@ -100,8 +95,7 @@ h2.section-title {
     align-items: center;
   }
 
-  .column,
-  .column.highlight {
+  .column {
     width: 90%;
     max-width: 420px;
   }
@@ -119,19 +113,19 @@ h2.section-title {
 
   <div class="column">
     <h3>Record</h3>
-    <img id="record-cover" src="/record.png" />
+    <img id="record-cover" class="cover" src="/record.png" />
     <div id="record-news" class="news"></div>
   </div>
 
   <div class="column">
     <h3>A Bola</h3>
-    <img id="bola-cover" src="/abola.png" />
+    <img id="bola-cover" class="cover" src="/abola.png" />
     <div id="bola-news" class="news"></div>
   </div>
 
   <div class="column">
     <h3>O Jogo</h3>
-    <img id="ojogo-cover" src="/ojogo.png" />
+    <img id="ojogo-cover" class="cover" src="/ojogo.png" />
     <div id="ojogo-news" class="news"></div>
   </div>
 
@@ -141,6 +135,7 @@ h2.section-title {
 
 <div class="container">
 
+  <!-- Sporting Adeptos -->
   <div class="column">
     <div class="x-header">
       <img src="/x.png" alt="X">
@@ -148,9 +143,14 @@ h2.section-title {
         @Sporting_CPAdep
       </a>
     </div>
-    <div id="adep-news" class="news"></div>
+    <a class="twitter-timeline"
+       data-height="500"
+       data-theme="light"
+       href="https://twitter.com/Sporting_CPAdep">
+    </a>
   </div>
 
+  <!-- Sporting Oficial -->
   <div class="column">
     <div class="x-header">
       <img src="/x.png" alt="X">
@@ -158,9 +158,14 @@ h2.section-title {
         @SportingCP
       </a>
     </div>
-    <div id="cp-news" class="news"></div>
+    <a class="twitter-timeline"
+       data-height="500"
+       data-theme="light"
+       href="https://twitter.com/SportingCP">
+    </a>
   </div>
 
+  <!-- Sporting Orgulho -->
   <div class="column">
     <div class="x-header">
       <img src="/x.png" alt="X">
@@ -168,10 +173,16 @@ h2.section-title {
         @SportingOrgulho
       </a>
     </div>
-    <div id="orgulho-news" class="news"></div>
+    <a class="twitter-timeline"
+       data-height="500"
+       data-theme="light"
+       href="https://twitter.com/SportingOrgulho">
+    </a>
   </div>
 
 </div>
+
+<script async src="https://platform.twitter.com/widgets.js"></script>
 
 <script>
 async function loadJournal(endpoint, coverId, newsId) {
@@ -179,12 +190,12 @@ async function loadJournal(endpoint, coverId, newsId) {
     const response = await fetch(endpoint + "?t=" + new Date().getTime());
     const data = await response.json();
 
-    if (coverId) {
-      const img = document.getElementById(coverId);
-      if (data.cover) img.src = data.cover;
-      if (data.coverLink) {
-        img.onclick = () => window.open(data.coverLink, "_blank");
-      }
+    const img = document.getElementById(coverId);
+
+    if (data.cover) img.src = data.cover;
+
+    if (data.coverLink) {
+      img.onclick = () => window.open(data.coverLink, "_blank");
     }
 
     const newsContainer = document.getElementById(newsId);
@@ -208,10 +219,6 @@ async function loadJournal(endpoint, coverId, newsId) {
 loadJournal("/api/record", "record-cover", "record-news");
 loadJournal("/api/bola", "bola-cover", "bola-news");
 loadJournal("/api/ojogo", "ojogo-cover", "ojogo-news");
-
-loadJournal("/api/sportingadep", null, "adep-news");
-loadJournal("/api/sportingcp", null, "cp-news");
-loadJournal("/api/sportingorgulho", null, "orgulho-news");
 </script>
 
 </body>

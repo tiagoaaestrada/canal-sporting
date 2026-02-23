@@ -1,22 +1,19 @@
 module.exports = async (req, res) => {
   try {
-    // Buscar página das capas
-    const coverResponse = await fetch("https://www.record.pt/capas", {
-      headers: { "User-Agent": "Mozilla/5.0" }
-    });
+    const response = await fetch(
+      "https://www.vercapas.com/capa/record.html",
+      { headers: { "User-Agent": "Mozilla/5.0" } }
+    );
 
-    const html = await coverResponse.text();
+    const html = await response.text();
 
-    // Procurar imagem da capa
-    const match = html.match(/img_80x100uu([^"]+)\.jpg/);
+    // Extrair capa específica .webp ou .jpg
+    const match = html.match(/https:\/\/imgs\.vercapas\.com\/covers\/record\/[^"]+\.(webp|jpg)/);
 
     let cover = "/record.png";
 
-    if (match) {
-      const imageId = match[1];
-
-      // Construir versão grande
-      cover = `https://cdn.record.pt/images/2026-02/img_1200x1200uu${imageId}.jpg`;
+    if (match && match[0]) {
+      cover = match[0];
     }
 
     // NOTÍCIAS via Google RSS

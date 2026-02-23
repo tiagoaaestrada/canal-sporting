@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Canal Sporting</title>
 
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a5c2a">
+
 <style>
 body {
   font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
@@ -25,15 +28,12 @@ h1 {
   padding: 20px;
 }
 
-/* ===== MERCADO ===== */
-
 .sidebar {
   width: 240px;
   background: white;
   padding: 20px;
   border-radius: 16px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  height: fit-content;
 }
 
 .sidebar h3 {
@@ -44,10 +44,6 @@ h1 {
 .sidebar h3 a {
   text-decoration: none;
   color: #0a5c2a;
-}
-
-.market-section {
-  margin-bottom: 25px;
 }
 
 .market-section h4 {
@@ -79,13 +75,9 @@ h1 {
   color: #0a5c2a;
 }
 
-/* ===== CONTEÚDO PRINCIPAL ===== */
-
 .main {
   flex: 1;
 }
-
-/* CAPAS MAIORES */
 
 .covers {
   display: flex;
@@ -110,8 +102,6 @@ h1 {
   cursor: pointer;
 }
 
-/* FEED */
-
 .feed {
   background: white;
   padding: 25px;
@@ -119,9 +109,20 @@ h1 {
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
-.feed h2 {
-  margin-top: 0;
-  color: #0a5c2a;
+.feed-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+#refreshBtn {
+  background: #0a5c2a;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
 }
 
 .feed-item {
@@ -144,14 +145,7 @@ h1 {
   text-decoration: none;
   color: #222;
   font-weight: 600;
-  line-height: 1.4;
 }
-
-.feed-item a:hover {
-  color: #0a5c2a;
-}
-
-/* RESPONSIVO */
 
 @media (max-width: 1000px) {
   .layout {
@@ -170,7 +164,6 @@ h1 {
 
 <div class="layout">
 
-  <!-- MERCADO -->
   <div class="sidebar">
     <h3>
       <a href="https://www.transfermarkt.pt" target="_blank">
@@ -194,32 +187,28 @@ h1 {
     </div>
   </div>
 
-  <!-- MAIN -->
   <div class="main">
 
-    <!-- CAPAS -->
     <div class="covers">
-
       <div class="cover-box">
         <h3>A Bola</h3>
         <img id="bola-cover" src="/abola.png">
       </div>
-
       <div class="cover-box">
         <h3>Record</h3>
         <img id="record-cover" src="/record.png">
       </div>
-
       <div class="cover-box">
         <h3>O Jogo</h3>
         <img id="ojogo-cover" src="/ojogo.png">
       </div>
-
     </div>
 
-    <!-- FEED -->
     <div class="feed">
-      <h2>Feed Geral Sporting</h2>
+      <div class="feed-header">
+        <h2>Feed Geral Sporting</h2>
+        <button id="refreshBtn">Atualizar</button>
+      </div>
       <div id="feed-container">A carregar...</div>
     </div>
 
@@ -228,72 +217,70 @@ h1 {
 
 <script>
 
-// CAPAS
 async function loadCover(endpoint, imgId) {
-  try {
-    const res = await fetch(endpoint);
-    const data = await res.json();
-    const img = document.getElementById(imgId);
-    img.src = data.cover;
-    img.onclick = () => window.open(data.coverLink, "_blank");
-  } catch {}
+  const res = await fetch(endpoint);
+  const data = await res.json();
+  const img = document.getElementById(imgId);
+  img.src = data.cover;
+  img.onclick = () => window.open(data.coverLink, "_blank");
 }
 
-loadCover("/api/bola", "bola-cover");
-loadCover("/api/record", "record-cover");
-loadCover("/api/ojogo", "ojogo-cover");
+loadCover("/api/bola","bola-cover");
+loadCover("/api/record","record-cover");
+loadCover("/api/ojogo","ojogo-cover");
 
-// FEED GERAL
 async function loadFeed() {
-  try {
-    const res = await fetch("/api/feed");
-    const data = await res.json();
-    const container = document.getElementById("feed-container");
-    container.innerHTML = "";
+  const res = await fetch("/api/feed");
+  const data = await res.json();
+  const container = document.getElementById("feed-container");
+  container.innerHTML = "";
 
-    data.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "feed-item";
-      div.innerHTML = `
-        <div class="source">
-          ${item.source} • ${item.formattedDate}
-        </div>
-        <a href="${item.link}" target="_blank">${item.title}</a>
-      `;
-      container.appendChild(div);
-    });
-
-  } catch {
-    document.getElementById("feed-container").innerHTML = "Erro ao carregar.";
-  }
+  data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "feed-item";
+    div.innerHTML = `
+      <div class="source">
+        ${item.source} • ${item.formattedDate}
+      </div>
+      <a href="${item.link}" target="_blank">${item.title}</a>
+    `;
+    container.appendChild(div);
+  });
 }
+
+async function loadMercado() {
+  const res = await fetch("/api/mercado");
+  const data = await res.json();
+
+  ["sporting","nacional","internacional"].forEach(section => {
+    const container = document.getElementById("mercado-"+section);
+    container.innerHTML = "";
+    data[section].forEach(item => {
+      const a = document.createElement("a");
+      a.href = item.link;
+      a.target = "_blank";
+      a.textContent = `${item.title} (${item.formattedDate})`;
+      container.appendChild(a);
+    });
+  });
+}
+
+document.getElementById("refreshBtn").addEventListener("click", () => {
+  loadFeed();
+  loadMercado();
+});
+
+setInterval(() => {
+  loadFeed();
+  loadMercado();
+}, 300000);
 
 loadFeed();
-
-// MERCADO
-async function loadMercado() {
-  try {
-    const res = await fetch("/api/mercado");
-    const data = await res.json();
-
-    ["sporting","nacional","internacional"].forEach(section => {
-      const container = document.getElementById("mercado-"+section);
-      container.innerHTML = "";
-      data[section].forEach(item => {
-        const a = document.createElement("a");
-        a.href = item.link;
-        a.target = "_blank";
-        a.textContent = item.formattedDate
-          ? `${item.title} (${item.formattedDate})`
-          : item.title;
-        container.appendChild(a);
-      });
-    });
-
-  } catch {}
-}
-
 loadMercado();
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js");
+}
 
 </script>
 

@@ -48,12 +48,13 @@ h1 {
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
-.jogo-card {
+.jogo-item {
   padding: 10px 0;
   border-bottom: 1px solid #eee;
+  font-size: 15px;
 }
 
-.jogo-card:last-child {
+.jogo-item:last-child {
   border-bottom: none;
 }
 
@@ -62,10 +63,20 @@ h1 {
   color: #0a5c2a;
 }
 
+.competicao {
+  color: #555;
+}
+
+.data {
+  color: #777;
+  font-size: 14px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  margin-top: 10px;
 }
 
 th, td {
@@ -112,6 +123,21 @@ th, td {
 
 <script>
 
+/* FORMATAR DATA: 08/mar/26 00h00 */
+function formatarData(dateString) {
+  const date = new Date(dateString);
+
+  const meses = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
+
+  const dia = String(date.getDate()).padStart(2,"0");
+  const mes = meses[date.getMonth()];
+  const ano = String(date.getFullYear()).slice(-2);
+  const horas = String(date.getHours()).padStart(2,"0");
+  const minutos = String(date.getMinutes()).padStart(2,"0");
+
+  return `${dia}/${mes}/${ano} ${horas}h${minutos}`;
+}
+
 /* JOGOS */
 async function carregarJogos() {
   const res = await fetch("/api/jogos");
@@ -123,31 +149,28 @@ async function carregarJogos() {
   porJogarDiv.innerHTML = "";
   jogadosDiv.innerHTML = "";
 
-  Object.keys(data.porJogar).forEach(comp => {
-    porJogarDiv.innerHTML += `<h3>${comp}</h3>`;
-    data.porJogar[comp].forEach(jogo => {
-      porJogarDiv.innerHTML += `
-        <div class="jogo-card">
-          ${jogo.homeTeam} vs ${jogo.awayTeam}
-          <br>${jogo.dataFormatada}
-        </div>
-      `;
-    });
+  /* PRÓXIMOS (já vêm ordenados pela API) */
+  Object.values(data.porJogar).flat().forEach(jogo => {
+    porJogarDiv.innerHTML += `
+      <div class="jogo-item">
+        ${jogo.homeTeam} vs ${jogo.awayTeam}
+        - <span class="competicao">${jogo.competition}</span>
+        - <span class="data">${formatarData(jogo.date)}</span>
+      </div>
+    `;
   });
 
-  Object.keys(data.jogados).forEach(comp => {
-    jogadosDiv.innerHTML += `<h3>${comp}</h3>`;
-    data.jogados[comp].forEach(jogo => {
-      jogadosDiv.innerHTML += `
-        <div class="jogo-card">
-          ${jogo.homeTeam}
-          <span class="resultado">
-            ${jogo.score.home} - ${jogo.score.away}
-          </span>
-          ${jogo.awayTeam}
-        </div>
-      `;
-    });
+  /* JOGADOS (já vêm ordenados desc pela API) */
+  Object.values(data.jogados).flat().forEach(jogo => {
+    jogadosDiv.innerHTML += `
+      <div class="jogo-item">
+        ${jogo.homeTeam}
+        <span class="resultado">${jogo.score.home} - ${jogo.score.away}</span>
+        ${jogo.awayTeam}
+        - <span class="competicao">${jogo.competition}</span>
+        - <span class="data">${formatarData(jogo.date)}</span>
+      </div>
+    `;
   });
 }
 

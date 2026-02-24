@@ -7,18 +7,28 @@
 
 <style>
 
-  /* ================= HEADER ================= */
+/* ================= GLOBAL ================= */
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f7f6;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* ================= HEADER ================= */
 
 .main-header {
   background: white;
   border-bottom: 1px solid #eee;
-  padding: 15px 0 5px 0;
+  padding: 18px 0 8px 0;
   text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .header-title a {
   text-decoration: none;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: bold;
   color: #0a5c2a;
 }
@@ -27,7 +37,7 @@
   display: flex;
   justify-content: center;
   gap: 30px;
-  margin-top: 10px;
+  margin-top: 12px;
 }
 
 .header-nav a {
@@ -42,93 +52,62 @@
   border-bottom: 3px solid #0a5c2a;
 }
 
-@media (max-width: 768px) {
-  .header-nav {
-    gap: 18px;
-    font-size: 14px;
-  }
-}
-  
-  body {
-  font-family: Arial;
-  background: #f5f7f6;
-  margin: 0;
-  font-size: 13px;
-}
-
-h1 {
-  text-align: center;
-  color: #0a5c2a;
-  margin: 15px 0;
-}
-
-.top-nav {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  background: white;
-  padding: 8px;
-  border-bottom: 1px solid #eee;
-}
-
-.top-nav a {
-  text-decoration: none;
-  font-weight: 600;
-  color: #0a5c2a;
-}
+/* ================= LAYOUT ================= */
 
 .layout {
+  max-width: 1300px;
+  margin: 40px auto;
+  padding: 0 25px 60px 25px;
   display: grid;
-  grid-template-columns: 1fr 1.3fr 1fr;
-  gap: 25px;
-  max-width: 1200px;
-  margin: auto;
-  padding: 20px;
+  grid-template-columns: 320px 1fr 300px;
+  gap: 35px;
 }
 
 .section {
   background: white;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
 .section h2 {
-  font-size: 16px;
   margin-top: 0;
+  font-size: 18px;
 }
 
-/* ================= FLASH MATCH ================= */
+/* ================= MATCH ================= */
 
 .match {
   display: grid;
-  grid-template-columns: 110px 1fr;
-  padding: 8px 0;
+  grid-template-columns: 120px 1fr;
+  padding: 10px 0;
   border-bottom: 1px solid #eee;
-  align-items: center;
+}
+
+.match:last-child {
+  border-bottom: none;
 }
 
 .match-time {
-  font-size: 11px;
-  color: #666;
+  font-size: 12px;
+  color: #777;
 }
 
 .match-main {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .team-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 8px;
 }
 
 .team-logo {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .score {
@@ -141,23 +120,18 @@ h1 {
   color: #0a5c2a;
 }
 
-.venue {
-  font-size: 11px;
-  color: #888;
-}
-
 .derby {
   background: #fff5f5;
   border-left: 3px solid #cc0000;
-  padding-left: 6px;
+  padding-left: 8px;
 }
 
 .derby-badge {
   background: #cc0000;
   color: white;
-  font-size: 9px;
-  padding: 2px 4px;
-  border-radius: 3px;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
   margin-left: 6px;
 }
 
@@ -166,11 +140,11 @@ h1 {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 th, td {
-  padding: 4px;
+  padding: 6px;
   text-align: center;
   border-bottom: 1px solid #eee;
 }
@@ -179,66 +153,13 @@ th, td {
   background: #e6f5ec;
   font-weight: bold;
 }
-  
-.marcador-item {
-  display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-  border-bottom: 1px solid #eee;
-  font-size: 12px;
-}
 
-.marcador-competition {
-  margin-top: 10px;
-  font-weight: bold;
-  font-size: 12px;
-}
+/* ================= RESPONSIVO ================= */
 
-.mobile-tabs {
-  display: none;
-}
-
-.mobile-tabs button {
-  flex: 1;
-  background: none;
-  border: none;
-  padding: 12px;
-  font-weight: 600;
-  color: #0a5c2a;
-}
-
-.mobile-tabs button.active {
-  border-bottom: 3px solid #0a5c2a;
-}
-  
-@media (max-width: 1000px) {
-
+@media (max-width: 1100px) {
   .layout {
     grid-template-columns: 1fr;
   }
-
-  .mobile-tabs {
-    display: flex;
-    background: white;
-    border-bottom: 1px solid #eee;
-  }
-
-}
-  
-@media (max-width: 1000px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* MOBILE TABS FIX */
-
-@media (max-width: 1000px) {
-
-  .mobile-hide {
-    display: none !important;
-  }
-
 }
 
 </style>
@@ -247,75 +168,59 @@ th, td {
 <body>
 
 <header class="main-header">
-
   <div class="header-title">
     <a href="/">Canal Sporting</a>
   </div>
-
   <nav class="header-nav">
     <a href="/" id="nav-feed">Feed</a>
     <a href="/jogos.html" id="nav-jogos">Jogos</a>
     <a href="/mercado.html" id="nav-mercado">Transferências</a>
   </nav>
-
 </header>
-
-<div class="mobile-tabs">
-  <button class="active" onclick="showTab('jogos')" id="tabJogos">Jogos</button>
-  <button onclick="showTab('classificacoes')" id="tabClass">Classificações</button>
-  <button onclick="showTab('estatisticas')" id="tabStats">Estatísticas</button>
-</div>
 
 <div class="layout">
 
-  <!-- ESQUERDA -->
-  <div id="colClassificacoes">
-
+  <!-- CLASSIFICAÇÕES -->
+  <div>
     <div class="section">
       <h2>Primeira Liga</h2>
       <div id="ligaContainer"></div>
     </div>
 
-  <div class="section">
-    <h2>UEFA Champions League</h2>
-    <div id="championsContainer"></div>
-  </div>
-    
+    <div class="section" style="margin-top:25px;">
+      <h2>UEFA Champions League</h2>
+      <div id="championsContainer"></div>
+    </div>
   </div>
 
-  <!-- CENTRO -->
-  <div id="colJogos">
-  
+  <!-- JOGOS -->
+  <div>
     <div class="section">
       <h2>Agenda</h2>
       <div id="agendaContainer"></div>
     </div>
-    
-    <div class="section">
+
+    <div class="section" style="margin-top:25px;">
       <h2>Resultados</h2>
       <div id="resultadosContainer"></div>
     </div>
-
   </div>
 
-  <!-- DIREITA -->
-
-<div id="colEstatisticas">
-
-  <div class="section">
-    <h2>Estatísticas da Equipa</h2>
-    <div id="estatisticasContainer"></div>
+  <!-- ESTATÍSTICAS -->
+  <div>
+    <div class="section">
+      <h2>Estatísticas da Equipa</h2>
+      <div id="estatisticasContainer"></div>
+    </div>
   </div>
-
-</div>
 
 </div>
 
 <script>
 
-/* ================= DATA FORMAT ================= */
+/* ================= DATA ================= */
 
-function formatarDataFlash(d) {
+function formatarData(d) {
   const date = new Date(d);
   const dia = String(date.getDate()).padStart(2,"0");
   const mes = String(date.getMonth()+1).padStart(2,"0");
@@ -325,17 +230,14 @@ function formatarDataFlash(d) {
   return `${dia}/${mes}/${ano}, ${hora}:${min}`;
 }
 
-/* ================= DERBIES ================= */
+/* ================= DERBY ================= */
 
-function isDerbyOrClassico(home, away) {
-  const rivais = [
-    "Sport Lisboa e Benfica",
-    "FC Porto"
-  ];
-
+function isDerby(home, away) {
   return (
-    (home === "Sporting Clube de Portugal" && rivais.includes(away)) ||
-    (away === "Sporting Clube de Portugal" && rivais.includes(home))
+    (home === "Sporting Clube de Portugal" && 
+     (away === "FC Porto" || away === "Sport Lisboa e Benfica")) ||
+    (away === "Sporting Clube de Portugal" && 
+     (home === "FC Porto" || home === "Sport Lisboa e Benfica"))
   );
 }
 
@@ -346,14 +248,17 @@ async function carregarJogos() {
   const res = await fetch("/api/jogos");
   const data = await res.json();
 
-  const proximos = data.porJogar.sort((a,b)=>new Date(a.date)-new Date(b.date));
-  const anteriores = data.jogados.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const proximos = [...data.porJogar]
+    .sort((a,b)=>new Date(a.date)-new Date(b.date));
 
-  renderLista(proximos, "agendaContainer", false);
-  renderLista(anteriores, "resultadosContainer", true);
+  const anteriores = [...data.jogados]
+    .sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+  render(proximos, "agendaContainer", false);
+  render(anteriores, "resultadosContainer", true);
 }
 
-function renderLista(lista, containerId, mostrarResultado) {
+function render(lista, containerId, mostrarResultado) {
 
   const container = document.getElementById(containerId);
   container.innerHTML = "";
@@ -362,30 +267,30 @@ function renderLista(lista, containerId, mostrarResultado) {
 
     const sportingHome = j.homeTeam === "Sporting Clube de Portugal";
     const sportingAway = j.awayTeam === "Sporting Clube de Portugal";
-    const derby = isDerbyOrClassico(j.homeTeam, j.awayTeam);
+    const derby = isDerby(j.homeTeam, j.awayTeam);
 
     container.innerHTML += `
       <div class="match ${derby ? "derby" : ""}">
 
         <div class="match-time">
-          ${formatarDataFlash(j.date)}
+          ${formatarData(j.date)}
         </div>
 
         <div class="match-main">
 
           <div class="team-row ${sportingHome ? "sporting" : ""}">
             <img src="${j.homeCrest}" class="team-logo">
-            <span>${j.homeTeam}</span>
+            ${j.homeTeam}
             ${mostrarResultado ? `<span class="score">${j.score.home}</span>` : ""}
           </div>
 
           <div class="team-row ${sportingAway ? "sporting" : ""}">
             <img src="${j.awayCrest}" class="team-logo">
-            <span>${j.awayTeam}</span>
+            ${j.awayTeam}
             ${mostrarResultado ? `<span class="score">${j.score.away}</span>` : ""}
           </div>
 
-          ${derby ? `<div><span class="derby-badge">CLÁSSICO</span></div>` : ""}
+          ${derby ? `<span class="derby-badge">CLÁSSICO</span>` : ""}
 
         </div>
 
@@ -401,7 +306,7 @@ async function carregarClassificacoes() {
   const res = await fetch("/api/classificacao");
   const data = await res.json();
 
-  function gerarTabela(lista) {
+  function tabela(lista) {
     return `
       <table>
         <tr>
@@ -427,177 +332,52 @@ async function carregarClassificacoes() {
 
   if (data["Primeira Liga"])
     document.getElementById("ligaContainer").innerHTML =
-      gerarTabela(data["Primeira Liga"]);
+      tabela(data["Primeira Liga"]);
 
   if (data["UEFA Champions League"])
     document.getElementById("championsContainer").innerHTML =
-      gerarTabela(data["UEFA Champions League"]);
+      tabela(data["UEFA Champions League"]);
 }
-  
+
 /* ================= ESTATÍSTICAS ================= */
-  
-  async function carregarEstatisticas() {
+
+async function carregarEstatisticas() {
 
   const res = await fetch("/api/jogos");
   const data = await res.json();
 
   const jogos = data.jogados;
 
-  let totalGolos = 0;
-  let totalSofridos = 0;
-
-  let liga = { golos: 0, sofridos: 0 };
-  let champions = { golos: 0, sofridos: 0 };
+  let golos = 0;
+  let sofridos = 0;
 
   jogos.forEach(j => {
 
-    const sportingHome = j.homeTeam === "Sporting Clube de Portugal";
+    const home = j.homeTeam === "Sporting Clube de Portugal";
 
-    const golosMarcados = sportingHome ? j.score.home : j.score.away;
-    const golosSofridos = sportingHome ? j.score.away : j.score.home;
-
-    totalGolos += golosMarcados;
-    totalSofridos += golosSofridos;
-
-    if (j.competition === "Primeira Liga") {
-      liga.golos += golosMarcados;
-      liga.sofridos += golosSofridos;
-    }
-
-    if (j.competition === "UEFA Champions League") {
-      champions.golos += golosMarcados;
-      champions.sofridos += golosSofridos;
-    }
+    golos += home ? j.score.home : j.score.away;
+    sofridos += home ? j.score.away : j.score.home;
 
   });
-
-  const media = (totalGolos / jogos.length).toFixed(2);
 
   document.getElementById("estatisticasContainer").innerHTML = `
-    <div><strong>Total Golos:</strong> ${totalGolos}</div>
-    <div><strong>Total Sofridos:</strong> ${totalSofridos}</div>
-    <div><strong>Média Golos/Jogo:</strong> ${media}</div>
-    <hr>
-    <div><strong>Primeira Liga</strong></div>
-    <div>Golos: ${liga.golos}</div>
-    <div>Sofridos: ${liga.sofridos}</div>
-    <hr>
-    <div><strong>Champions</strong></div>
-    <div>Golos: ${champions.golos}</div>
-    <div>Sofridos: ${champions.sofridos}</div>
+    <div><strong>Total Golos:</strong> ${golos}</div>
+    <div><strong>Total Sofridos:</strong> ${sofridos}</div>
   `;
 }
 
-  /* ================= MARCADORES ================= */
+/* ================= INIT ================= */
 
-async function carregarMarcadores() {
-
-  const res = await fetch("/api/marcadores");
-  const data = await res.json();
-
-  const container = document.getElementById("marcadoresContainer");
-  container.innerHTML = `
-    <div style="font-weight:bold;margin-bottom:8px;">
-      Total de Golos: ${data.totalGolos}
-    </div>
-  `;
-
-  Object.keys(data.competicoes).forEach(comp => {
-
-    container.innerHTML += `
-      <div class="marcador-competition">${comp}</div>
-    `;
-
-    data.competicoes[comp].forEach(j => {
-      container.innerHTML += `
-        <div class="marcador-item">
-          <span>${j.player}</span>
-          <span>${j.goals}</span>
-        </div>
-      `;
-    });
-
-  });
-}
-
-function showTab(tab) {
-
-  const colJogos = document.getElementById("colJogos");
-  const colClass = document.getElementById("colClassificacoes");
-  const colStats = document.getElementById("colEstatisticas");
-
-  const tabJogos = document.getElementById("tabJogos");
-  const tabClass = document.getElementById("tabClass");
-  const tabStats = document.getElementById("tabStats");
-
-  // Reset active buttons
-  tabJogos.classList.remove("active");
-  tabClass.classList.remove("active");
-  tabStats.classList.remove("active");
-
-  // Mostrar tudo primeiro
-  colJogos.classList.remove("mobile-hide");
-  colClass.classList.remove("mobile-hide");
-  colStats.classList.remove("mobile-hide");
-
-  if (window.innerWidth <= 1000) {
-
-    if (tab === "jogos") {
-      colClass.classList.add("mobile-hide");
-      colStats.classList.add("mobile-hide");
-      tabJogos.classList.add("active");
-    }
-
-    if (tab === "classificacoes") {
-      colJogos.classList.add("mobile-hide");
-      colStats.classList.add("mobile-hide");
-      tabClass.classList.add("active");
-    }
-
-    if (tab === "estatisticas") {
-      colJogos.classList.add("mobile-hide");
-      colClass.classList.add("mobile-hide");
-      tabStats.classList.add("active");
-    }
-
-  }
-
-}
-  
 carregarJogos();
 carregarClassificacoes();
-carregarMarcadores();
 carregarEstatisticas();
 
-setInterval(() => {
-  carregarJogos();
-  carregarClassificacoes();
-  carregarMarcadores();
-  carregarEstatisticas();
-}, 300000);
-
-window.addEventListener("load", () => {
-  if (window.innerWidth <= 1000) {
-    showTab("jogos");
-  }
-});
-
-/* ================= NAV ACTIVE ================= */
-
 const path = window.location.pathname;
-
-if (path === "/" || path === "/index.html") {
-  document.getElementById("nav-feed")?.classList.add("active");
-}
 
 if (path.includes("jogos")) {
   document.getElementById("nav-jogos")?.classList.add("active");
 }
 
-if (path.includes("mercado")) {
-  document.getElementById("nav-mercado")?.classList.add("active");
-}
-  
 </script>
 
 </body>

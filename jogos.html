@@ -36,9 +36,9 @@ h1 {
 
 .layout {
   display: grid;
-  grid-template-columns: 1fr 1.6fr 1fr;
+  grid-template-columns: 1fr 1.2fr 1fr;
   gap: 25px;
-  max-width: 1400px;
+  max-width: 1200px;
   margin: auto;
   padding: 20px;
 }
@@ -47,7 +47,7 @@ h1 {
   background: white;
   padding: 15px;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
 .section h2 {
@@ -278,10 +278,7 @@ function renderLista(lista, containerId, mostrarResultado) {
             ${mostrarResultado ? `<span class="score">${j.score.away}</span>` : ""}
           </div>
 
-          <div class="venue">
-            🏟 ${j.venue}
-            ${derby ? `<span class="derby-badge">CLÁSSICO</span>` : ""}
-          </div>
+          ${derby ? `<div><span class="derby-badge">CLÁSSICO</span></div>` : ""}
 
         </div>
 

@@ -10,7 +10,6 @@ body {
   font-family: Arial;
   background: #f5f7f6;
   margin: 0;
-  padding: 0;
 }
 
 h1 {
@@ -34,28 +33,33 @@ h1 {
   color: #0a5c2a;
 }
 
-.container {
-  max-width: 1000px;
+.layout {
+  display: flex;
+  gap: 30px;
+  max-width: 1300px;
   margin: auto;
   padding: 20px;
+}
+
+.left {
+  flex: 1;
+}
+
+.right {
+  flex: 1.3;
 }
 
 .section {
   background: white;
   padding: 20px;
   border-radius: 16px;
-  margin-bottom: 30px;
+  margin-bottom: 25px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
 .jogo-item {
-  padding: 10px 0;
+  padding: 8px 0;
   border-bottom: 1px solid #eee;
-  font-size: 15px;
-}
-
-.jogo-item:last-child {
-  border-bottom: none;
 }
 
 .resultado {
@@ -63,20 +67,10 @@ h1 {
   color: #0a5c2a;
 }
 
-.competicao {
-  color: #555;
-}
-
-.data {
-  color: #777;
-  font-size: 14px;
-}
-
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
-  margin-top: 10px;
+  font-size: 13px;
 }
 
 th, td {
@@ -88,6 +82,12 @@ th, td {
 .highlight {
   background: #e6f5ec;
   font-weight: bold;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
 }
 </style>
 </head>
@@ -102,40 +102,45 @@ th, td {
   <a href="/mercado.html">Transferências</a>
 </div>
 
-<div class="container">
+<div class="layout">
 
-  <div class="section">
-    <h2>Próximos Jogos</h2>
-    <div id="porJogarContainer"></div>
+  <!-- ESQUERDA -->
+  <div class="left">
+
+    <div class="section">
+      <h2>Classificações</h2>
+      <div id="classificacaoContainer"></div>
+    </div>
+
+    <div class="section">
+      <h2>Taças (Percurso)</h2>
+      <div id="tacasContainer"></div>
+    </div>
+
   </div>
 
-  <div class="section">
-    <h2>Jogos Realizados</h2>
-    <div id="jogadosContainer"></div>
-  </div>
+  <!-- DIREITA -->
+  <div class="right">
 
-  <div class="section">
-    <h2>Classificações</h2>
-    <div id="classificacaoContainer"></div>
+    <div class="section">
+      <h2>Próximos Jogos</h2>
+      <div id="porJogarContainer"></div>
+    </div>
+
+    <div class="section">
+      <h2>Jogos Realizados</h2>
+      <div id="jogadosContainer"></div>
+    </div>
+
   </div>
 
 </div>
 
 <script>
 
-/* FORMATAR DATA */
 function formatarData(dateString) {
-  const date = new Date(dateString);
-
-  const meses = ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
-
-  const dia = String(date.getDate()).padStart(2,"0");
-  const mes = meses[date.getMonth()];
-  const ano = String(date.getFullYear()).slice(-2);
-  const horas = String(date.getHours()).padStart(2,"0");
-  const minutos = String(date.getMinutes()).padStart(2,"0");
-
-  return `${dia}/${mes}/${ano} ${horas}h${minutos}`;
+  const d = new Date(dateString);
+  return d.toLocaleString("pt-PT");
 }
 
 /* JOGOS */
@@ -143,39 +148,31 @@ async function carregarJogos() {
   const res = await fetch("/api/jogos");
   const data = await res.json();
 
-  const porJogarDiv = document.getElementById("porJogarContainer");
-  const jogadosDiv = document.getElementById("jogadosContainer");
+  const proximos = Object.values(data.porJogar).flat()
+    .sort((a,b) => new Date(a.date) - new Date(b.date));
 
-  porJogarDiv.innerHTML = "";
-  jogadosDiv.innerHTML = "";
+  const jogados = Object.values(data.jogados).flat()
+    .sort((a,b) => new Date(b.date) - new Date(a.date));
 
-  const proximos = Object.values(data.porJogar).flat();
-  proximos.sort((a, b) => new Date(a.date) - new Date(b.date));
+  document.getElementById("porJogarContainer").innerHTML =
+    proximos.map(j =>
+      `<div class="jogo-item">
+        ${j.homeTeam} vs ${j.awayTeam}
+        - ${j.competition}
+        - ${formatarData(j.date)}
+      </div>`
+    ).join("");
 
-  proximos.forEach(jogo => {
-    porJogarDiv.innerHTML += `
-      <div class="jogo-item">
-        ${jogo.homeTeam} vs ${jogo.awayTeam}
-        - <span class="competicao">${jogo.competition}</span>
-        - <span class="data">${formatarData(jogo.date)}</span>
-      </div>
-    `;
-  });
-
-  const jogados = Object.values(data.jogados).flat();
-  jogados.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-  jogados.forEach(jogo => {
-    jogadosDiv.innerHTML += `
-      <div class="jogo-item">
-        ${jogo.homeTeam}
-        <span class="resultado">${jogo.score.home} - ${jogo.score.away}</span>
-        ${jogo.awayTeam}
-        - <span class="competicao">${jogo.competition}</span>
-        - <span class="data">${formatarData(jogo.date)}</span>
-      </div>
-    `;
-  });
+  document.getElementById("jogadosContainer").innerHTML =
+    jogados.map(j =>
+      `<div class="jogo-item">
+        ${j.homeTeam}
+        <span class="resultado">${j.score.home} - ${j.score.away}</span>
+        ${j.awayTeam}
+        - ${j.competition}
+        - ${formatarData(j.date)}
+      </div>`
+    ).join("");
 }
 
 /* CLASSIFICAÇÃO */
@@ -183,46 +180,67 @@ async function carregarClassificacao() {
   const res = await fetch("/api/classificacao");
   const data = await res.json();
 
-  const container = document.getElementById("classificacaoContainer");
-  container.innerHTML = "";
+  let html = "";
 
   Object.keys(data).forEach(comp => {
 
-    container.innerHTML += `<h3>${comp}</h3>`;
+    html += `<h3>${comp}</h3>
+    <table>
+      <tr>
+        <th>#</th><th>Equipa</th><th>J</th><th>V</th>
+        <th>E</th><th>D</th><th>DG</th><th>Pts</th>
+      </tr>`;
 
-    let table = `
-      <table>
-        <tr>
-          <th>#</th>
-          <th>Equipa</th>
-          <th>J</th>
-          <th>Pts</th>
-        </tr>
-    `;
-
-    data[comp].forEach(team => {
-      const highlight = team.team === "Sporting Clube de Portugal" ? "highlight" : "";
-      table += `
+    data[comp].forEach(t => {
+      const highlight = t.team === "Sporting Clube de Portugal" ? "highlight" : "";
+      html += `
         <tr class="${highlight}">
-          <td>${team.position}</td>
-          <td>${team.team}</td>
-          <td>${team.played}</td>
-          <td>${team.points}</td>
-        </tr>
-      `;
+          <td>${t.position}</td>
+          <td>${t.team}</td>
+          <td>${t.played}</td>
+          <td>${t.won}</td>
+          <td>${t.draw}</td>
+          <td>${t.lost}</td>
+          <td>${t.goalDifference}</td>
+          <td>${t.points}</td>
+        </tr>`;
     });
 
-    table += `</table>`;
-    container.innerHTML += table;
+    html += `</table>`;
   });
+
+  document.getElementById("classificacaoContainer").innerHTML = html;
+}
+
+/* TAÇAS */
+async function carregarTacas() {
+  const res = await fetch("/api/tacas");
+  const data = await res.json();
+
+  let html = "";
+
+  Object.keys(data).forEach(comp => {
+    html += `<h3>${comp}</h3>`;
+    data[comp].forEach(j => {
+      html += `
+        <div class="jogo-item">
+          ${j.home} ${j.score.home ?? "-"} - ${j.score.away ?? "-"} ${j.away}
+          - ${formatarData(j.date)}
+        </div>`;
+    });
+  });
+
+  document.getElementById("tacasContainer").innerHTML = html;
 }
 
 carregarJogos();
 carregarClassificacao();
+carregarTacas();
 
 setInterval(() => {
   carregarJogos();
   carregarClassificacao();
+  carregarTacas();
 }, 300000);
 
 </script>

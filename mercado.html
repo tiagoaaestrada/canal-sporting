@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Transferências - Canal Sporting</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #f5f7f6;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+  color: #0a5c2a;
+  margin: 20px 0;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  background: white;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.top-nav a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #0a5c2a;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.mercado-section {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.mercado-section a {
+  display: block;
+  margin-bottom: 6px;
+  text-decoration: none;
+  color: #333;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Canal Sporting</h1>
+
+<div class="top-nav">
+  <a href="/">Feed</a>
+  <a href="/jogos.html">Jogos</a>
+  <a href="/mercado.html">Transferências</a>
+</div>
+
+<div class="container">
+
+  <div class="mercado-section">
+    <h3>Sporting</h3>
+    <div id="mercado-sporting"></div>
+  </div>
+
+  <div class="mercado-section">
+    <h3>Nacional</h3>
+    <div id="mercado-nacional"></div>
+  </div>
+
+  <div class="mercado-section">
+    <h3>Internacional</h3>
+    <div id="mercado-internacional"></div>
+  </div>
+
+</div>
+
+<script>
+async function loadMercado() {
+  const res = await fetch("/api/mercado");
+  const data = await res.json();
+
+  ["sporting","nacional","internacional"].forEach(section => {
+    const container = document.getElementById("mercado-"+section);
+    container.innerHTML = "";
+    data[section].forEach(item => {
+      const a = document.createElement("a");
+      a.href = item.link;
+      a.target = "_blank";
+      a.textContent = `${item.title} (${item.formattedDate})`;
+      container.appendChild(a);
+    });
+  });
+}
+
+loadMercado();
+</script>
+
+</body>
+</html>

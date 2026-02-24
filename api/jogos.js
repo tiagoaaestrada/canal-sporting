@@ -10,17 +10,10 @@ export default async function handler(req, res) {
       }
     );
 
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: "Erro na API",
-        details: await response.text(),
-      });
-    }
-
     const data = await response.json();
 
-    const porJogar = {};
-    const jogados = {};
+    const porJogar = [];
+    const jogados = [];
 
     data.matches.forEach(match => {
 
@@ -28,21 +21,20 @@ export default async function handler(req, res) {
         id: match.id,
         competition: match.competition.name,
         date: match.utcDate,
+        venue: match.venue || "Estádio por confirmar",
         homeTeam: match.homeTeam.name,
+        homeCrest: match.homeTeam.crest,
         awayTeam: match.awayTeam.name,
-        score: match.score.fullTime,
+        awayCrest: match.awayTeam.crest,
+        score: match.score.fullTime
       };
 
       if (match.status === "SCHEDULED" || match.status === "TIMED") {
-        if (!porJogar[jogo.competition])
-          porJogar[jogo.competition] = [];
-        porJogar[jogo.competition].push(jogo);
+        porJogar.push(jogo);
       }
 
       if (match.status === "FINISHED") {
-        if (!jogados[jogo.competition])
-          jogados[jogo.competition] = [];
-        jogados[jogo.competition].push(jogo);
+        jogados.push(jogo);
       }
 
     });

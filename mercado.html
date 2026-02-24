@@ -7,7 +7,7 @@
 
 <style>
 
-/* ================= HEADER ================= */
+  /* ================= HEADER ================= */
 
 .main-header {
   background: white;
@@ -49,17 +49,17 @@
   }
 }
   
-body {
+  body {
   font-family: Arial;
   background: #f5f7f6;
   margin: 0;
-  padding: 0;
+  font-size: 13px;
 }
 
 h1 {
   text-align: center;
   color: #0a5c2a;
-  margin: 20px 0;
+  margin: 15px 0;
 }
 
 .top-nav {
@@ -67,7 +67,7 @@ h1 {
   justify-content: center;
   gap: 20px;
   background: white;
-  padding: 10px;
+  padding: 8px;
   border-bottom: 1px solid #eee;
 }
 
@@ -77,27 +77,173 @@ h1 {
   color: #0a5c2a;
 }
 
-.container {
-  max-width: 900px;
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr 1fr;
+  gap: 25px;
+  max-width: 1200px;
   margin: auto;
   padding: 20px;
 }
 
-.mercado-section {
+.section {
   background: white;
   padding: 15px;
   border-radius: 12px;
-  margin-bottom: 20px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
 }
 
-.mercado-section a {
-  display: block;
-  margin-bottom: 6px;
-  text-decoration: none;
-  color: #333;
+.section h2 {
+  font-size: 16px;
+  margin-top: 0;
 }
+
+/* ================= FLASH MATCH ================= */
+
+.match {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+}
+
+.match-time {
+  font-size: 11px;
+  color: #666;
+}
+
+.match-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.team-logo {
+  width: 16px;
+  height: 16px;
+}
+
+.score {
+  margin-left: auto;
+  font-weight: bold;
+}
+
+.sporting {
+  font-weight: bold;
+  color: #0a5c2a;
+}
+
+.venue {
+  font-size: 11px;
+  color: #888;
+}
+
+.derby {
+  background: #fff5f5;
+  border-left: 3px solid #cc0000;
+  padding-left: 6px;
+}
+
+.derby-badge {
+  background: #cc0000;
+  color: white;
+  font-size: 9px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-left: 6px;
+}
+
+/* ================= TABLE ================= */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th, td {
+  padding: 4px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.highlight {
+  background: #e6f5ec;
+  font-weight: bold;
+}
+  
+.marcador-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 12px;
+}
+
+.marcador-competition {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+.mobile-tabs {
+  display: none;
+}
+
+.mobile-tabs button {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 12px;
+  font-weight: 600;
+  color: #0a5c2a;
+}
+
+.mobile-tabs button.active {
+  border-bottom: 3px solid #0a5c2a;
+}
+  
+@media (max-width: 1000px) {
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-tabs {
+    display: flex;
+    background: white;
+    border-bottom: 1px solid #eee;
+  }
+
+}
+  
+@media (max-width: 1000px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* MOBILE TABS FIX */
+
+@media (max-width: 1000px) {
+
+  .mobile-hide {
+    display: none !important;
+  }
+
+}
+
 </style>
+
+  
 </head>
 
 <body>

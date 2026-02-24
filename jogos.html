@@ -89,6 +89,36 @@ th, td {
     flex-direction: column;
   }
 }
+
+  .agenda-header {
+  background: #dfe6eb;
+  padding: 10px 15px;
+  border-radius: 10px;
+  margin-top: 15px;
+  font-weight: 600;
+  color: #1f2d3d;
+}
+
+.agenda-item {
+  display: flex;
+  gap: 15px;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+}
+
+.agenda-data {
+  min-width: 120px;
+  color: #666;
+  font-size: 13px;
+}
+
+.agenda-equipas {
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+}
+  
 </style>
 </head>
 
@@ -148,31 +178,45 @@ async function carregarJogos() {
   const res = await fetch("/api/jogos");
   const data = await res.json();
 
+  const container = document.getElementById("porJogarContainer");
+  container.innerHTML = "";
+
   const proximos = Object.values(data.porJogar).flat()
     .sort((a,b) => new Date(a.date) - new Date(b.date));
 
-  const jogados = Object.values(data.jogados).flat()
-    .sort((a,b) => new Date(b.date) - new Date(a.date));
+  /* AGRUPAR POR COMPETIÇÃO */
+  const agrupados = {};
 
-  document.getElementById("porJogarContainer").innerHTML =
-    proximos.map(j =>
-      `<div class="jogo-item">
-        ${j.homeTeam} vs ${j.awayTeam}
-        - ${j.competition}
-        - ${formatarData(j.date)}
-      </div>`
-    ).join("");
+  proximos.forEach(jogo => {
+    if (!agrupados[jogo.competition]) {
+      agrupados[jogo.competition] = [];
+    }
+    agrupados[jogo.competition].push(jogo);
+  });
 
-  document.getElementById("jogadosContainer").innerHTML =
-    jogados.map(j =>
-      `<div class="jogo-item">
-        ${j.homeTeam}
-        <span class="resultado">${j.score.home} - ${j.score.away}</span>
-        ${j.awayTeam}
-        - ${j.competition}
-        - ${formatarData(j.date)}
-      </div>`
-    ).join("");
+  Object.keys(agrupados).forEach(comp => {
+
+    container.innerHTML += `
+      <div class="agenda-header">
+        🇵🇹 ${comp}
+      </div>
+    `;
+
+    agrupados[comp].forEach(jogo => {
+      container.innerHTML += `
+        <div class="agenda-item">
+          <div class="agenda-data">
+            ${formatarData(jogo.date)}
+          </div>
+          <div class="agenda-equipas">
+            <div>${jogo.homeTeam}</div>
+            <div>${jogo.awayTeam}</div>
+          </div>
+        </div>
+      `;
+    });
+
+  });
 }
 
 /* CLASSIFICAÇÃO */
@@ -214,23 +258,39 @@ async function carregarClassificacao() {
 
 /* TAÇAS */
 async function carregarTacas() {
-  const res = await fetch("/api/tacas");
+
+  const res = await fetch("/api/jogos");
   const data = await res.json();
 
-  let html = "";
+  const todosJogos = [
+    ...Object.values(data.porJogar).flat(),
+    ...Object.values(data.jogados).flat()
+  ];
 
-  Object.keys(data).forEach(comp => {
-    html += `<h3>${comp}</h3>`;
-    data[comp].forEach(j => {
-      html += `
-        <div class="jogo-item">
-          ${j.home} ${j.score.home ?? "-"} - ${j.score.away ?? "-"} ${j.away}
-          - ${formatarData(j.date)}
-        </div>`;
-    });
+  const tacas = todosJogos.filter(j =>
+    j.competition.toLowerCase().includes("taça")
+  );
+
+  const container = document.getElementById("tacasContainer");
+  container.innerHTML = "";
+
+  if (tacas.length === 0) {
+    container.innerHTML = "Sem dados disponíveis.";
+    return;
+  }
+
+  tacas.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+  tacas.forEach(j => {
+    container.innerHTML += `
+      <div class="jogo-item">
+        ${j.homeTeam}
+        ${j.score?.home ?? "-"} - ${j.score?.away ?? "-"}
+        ${j.awayTeam}
+        - ${formatarData(j.date)}
+      </div>
+    `;
   });
-
-  document.getElementById("tacasContainer").innerHTML = html;
 }
 
 carregarJogos();

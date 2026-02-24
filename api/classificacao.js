@@ -1,41 +1,40 @@
 export default async function handler(req, res) {
   try {
 
-    const competitions = {
-      "Primeira Liga": "PPL",
-      "UEFA Champions League": "CL"
+    const headers = {
+      "x-apisports-key": process.env.APISPORTS_KEY
     };
 
-    const result = {};
+    const leagues = [
+      { name: "Primeira Liga", id: 94 },
+      { name: "UEFA Champions League", id: 2 }
+    ];
 
-    for (const [name, code] of Object.entries(competitions)) {
+    const resultado = {};
 
+    for (const league of leagues) {
       const response = await fetch(
-        `https://api.football-data.org/v4/competitions/${code}/standings`,
-        {
-          headers: {
-            "X-Auth-Token": process.env.FOOTBALL_API_KEY,
-          },
-        }
+        `https://v3.football.api-sports.io/standings?league=${league.id}&season=2025`,
+        { headers }
       );
-
-      if (!response.ok) continue;
 
       const data = await response.json();
 
-      result[name] = data.standings[0].table.map(team => ({
-        position: team.position,
+      const tabela = data.response[0]?.league?.standings[0] || [];
+
+      resultado[league.name] = tabela.map(team => ({
+        position: team.rank,
         team: team.team.name,
-        played: team.playedGames,
-        won: team.won,
-        draw: team.draw,
-        lost: team.lost,
-        goalDifference: team.goalDifference,
+        played: team.all.played,
+        won: team.all.win,
+        draw: team.all.draw,
+        lost: team.all.lose,
+        goalDifference: team.goalsDiff,
         points: team.points
       }));
     }
 
-    res.status(200).json(result);
+    res.status(200).json(resultado);
 
   } catch (error) {
     res.status(500).json({ error: error.message });

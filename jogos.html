@@ -3,14 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Canal Sporting</title>
-
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#0a5c2a">
+<title>Jogos - Canal Sporting</title>
 
 <style>
 body {
-  font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  font-family: Arial;
   background: #f5f7f6;
   margin: 0;
   padding: 0;
@@ -19,7 +16,7 @@ body {
 h1 {
   text-align: center;
   color: #0a5c2a;
-  margin: 20px 0 10px 0;
+  margin: 20px 0;
 }
 
 .top-nav {
@@ -37,78 +34,49 @@ h1 {
   color: #0a5c2a;
 }
 
-/* ===== LAYOUT ===== */
-
-.layout {
+.container {
+  max-width: 1000px;
+  margin: auto;
   padding: 20px;
 }
 
-.covers {
-  display: flex;
-  gap: 20px;
-  justify-content: center;
-  margin-bottom: 40px;
-  flex-wrap: wrap;
-}
-
-.cover-box {
+.section {
   background: white;
   padding: 20px;
   border-radius: 16px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-  width: 320px;
-  text-align: center;
-}
-
-.cover-box img {
-  width: 100%;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.feed {
-  background: white;
-  padding: 25px;
-  border-radius: 16px;
+  margin-bottom: 30px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
 }
 
-.feed-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-#refreshBtn {
-  background: #0a5c2a;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-.feed-item {
+.jogo-card {
+  padding: 10px 0;
   border-bottom: 1px solid #eee;
-  padding: 12px 0;
 }
 
-.feed-item:last-child {
+.jogo-card:last-child {
   border-bottom: none;
 }
 
-.source {
-  font-size: 12px;
+.resultado {
   font-weight: bold;
   color: #0a5c2a;
-  margin-bottom: 4px;
 }
 
-.feed-item a {
-  text-decoration: none;
-  color: #222;
-  font-weight: 600;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th, td {
+  padding: 6px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
+}
+
+.highlight {
+  background: #e6f5ec;
+  font-weight: bold;
 }
 </style>
 </head>
@@ -123,75 +91,107 @@ h1 {
   <a href="/mercado.html">Transferências</a>
 </div>
 
-<div class="layout">
+<div class="container">
 
-  <div class="covers">
-    <div class="cover-box">
-      <h3>A Bola</h3>
-      <img id="bola-cover" src="/abola.png">
-    </div>
-    <div class="cover-box">
-      <h3>Record</h3>
-      <img id="record-cover" src="/record.png">
-    </div>
-    <div class="cover-box">
-      <h3>O Jogo</h3>
-      <img id="ojogo-cover" src="/ojogo.png">
-    </div>
+  <div class="section">
+    <h2>Próximos Jogos</h2>
+    <div id="porJogarContainer"></div>
   </div>
 
-  <div class="feed">
-    <div class="feed-header">
-      <h2>Feed Geral Sporting</h2>
-      <button id="refreshBtn">Atualizar</button>
-    </div>
-    <div id="feed-container">A carregar...</div>
+  <div class="section">
+    <h2>Jogos Realizados</h2>
+    <div id="jogadosContainer"></div>
+  </div>
+
+  <div class="section">
+    <h2>Classificações</h2>
+    <div id="classificacaoContainer"></div>
   </div>
 
 </div>
 
 <script>
 
-/* FEED */
-async function loadFeed() {
-  const res = await fetch("/api/feed");
+/* JOGOS */
+async function carregarJogos() {
+  const res = await fetch("/api/jogos");
   const data = await res.json();
-  const container = document.getElementById("feed-container");
-  container.innerHTML = "";
 
-  data.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "feed-item";
-    div.innerHTML = `
-      <div class="source">
-        ${item.source} • ${item.formattedDate}
-      </div>
-      <a href="${item.link}" target="_blank">${item.title}</a>
-    `;
-    container.appendChild(div);
+  const porJogarDiv = document.getElementById("porJogarContainer");
+  const jogadosDiv = document.getElementById("jogadosContainer");
+
+  porJogarDiv.innerHTML = "";
+  jogadosDiv.innerHTML = "";
+
+  Object.keys(data.porJogar).forEach(comp => {
+    porJogarDiv.innerHTML += `<h3>${comp}</h3>`;
+    data.porJogar[comp].forEach(jogo => {
+      porJogarDiv.innerHTML += `
+        <div class="jogo-card">
+          ${jogo.homeTeam} vs ${jogo.awayTeam}
+          <br>${jogo.dataFormatada}
+        </div>
+      `;
+    });
+  });
+
+  Object.keys(data.jogados).forEach(comp => {
+    jogadosDiv.innerHTML += `<h3>${comp}</h3>`;
+    data.jogados[comp].forEach(jogo => {
+      jogadosDiv.innerHTML += `
+        <div class="jogo-card">
+          ${jogo.homeTeam}
+          <span class="resultado">
+            ${jogo.score.home} - ${jogo.score.away}
+          </span>
+          ${jogo.awayTeam}
+        </div>
+      `;
+    });
   });
 }
 
-document.getElementById("refreshBtn").addEventListener("click", loadFeed);
-
-/* CAPAS */
-async function loadCover(endpoint, imgId) {
-  const res = await fetch(endpoint);
+/* CLASSIFICAÇÃO */
+async function carregarClassificacao() {
+  const res = await fetch("/api/classificacao");
   const data = await res.json();
-  const img = document.getElementById(imgId);
-  img.src = data.cover;
-  img.onclick = () => window.open(data.coverLink, "_blank");
+
+  const container = document.getElementById("classificacaoContainer");
+  container.innerHTML = "";
+
+  Object.keys(data).forEach(comp => {
+
+    container.innerHTML += `<h3>${comp}</h3>`;
+
+    let table = `
+      <table>
+        <tr>
+          <th>#</th>
+          <th>Equipa</th>
+          <th>J</th>
+          <th>Pts</th>
+        </tr>
+    `;
+
+    data[comp].forEach(team => {
+      const highlight = team.team.includes("Sporting") ? "highlight" : "";
+      table += `
+        <tr class="${highlight}">
+          <td>${team.position}</td>
+          <td>${team.team}</td>
+          <td>${team.played}</td>
+          <td>${team.points}</td>
+        </tr>
+      `;
+    });
+
+    table += `</table>`;
+    container.innerHTML += table;
+  });
 }
 
-loadCover("/api/bola","bola-cover");
-loadCover("/api/record","record-cover");
-loadCover("/api/ojogo","ojogo-cover");
-
-loadFeed();
-
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js");
-}
+carregarJogos();
+carregarClassificacao();
 
 </script>
 

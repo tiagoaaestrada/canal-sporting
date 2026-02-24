@@ -123,7 +123,7 @@ th, td {
 
 <script>
 
-/* FORMATAR DATA: 08/mar/26 00h00 */
+/* FORMATAR DATA */
 function formatarData(dateString) {
   const date = new Date(dateString);
 
@@ -149,9 +149,7 @@ async function carregarJogos() {
   porJogarDiv.innerHTML = "";
   jogadosDiv.innerHTML = "";
 
-  /* JUNTAR TODOS OS PRÓXIMOS */
   const proximos = Object.values(data.porJogar).flat();
-
   proximos.sort((a, b) => new Date(a.date) - new Date(b.date));
 
   proximos.forEach(jogo => {
@@ -164,26 +162,10 @@ async function carregarJogos() {
     `;
   });
 
-  /* JUNTAR TODOS OS JOGADOS */
   const jogados = Object.values(data.jogados).flat();
-
   jogados.sort((a, b) => new Date(b.date) - new Date(a.date));
 
   jogados.forEach(jogo => {
-    jogadosDiv.innerHTML += `
-      <div class="jogo-item">
-        ${jogo.homeTeam}
-        <span class="resultado">${jogo.score.home} - ${jogo.score.away}</span>
-        ${jogo.awayTeam}
-        - <span class="competicao">${jogo.competition}</span>
-        - <span class="data">${formatarData(jogo.date)}</span>
-      </div>
-    `;
-  });
-}
-
-  /* JOGADOS (já vêm ordenados desc pela API) */
-  Object.values(data.jogados).flat().forEach(jogo => {
     jogadosDiv.innerHTML += `
       <div class="jogo-item">
         ${jogo.homeTeam}
@@ -219,7 +201,7 @@ async function carregarClassificacao() {
     `;
 
     data[comp].forEach(team => {
-    const highlight = team.team === "Sporting Clube de Portugal" ? "highlight" : "";
+      const highlight = team.team === "Sporting Clube de Portugal" ? "highlight" : "";
       table += `
         <tr class="${highlight}">
           <td>${team.position}</td>
@@ -238,10 +220,10 @@ async function carregarClassificacao() {
 carregarJogos();
 carregarClassificacao();
 
-  setInterval(() => {
+setInterval(() => {
   carregarJogos();
   carregarClassificacao();
-}, 300000); // 5 minutos
+}, 300000);
 
 </script>
 

@@ -10,12 +10,13 @@ body {
   font-family: Arial;
   background: #f5f7f6;
   margin: 0;
+  font-size: 13px;
 }
 
 h1 {
   text-align: center;
   color: #0a5c2a;
-  margin: 20px 0;
+  margin: 15px 0;
 }
 
 .top-nav {
@@ -23,7 +24,7 @@ h1 {
   justify-content: center;
   gap: 20px;
   background: white;
-  padding: 10px;
+  padding: 8px;
   border-bottom: 1px solid #eee;
 }
 
@@ -34,31 +35,28 @@ h1 {
 }
 
 .layout {
-  display: flex;
-  gap: 30px;
-  max-width: 1300px;
+  display: grid;
+  grid-template-columns: 1fr 1.6fr 1fr;
+  gap: 25px;
+  max-width: 1400px;
   margin: auto;
   padding: 20px;
 }
 
-.left {
-  flex: 1;
-}
-
-.right {
-  flex: 1.3;
-}
-
 .section {
   background: white;
-  padding: 20px;
-  border-radius: 16px;
-  margin-bottom: 25px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.section h2 {
+  font-size: 16px;
+  margin-top: 0;
 }
 
 .jogo-item {
-  padding: 8px 0;
+  padding: 6px 0;
   border-bottom: 1px solid #eee;
 }
 
@@ -67,14 +65,19 @@ h1 {
   color: #0a5c2a;
 }
 
+.canal {
+  color: #888;
+  font-size: 11px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 th, td {
-  padding: 6px;
+  padding: 4px;
   text-align: center;
   border-bottom: 1px solid #eee;
 }
@@ -84,41 +87,11 @@ th, td {
   font-weight: bold;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
   .layout {
-    flex-direction: column;
+    grid-template-columns: 1fr;
   }
 }
-
-  .agenda-header {
-  background: #dfe6eb;
-  padding: 10px 15px;
-  border-radius: 10px;
-  margin-top: 15px;
-  font-weight: 600;
-  color: #1f2d3d;
-}
-
-.agenda-item {
-  display: flex;
-  gap: 15px;
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-  align-items: center;
-}
-
-.agenda-data {
-  min-width: 120px;
-  color: #666;
-  font-size: 13px;
-}
-
-.agenda-equipas {
-  display: flex;
-  flex-direction: column;
-  font-weight: 500;
-}
-  
 </style>
 </head>
 
@@ -135,31 +108,46 @@ th, td {
 <div class="layout">
 
   <!-- ESQUERDA -->
-  <div class="left">
+  <div>
 
     <div class="section">
-      <h2>Classificações</h2>
-      <div id="classificacaoContainer"></div>
+      <h2>Primeira Liga</h2>
+      <div id="ligaContainer"></div>
     </div>
 
     <div class="section">
-      <h2>Taças (Percurso)</h2>
-      <div id="tacasContainer"></div>
+      <h2>Taça de Portugal</h2>
+      <div id="tacaPortugalContainer"></div>
+    </div>
+
+  </div>
+
+  <!-- CENTRO -->
+  <div>
+
+    <div class="section">
+      <h2>Próximos Jogos</h2>
+      <div id="proximosContainer"></div>
+    </div>
+
+    <div class="section">
+      <h2>Jogos Anteriores</h2>
+      <div id="anterioresContainer"></div>
     </div>
 
   </div>
 
   <!-- DIREITA -->
-  <div class="right">
+  <div>
 
     <div class="section">
-      <h2>Próximos Jogos</h2>
-      <div id="porJogarContainer"></div>
+      <h2>UEFA Champions League</h2>
+      <div id="championsContainer"></div>
     </div>
 
     <div class="section">
-      <h2>Jogos Realizados</h2>
-      <div id="jogadosContainer"></div>
+      <h2>Taça da Liga</h2>
+      <div id="tacaLigaContainer"></div>
     </div>
 
   </div>
@@ -168,139 +156,123 @@ th, td {
 
 <script>
 
-function formatarData(dateString) {
-  const d = new Date(dateString);
-  return d.toLocaleString("pt-PT");
+function formatarData(d) {
+  return new Date(d).toLocaleString("pt-PT");
 }
 
-/* JOGOS */
+/* JOGOS CENTRAIS */
 async function carregarJogos() {
+
   const res = await fetch("/api/jogos");
   const data = await res.json();
 
-  const container = document.getElementById("porJogarContainer");
-  container.innerHTML = "";
-
-  const proximos = Object.values(data.porJogar).flat()
+  const todosProximos = Object.values(data.porJogar).flat()
     .sort((a,b) => new Date(a.date) - new Date(b.date));
 
-  /* AGRUPAR POR COMPETIÇÃO */
-  const agrupados = {};
+  const todosAnteriores = Object.values(data.jogados).flat()
+    .sort((a,b) => new Date(b.date) - new Date(a.date));
 
-  proximos.forEach(jogo => {
-    if (!agrupados[jogo.competition]) {
-      agrupados[jogo.competition] = [];
-    }
-    agrupados[jogo.competition].push(jogo);
-  });
-
-  Object.keys(agrupados).forEach(comp => {
-
-    container.innerHTML += `
-      <div class="agenda-header">
-        🇵🇹 ${comp}
+  document.getElementById("proximosContainer").innerHTML =
+    todosProximos.map(j => `
+      <div class="jogo-item">
+        ${j.homeTeam} vs ${j.awayTeam}
+        - ${formatarData(j.date)}
+        <div class="canal">Canal: por confirmar</div>
       </div>
-    `;
+    `).join("");
 
-    agrupados[comp].forEach(jogo => {
-      container.innerHTML += `
-        <div class="agenda-item">
-          <div class="agenda-data">
-            ${formatarData(jogo.date)}
-          </div>
-          <div class="agenda-equipas">
-            <div>${jogo.homeTeam}</div>
-            <div>${jogo.awayTeam}</div>
-          </div>
-        </div>
-      `;
-    });
-
-  });
-}
-
-/* CLASSIFICAÇÃO */
-async function carregarClassificacao() {
-  const res = await fetch("/api/classificacao");
-  const data = await res.json();
-
-  let html = "";
-
-  Object.keys(data).forEach(comp => {
-
-    html += `<h3>${comp}</h3>
-    <table>
-      <tr>
-        <th>#</th><th>Equipa</th><th>J</th><th>V</th>
-        <th>E</th><th>D</th><th>DG</th><th>Pts</th>
-      </tr>`;
-
-    data[comp].forEach(t => {
-      const highlight = t.team === "Sporting Clube de Portugal" ? "highlight" : "";
-      html += `
-        <tr class="${highlight}">
-          <td>${t.position}</td>
-          <td>${t.team}</td>
-          <td>${t.played}</td>
-          <td>${t.won}</td>
-          <td>${t.draw}</td>
-          <td>${t.lost}</td>
-          <td>${t.goalDifference}</td>
-          <td>${t.points}</td>
-        </tr>`;
-    });
-
-    html += `</table>`;
-  });
-
-  document.getElementById("classificacaoContainer").innerHTML = html;
-}
-
-/* TAÇAS */
-async function carregarTacas() {
-
-  const res = await fetch("/api/jogos");
-  const data = await res.json();
-
-  const todosJogos = [
-    ...Object.values(data.porJogar).flat(),
-    ...Object.values(data.jogados).flat()
-  ];
-
-  const tacas = todosJogos.filter(j =>
-    j.competition.toLowerCase().includes("taça")
-  );
-
-  const container = document.getElementById("tacasContainer");
-  container.innerHTML = "";
-
-  if (tacas.length === 0) {
-    container.innerHTML = "Sem dados disponíveis.";
-    return;
-  }
-
-  tacas.sort((a,b) => new Date(a.date) - new Date(b.date));
-
-  tacas.forEach(j => {
-    container.innerHTML += `
+  document.getElementById("anterioresContainer").innerHTML =
+    todosAnteriores.map(j => `
       <div class="jogo-item">
         ${j.homeTeam}
-        ${j.score?.home ?? "-"} - ${j.score?.away ?? "-"}
+        <span class="resultado">${j.score.home} - ${j.score.away}</span>
         ${j.awayTeam}
         - ${formatarData(j.date)}
       </div>
+    `).join("");
+
+  carregarTacas(todosProximos, todosAnteriores);
+}
+
+/* CLASSIFICAÇÕES */
+async function carregarClassificacoes() {
+
+  const res = await fetch("/api/classificacao");
+  const data = await res.json();
+
+  function gerarTabela(lista) {
+    return `
+      <table>
+        <tr>
+          <th>#</th><th>Equipa</th><th>J</th>
+          <th>V</th><th>E</th><th>D</th>
+          <th>DG</th><th>Pts</th>
+        </tr>
+        ${lista.map(t => `
+          <tr class="${t.team === "Sporting Clube de Portugal" ? "highlight" : ""}">
+            <td>${t.position}</td>
+            <td>${t.team}</td>
+            <td>${t.played}</td>
+            <td>${t.won}</td>
+            <td>${t.draw}</td>
+            <td>${t.lost}</td>
+            <td>${t.goalDifference}</td>
+            <td>${t.points}</td>
+          </tr>
+        `).join("")}
+      </table>
     `;
-  });
+  }
+
+  if (data["Primeira Liga"])
+    document.getElementById("ligaContainer").innerHTML =
+      gerarTabela(data["Primeira Liga"]);
+
+  if (data["UEFA Champions League"])
+    document.getElementById("championsContainer").innerHTML =
+      gerarTabela(data["UEFA Champions League"]);
+}
+
+/* TAÇAS */
+function carregarTacas(proximos, anteriores) {
+
+  const todos = [...proximos, ...anteriores];
+
+  const tacaPortugal = todos.filter(j =>
+    j.competition.toLowerCase().includes("taça de portugal")
+  );
+
+  const tacaLiga = todos.filter(j =>
+    j.competition.toLowerCase().includes("taça da liga")
+  );
+
+  document.getElementById("tacaPortugalContainer").innerHTML =
+    tacaPortugal.length ?
+      tacaPortugal.map(j =>
+        `<div class="jogo-item">
+          ${j.homeTeam}
+          ${j.score?.home ?? "-"} - ${j.score?.away ?? "-"}
+          ${j.awayTeam}
+        </div>`).join("")
+      : "Sem jogos registados.";
+
+  document.getElementById("tacaLigaContainer").innerHTML =
+    tacaLiga.length ?
+      tacaLiga.map(j =>
+        `<div class="jogo-item">
+          ${j.homeTeam}
+          ${j.score?.home ?? "-"} - ${j.score?.away ?? "-"}
+          ${j.awayTeam}
+        </div>`).join("")
+      : "Sem jogos registados.";
 }
 
 carregarJogos();
-carregarClassificacao();
-carregarTacas();
+carregarClassificacoes();
 
 setInterval(() => {
   carregarJogos();
-  carregarClassificacao();
-  carregarTacas();
+  carregarClassificacoes();
 }, 300000);
 
 </script>

@@ -55,15 +55,70 @@ h1 {
   margin-top: 0;
 }
 
-.resultado {
+/* ================= FLASH MATCH ================= */
+
+.match {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  align-items: center;
+}
+
+.match-time {
+  font-size: 11px;
+  color: #666;
+}
+
+.match-main {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.team-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.team-logo {
+  width: 16px;
+  height: 16px;
+}
+
+.score {
+  margin-left: auto;
+  font-weight: bold;
+}
+
+.sporting {
   font-weight: bold;
   color: #0a5c2a;
 }
 
-.canal {
-  color: #888;
+.venue {
   font-size: 11px;
+  color: #888;
 }
+
+.derby {
+  background: #fff5f5;
+  border-left: 3px solid #cc0000;
+  padding-left: 6px;
+}
+
+.derby-badge {
+  background: #cc0000;
+  color: white;
+  font-size: 9px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  margin-left: 6px;
+}
+
+/* ================= TABLE ================= */
 
 table {
   width: 100%;
@@ -81,44 +136,7 @@ th, td {
   background: #e6f5ec;
   font-weight: bold;
 }
-.flash-competition {
-  background: #e9eef2;
-  padding: 6px 10px;
-  font-weight: 600;
-  border-radius: 6px;
-  margin-top: 10px;
-  font-size: 12px;
-}
 
-.flash-match {
-  display: grid;
-  grid-template-columns: 90px 1fr;
-  padding: 6px 0;
-  border-bottom: 1px solid #eee;
-  align-items: center;
-}
-
-.flash-time {
-  font-size: 11px;
-  color: #666;
-}
-
-.flash-teams {
-  display: flex;
-  flex-direction: column;
-  font-size: 13px;
-}
-
-.flash-row {
-  display: flex;
-  justify-content: space-between;
-}
-
-.sporting-highlight {
-  font-weight: bold;
-  color: #0a5c2a;
-}
-  
 @media (max-width: 1000px) {
   .layout {
     grid-template-columns: 1fr;
@@ -188,11 +206,8 @@ th, td {
 
 <script>
 
-function formatarData(d) {
-  return new Date(d).toLocaleString("pt-PT");
-}
+/* ================= DATA FORMAT ================= */
 
-/* JOGOS CENTRAIS */
 function formatarDataFlash(d) {
   const date = new Date(d);
   const dia = String(date.getDate()).padStart(2,"0");
@@ -203,73 +218,80 @@ function formatarDataFlash(d) {
   return `${dia}/${mes}/${ano}, ${hora}:${min}`;
 }
 
+/* ================= DERBIES ================= */
+
+function isDerbyOrClassico(home, away) {
+  const rivais = [
+    "Sport Lisboa e Benfica",
+    "FC Porto"
+  ];
+
+  return (
+    (home === "Sporting Clube de Portugal" && rivais.includes(away)) ||
+    (away === "Sporting Clube de Portugal" && rivais.includes(home))
+  );
+}
+
+/* ================= JOGOS ================= */
+
 async function carregarJogos() {
 
   const res = await fetch("/api/jogos");
   const data = await res.json();
 
-  const proximos = Object.values(data.porJogar).flat()
-    .sort((a,b) => new Date(a.date) - new Date(b.date));
+  const proximos = data.porJogar.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const anteriores = data.jogados.sort((a,b)=>new Date(b.date)-new Date(a.date));
 
-  const anteriores = Object.values(data.jogados).flat()
-    .sort((a,b) => new Date(b.date) - new Date(a.date));
-
-  renderFlash(proximos, "agendaContainer", false);
-  renderFlash(anteriores, "resultadosContainer", true);
+  renderLista(proximos, "agendaContainer", false);
+  renderLista(anteriores, "resultadosContainer", true);
 }
 
-function renderFlash(lista, containerId, mostrarResultado) {
+function renderLista(lista, containerId, mostrarResultado) {
 
   const container = document.getElementById(containerId);
   container.innerHTML = "";
 
-  const agrupado = {};
-
   lista.forEach(j => {
-    if (!agrupado[j.competition]) agrupado[j.competition] = [];
-    agrupado[j.competition].push(j);
-  });
 
-  Object.keys(agrupado).forEach(comp => {
+    const sportingHome = j.homeTeam === "Sporting Clube de Portugal";
+    const sportingAway = j.awayTeam === "Sporting Clube de Portugal";
+    const derby = isDerbyOrClassico(j.homeTeam, j.awayTeam);
 
     container.innerHTML += `
-      <div class="flash-competition">
-        🇵🇹 ${comp}
+      <div class="match ${derby ? "derby" : ""}">
+
+        <div class="match-time">
+          ${formatarDataFlash(j.date)}
+        </div>
+
+        <div class="match-main">
+
+          <div class="team-row ${sportingHome ? "sporting" : ""}">
+            <img src="${j.homeCrest}" class="team-logo">
+            <span>${j.homeTeam}</span>
+            ${mostrarResultado ? `<span class="score">${j.score.home}</span>` : ""}
+          </div>
+
+          <div class="team-row ${sportingAway ? "sporting" : ""}">
+            <img src="${j.awayCrest}" class="team-logo">
+            <span>${j.awayTeam}</span>
+            ${mostrarResultado ? `<span class="score">${j.score.away}</span>` : ""}
+          </div>
+
+          <div class="venue">
+            🏟 ${j.venue}
+            ${derby ? `<span class="derby-badge">CLÁSSICO</span>` : ""}
+          </div>
+
+        </div>
+
       </div>
     `;
-
-    agrupado[comp].forEach(j => {
-
-      const homeClass = j.homeTeam === "Sporting Clube de Portugal"
-        ? "sporting-highlight" : "";
-
-      const awayClass = j.awayTeam === "Sporting Clube de Portugal"
-        ? "sporting-highlight" : "";
-
-      container.innerHTML += `
-        <div class="flash-match">
-          <div class="flash-time">
-            ${formatarDataFlash(j.date)}
-          </div>
-
-          <div class="flash-teams">
-            <div class="flash-row ${homeClass}">
-              <span>${j.homeTeam}</span>
-              ${mostrarResultado ? `<span>${j.score.home}</span>` : ""}
-            </div>
-            <div class="flash-row ${awayClass}">
-              <span>${j.awayTeam}</span>
-              ${mostrarResultado ? `<span>${j.score.away}</span>` : ""}
-            </div>
-          </div>
-        </div>
-      `;
-    });
-
   });
 }
 
-/* CLASSIFICAÇÕES */
+/* ================= CLASSIFICAÇÕES ================= */
+
 async function carregarClassificacoes() {
 
   const res = await fetch("/api/classificacao");
@@ -306,40 +328,6 @@ async function carregarClassificacoes() {
   if (data["UEFA Champions League"])
     document.getElementById("championsContainer").innerHTML =
       gerarTabela(data["UEFA Champions League"]);
-}
-
-/* TAÇAS */
-function carregarTacas(proximos, anteriores) {
-
-  const todos = [...proximos, ...anteriores];
-
-  const tacaPortugal = todos.filter(j =>
-    j.competition.toLowerCase().includes("taça de portugal")
-  );
-
-  const tacaLiga = todos.filter(j =>
-    j.competition.toLowerCase().includes("taça da liga")
-  );
-
-  document.getElementById("tacaPortugalContainer").innerHTML =
-    tacaPortugal.length ?
-      tacaPortugal.map(j =>
-        `<div class="jogo-item">
-          ${j.homeTeam}
-          ${j.score?.home ?? "-"} - ${j.score?.away ?? "-"}
-          ${j.awayTeam}
-        </div>`).join("")
-      : "Sem jogos registados.";
-
-  document.getElementById("tacaLigaContainer").innerHTML =
-    tacaLiga.length ?
-      tacaLiga.map(j =>
-        `<div class="jogo-item">
-          ${j.homeTeam}
-          ${j.score?.home ?? "-"} - ${j.score?.away ?? "-"}
-          ${j.awayTeam}
-        </div>`).join("")
-      : "Sem jogos registados.";
 }
 
 carregarJogos();

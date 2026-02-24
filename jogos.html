@@ -149,8 +149,12 @@ async function carregarJogos() {
   porJogarDiv.innerHTML = "";
   jogadosDiv.innerHTML = "";
 
-  /* PRÓXIMOS (já vêm ordenados pela API) */
-  Object.values(data.porJogar).flat().forEach(jogo => {
+  /* JUNTAR TODOS OS PRÓXIMOS */
+  const proximos = Object.values(data.porJogar).flat();
+
+  proximos.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  proximos.forEach(jogo => {
     porJogarDiv.innerHTML += `
       <div class="jogo-item">
         ${jogo.homeTeam} vs ${jogo.awayTeam}
@@ -159,6 +163,24 @@ async function carregarJogos() {
       </div>
     `;
   });
+
+  /* JUNTAR TODOS OS JOGADOS */
+  const jogados = Object.values(data.jogados).flat();
+
+  jogados.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  jogados.forEach(jogo => {
+    jogadosDiv.innerHTML += `
+      <div class="jogo-item">
+        ${jogo.homeTeam}
+        <span class="resultado">${jogo.score.home} - ${jogo.score.away}</span>
+        ${jogo.awayTeam}
+        - <span class="competicao">${jogo.competition}</span>
+        - <span class="data">${formatarData(jogo.date)}</span>
+      </div>
+    `;
+  });
+}
 
   /* JOGADOS (já vêm ordenados desc pela API) */
   Object.values(data.jogados).flat().forEach(jogo => {
@@ -197,7 +219,7 @@ async function carregarClassificacao() {
     `;
 
     data[comp].forEach(team => {
-      const highlight = team.team.includes("Sporting") ? "highlight" : "";
+    const highlight = team.team === "Sporting Clube de Portugal" ? "highlight" : "";
       table += `
         <tr class="${highlight}">
           <td>${team.position}</td>
@@ -215,6 +237,11 @@ async function carregarClassificacao() {
 
 carregarJogos();
 carregarClassificacao();
+
+  setInterval(() => {
+  carregarJogos();
+  carregarClassificacao();
+}, 300000); // 5 minutos
 
 </script>
 

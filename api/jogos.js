@@ -1,76 +1,42 @@
 export default async function handler(req, res) {
   try {
-
     const headers = {
-      "X-Auth-Token": process.env.FOOTBALL_API_KEY,
+      "x-apisports-key": process.env.APISPORTS_KEY
     };
 
-    // 1️⃣ Jogos normais da equipa
-    const teamRes = await fetch(
-      "https://api.football-data.org/v4/teams/498/matches?season=2025",
+    const response = await fetch(
+      "https://v3.football.api-sports.io/fixtures?team=228&season=2025",
       { headers }
     );
 
-    const teamData = await teamRes.json();
-
-    // 2️⃣ Taça de Portugal
-    const tacaRes = await fetch(
-      "https://api.football-data.org/v4/competitions/TP/matches?season=2025",
-      { headers }
-    );
-
-    const tacaData = await tacaRes.json();
-
-    // 3️⃣ Taça da Liga
-    const tacaLigaRes = await fetch(
-      "https://api.football-data.org/v4/competitions/TCL/matches?season=2025",
-      { headers }
-    );
-
-    const tacaLigaData = await tacaLigaRes.json();
-
-    // Junta todos os jogos
-    const allMatches = [
-      ...(teamData.matches || []),
-      ...(tacaData.matches || []),
-      ...(tacaLigaData.matches || [])
-    ];
-
-    // Filtrar só jogos do Sporting
-    const sportingMatches = allMatches.filter(match =>
-      match.homeTeam.id === 498 || match.awayTeam.id === 498
-    );
-
-    // Remover duplicados (caso venham repetidos)
-    const uniqueMatches = Array.from(
-      new Map(sportingMatches.map(m => [m.id, m])).values()
-    );
+    const data = await response.json();
 
     const porJogar = [];
     const jogados = [];
 
-    uniqueMatches.forEach(match => {
-
+    data.response.forEach(match => {
       const jogo = {
-        id: match.id,
-        competition: match.competition.name,
-        date: match.utcDate,
-        venue: match.venue || "Estádio por confirmar",
-        homeTeam: match.homeTeam.name,
-        homeCrest: match.homeTeam.crest,
-        awayTeam: match.awayTeam.name,
-        awayCrest: match.awayTeam.crest,
-        score: match.score.fullTime
+        id: match.fixture.id,
+        competition: match.league.name,
+        date: match.fixture.date,
+        homeTeam: match.teams.home.name,
+        homeLogo: match.teams.home.logo,
+        awayTeam: match.teams.away.name,
+        awayLogo: match.teams.away.logo,
+        score: {
+          home: match.goals.home,
+          away: match.goals.away
+        },
+        venue: match.fixture.venue.name
       };
 
-      if (match.status === "SCHEDULED" || match.status === "TIMED") {
+      if (match.fixture.status.short === "NS") {
         porJogar.push(jogo);
       }
 
-      if (match.status === "FINISHED") {
+      if (match.fixture.status.short === "FT") {
         jogados.push(jogo);
       }
-
     });
 
     res.status(200).json({ porJogar, jogados });

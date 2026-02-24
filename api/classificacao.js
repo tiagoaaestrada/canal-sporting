@@ -27,6 +27,10 @@ export default async function handler(req, res) {
         position: team.position,
         team: team.team.name,
         played: team.playedGames,
+        won: team.won,
+        draw: team.draw,
+        lost: team.lost,
+        goalDifference: team.goalDifference,
         points: team.points
       }));
     }

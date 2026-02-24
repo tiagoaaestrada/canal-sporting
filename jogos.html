@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Canal Sporting</title>
+
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a5c2a">
+
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  background: #f5f7f6;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+  color: #0a5c2a;
+  margin: 20px 0 10px 0;
+}
+
+.top-nav {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  background: white;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.top-nav a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #0a5c2a;
+}
+
+/* ===== LAYOUT ===== */
+
+.layout {
+  padding: 20px;
+}
+
+.covers {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+
+.cover-box {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  width: 320px;
+  text-align: center;
+}
+
+.cover-box img {
+  width: 100%;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.feed {
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.feed-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+#refreshBtn {
+  background: #0a5c2a;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.feed-item {
+  border-bottom: 1px solid #eee;
+  padding: 12px 0;
+}
+
+.feed-item:last-child {
+  border-bottom: none;
+}
+
+.source {
+  font-size: 12px;
+  font-weight: bold;
+  color: #0a5c2a;
+  margin-bottom: 4px;
+}
+
+.feed-item a {
+  text-decoration: none;
+  color: #222;
+  font-weight: 600;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Canal Sporting</h1>
+
+<div class="top-nav">
+  <a href="/">Feed</a>
+  <a href="/jogos.html">Jogos</a>
+  <a href="/mercado.html">Transferências</a>
+</div>
+
+<div class="layout">
+
+  <div class="covers">
+    <div class="cover-box">
+      <h3>A Bola</h3>
+      <img id="bola-cover" src="/abola.png">
+    </div>
+    <div class="cover-box">
+      <h3>Record</h3>
+      <img id="record-cover" src="/record.png">
+    </div>
+    <div class="cover-box">
+      <h3>O Jogo</h3>
+      <img id="ojogo-cover" src="/ojogo.png">
+    </div>
+  </div>
+
+  <div class="feed">
+    <div class="feed-header">
+      <h2>Feed Geral Sporting</h2>
+      <button id="refreshBtn">Atualizar</button>
+    </div>
+    <div id="feed-container">A carregar...</div>
+  </div>
+
+</div>
+
+<script>
+
+/* FEED */
+async function loadFeed() {
+  const res = await fetch("/api/feed");
+  const data = await res.json();
+  const container = document.getElementById("feed-container");
+  container.innerHTML = "";
+
+  data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "feed-item";
+    div.innerHTML = `
+      <div class="source">
+        ${item.source} • ${item.formattedDate}
+      </div>
+      <a href="${item.link}" target="_blank">${item.title}</a>
+    `;
+    container.appendChild(div);
+  });
+}
+
+document.getElementById("refreshBtn").addEventListener("click", loadFeed);
+
+/* CAPAS */
+async function loadCover(endpoint, imgId) {
+  const res = await fetch(endpoint);
+  const data = await res.json();
+  const img = document.getElementById(imgId);
+  img.src = data.cover;
+  img.onclick = () => window.open(data.coverLink, "_blank");
+}
+
+loadCover("/api/bola","bola-cover");
+loadCover("/api/record","record-cover");
+loadCover("/api/ojogo","ojogo-cover");
+
+loadFeed();
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js");
+}
+
+</script>
+
+</body>
+</html>

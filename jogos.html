@@ -191,6 +191,17 @@ th, td {
     grid-template-columns: 1fr;
   }
 }
+
+/* MOBILE TABS FIX */
+
+@media (max-width: 1000px) {
+
+  .mobile-hide {
+    display: none !important;
+  }
+
+}
+
 </style>
 </head>
 
@@ -474,29 +485,36 @@ function showTab(tab) {
   const tabClass = document.getElementById("tabClass");
   const tabStats = document.getElementById("tabStats");
 
-  // esconder todas
-  colJogos.classList.add("hidden");
-  colClass.classList.add("hidden");
-  colStats.classList.add("hidden");
-
+  // Reset active buttons
   tabJogos.classList.remove("active");
   tabClass.classList.remove("active");
   tabStats.classList.remove("active");
 
-  // mostrar selecionada
-  if (tab === "jogos") {
-    colJogos.classList.remove("hidden");
-    tabJogos.classList.add("active");
-  }
+  // Mostrar tudo primeiro
+  colJogos.classList.remove("mobile-hide");
+  colClass.classList.remove("mobile-hide");
+  colStats.classList.remove("mobile-hide");
 
-  if (tab === "classificacoes") {
-    colClass.classList.remove("hidden");
-    tabClass.classList.add("active");
-  }
+  if (window.innerWidth <= 1000) {
 
-  if (tab === "estatisticas") {
-    colStats.classList.remove("hidden");
-    tabStats.classList.add("active");
+    if (tab === "jogos") {
+      colClass.classList.add("mobile-hide");
+      colStats.classList.add("mobile-hide");
+      tabJogos.classList.add("active");
+    }
+
+    if (tab === "classificacoes") {
+      colJogos.classList.add("mobile-hide");
+      colStats.classList.add("mobile-hide");
+      tabClass.classList.add("active");
+    }
+
+    if (tab === "estatisticas") {
+      colJogos.classList.add("mobile-hide");
+      colClass.classList.add("mobile-hide");
+      tabStats.classList.add("active");
+    }
+
   }
 
 }
@@ -513,18 +531,11 @@ setInterval(() => {
   carregarEstatisticas();
 }, 300000);
 
-function initMobileTabs() {
+window.addEventListener("load", () => {
   if (window.innerWidth <= 1000) {
     showTab("jogos");
-  } else {
-    // Desktop mostra tudo
-    document.getElementById("colJogos").classList.remove("hidden");
-    document.getElementById("colClassificacoes").classList.remove("hidden");
-    document.getElementById("colEstatisticas").classList.remove("hidden");
   }
-}
-
-window.addEventListener("load", initMobileTabs);
+});
   
 </script>
 

@@ -136,7 +136,21 @@ th, td {
   background: #e6f5ec;
   font-weight: bold;
 }
+  
+.marcador-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 12px;
+}
 
+.marcador-competition {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 12px;
+}
+  
 @media (max-width: 1000px) {
   .layout {
     grid-template-columns: 1fr;
@@ -188,19 +202,24 @@ th, td {
   </div>
 
   <!-- DIREITA -->
-  <div>
+<div>
 
-    <div class="section">
-      <h2>UEFA Champions League</h2>
-      <div id="championsContainer"></div>
-    </div>
-
-    <div class="section">
-      <h2>Taça da Liga</h2>
-      <div id="tacaLigaContainer"></div>
-    </div>
-
+  <div class="section">
+    <h2>Marcadores</h2>
+    <div id="marcadoresContainer"></div>
   </div>
+
+  <div class="section">
+    <h2>UEFA Champions League</h2>
+    <div id="championsContainer"></div>
+  </div>
+
+  <div class="section">
+    <h2>Taça da Liga</h2>
+    <div id="tacaLigaContainer"></div>
+  </div>
+
+</div>
 
 </div>
 
@@ -326,13 +345,47 @@ async function carregarClassificacoes() {
     document.getElementById("championsContainer").innerHTML =
       gerarTabela(data["UEFA Champions League"]);
 }
+  
+/* ================= MARCADORES ================= */
 
+async function carregarMarcadores() {
+
+  const res = await fetch("/api/marcadores");
+  const data = await res.json();
+
+  const container = document.getElementById("marcadoresContainer");
+  container.innerHTML = `
+    <div style="font-weight:bold;margin-bottom:8px;">
+      Total de Golos: ${data.totalGolos}
+    </div>
+  `;
+
+  Object.keys(data.competicoes).forEach(comp => {
+
+    container.innerHTML += `
+      <div class="marcador-competition">${comp}</div>
+    `;
+
+    data.competicoes[comp].forEach(j => {
+      container.innerHTML += `
+        <div class="marcador-item">
+          <span>${j.player}</span>
+          <span>${j.goals}</span>
+        </div>
+      `;
+    });
+
+  });
+}
+  
 carregarJogos();
 carregarClassificacoes();
+carregarMarcadores();
 
 setInterval(() => {
   carregarJogos();
   carregarClassificacoes();
+  carregarMarcadores();
 }, 300000);
 
 </script>

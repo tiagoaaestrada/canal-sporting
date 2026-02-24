@@ -6,7 +6,50 @@
 <title>Jogos - Canal Sporting</title>
 
 <style>
-body {
+
+  /* ================= HEADER ================= */
+
+.main-header {
+  background: white;
+  border-bottom: 1px solid #eee;
+  padding: 15px 0 5px 0;
+  text-align: center;
+}
+
+.header-title a {
+  text-decoration: none;
+  font-size: 22px;
+  font-weight: bold;
+  color: #0a5c2a;
+}
+
+.header-nav {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 10px;
+}
+
+.header-nav a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #666;
+  padding-bottom: 6px;
+}
+
+.header-nav a.active {
+  color: #0a5c2a;
+  border-bottom: 3px solid #0a5c2a;
+}
+
+@media (max-width: 768px) {
+  .header-nav {
+    gap: 18px;
+    font-size: 14px;
+  }
+}
+  
+  body {
   font-family: Arial;
   background: #f5f7f6;
   margin: 0;
@@ -203,13 +246,19 @@ th, td {
 
 <body>
 
-<h1>Canal Sporting</h1>
+<header class="main-header">
 
-<div class="top-nav">
-  <a href="/">Feed</a>
-  <a href="/jogos.html">Jogos</a>
-  <a href="/mercado.html">Transferências</a>
-</div>
+  <div class="header-title">
+    <a href="/">Canal Sporting</a>
+  </div>
+
+  <nav class="header-nav">
+    <a href="/" id="nav-feed">Feed</a>
+    <a href="/jogos.html" id="nav-jogos">Jogos</a>
+    <a href="/mercado.html" id="nav-mercado">Transferências</a>
+  </nav>
+
+</header>
 
 <div class="mobile-tabs">
   <button class="active" onclick="showTab('jogos')" id="tabJogos">Jogos</button>
@@ -532,6 +581,22 @@ window.addEventListener("load", () => {
     showTab("jogos");
   }
 });
+
+/* ================= NAV ACTIVE ================= */
+
+const path = window.location.pathname;
+
+if (path === "/" || path === "/index.html") {
+  document.getElementById("nav-feed")?.classList.add("active");
+}
+
+if (path.includes("jogos")) {
+  document.getElementById("nav-jogos")?.classList.add("active");
+}
+
+if (path.includes("mercado")) {
+  document.getElementById("nav-mercado")?.classList.add("active");
+}
   
 </script>
 

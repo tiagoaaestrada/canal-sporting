@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     /* ================= JOGOS ================= */
 
     const matchesRes = await fetch(
-      `https://api.football-data.org/v4/teams/${teamId}/matches?season=${season}`,
+      `https://api.football-data.org/v4/teams/${teamId}/matches?season=${season}&limit=200`,
       { headers }
     );
 

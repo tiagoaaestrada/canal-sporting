@@ -1,137 +1,138 @@
 export default async function handler(req, res) {
   try {
     const headers = {
-      "x-apisports-key": process.env.APISPORTS_KEY
+      "X-Auth-Token": process.env.FOOTBALL_API_KEY
     };
 
+    const teamId = 498; // Sporting (football-data)
     const season = 2025;
-    const teamId = 228; // Sporting CP
 
-    /* ===============================
+    /* ========================
        1️⃣ JOGOS
-    =============================== */
+    ======================== */
 
-    const fixturesRes = await fetch(
-      `https://v3.football.api-sports.io/fixtures?team=${teamId}&season=${season}`,
+    const matchesRes = await fetch(
+      `https://api.football-data.org/v4/teams/${teamId}/matches?season=${season}`,
       { headers }
     );
 
-    const fixturesData = await fixturesRes.json();
+    const matchesData = await matchesRes.json();
 
     const porJogar = [];
     const jogados = [];
 
-    fixturesData.response.forEach(match => {
+    matchesData.matches.forEach(match => {
+
       const jogo = {
-        id: match.fixture.id,
-        competition: match.league.name,
-        date: match.fixture.date,
-        venue: match.fixture.venue?.name || "",
-        homeTeam: match.teams.home.name,
-        homeLogo: match.teams.home.logo,
-        awayTeam: match.teams.away.name,
-        awayLogo: match.teams.away.logo,
+        id: match.id,
+        competition: match.competition.name,
+        date: match.utcDate,
+        homeTeam: match.homeTeam.name,
+        homeLogo: null,
+        awayTeam: match.awayTeam.name,
+        awayLogo: null,
         score: {
-          home: match.goals.home,
-          away: match.goals.away
+          home: match.score.fullTime.home,
+          away: match.score.fullTime.away
         }
       };
 
-      if (match.fixture.status.short === "NS") {
+      if (match.status === "SCHEDULED" || match.status === "TIMED") {
         porJogar.push(jogo);
       }
 
-      if (match.fixture.status.short === "FT") {
+      if (match.status === "FINISHED") {
         jogados.push(jogo);
       }
+
     });
 
-    /* ===============================
+    /* ========================
        2️⃣ CLASSIFICAÇÕES
-    =============================== */
+    ======================== */
 
-    async function getStandings(leagueId) {
+    async function getStandings(code) {
+
       const response = await fetch(
-        `https://v3.football.api-sports.io/standings?league=${leagueId}&season=${season}`,
+        `https://api.football-data.org/v4/competitions/${code}/standings`,
         { headers }
       );
 
       const data = await response.json();
-      const table = data.response[0]?.league?.standings[0] || [];
+
+      const table = data.standings?.[0]?.table || [];
 
       return table.map(team => ({
-        position: team.rank,
+        position: team.position,
         team: team.team.name,
-        played: team.all.played,
-        won: team.all.win,
-        draw: team.all.draw,
-        lost: team.all.lose,
-        goalDifference: team.goalsDiff,
+        played: team.playedGames,
+        won: team.won,
+        draw: team.draw,
+        lost: team.lost,
+        goalDifference: team.goalDifference,
         points: team.points
       }));
     }
 
     const classificacoes = {
-      "Primeira Liga": await getStandings(94),
-      "UEFA Champions League": await getStandings(2)
+      "Primeira Liga": await getStandings("PPL"),
+      "UEFA Champions League": await getStandings("CL")
     };
 
-    /* ===============================
-       3️⃣ ESTATÍSTICAS EQUIPA (Liga)
-    =============================== */
+    /* ========================
+       3️⃣ ESTATÍSTICAS CALCULADAS
+    ======================== */
 
-    const statsRes = await fetch(
-      `https://v3.football.api-sports.io/teams/statistics?league=94&season=${season}&team=${teamId}`,
-      { headers }
-    );
+    let jogosTotal = 0;
+    let vitorias = 0;
+    let empates = 0;
+    let derrotas = 0;
+    let golosMarcados = 0;
+    let golosSofridos = 0;
 
-    const statsData = await statsRes.json();
-    const stats = statsData.response;
+    jogados.forEach(match => {
+
+      const sportingHome = match.homeTeam === "Sporting CP";
+
+      const golosSporting = sportingHome
+        ? match.score.home
+        : match.score.away;
+
+      const golosAdversario = sportingHome
+        ? match.score.away
+        : match.score.home;
+
+      jogosTotal++;
+
+      golosMarcados += golosSporting;
+      golosSofridos += golosAdversario;
+
+      if (golosSporting > golosAdversario) vitorias++;
+      else if (golosSporting === golosAdversario) empates++;
+      else derrotas++;
+
+    });
 
     const estatisticas = {
-      jogos: stats?.fixtures?.played?.total || 0,
-      vitorias: stats?.fixtures?.wins?.total || 0,
-      empates: stats?.fixtures?.draws?.total || 0,
-      derrotas: stats?.fixtures?.loses?.total || 0,
-      golosMarcados: stats?.goals?.for?.total?.total || 0,
-      golosSofridos: stats?.goals?.against?.total?.total || 0
+      jogos: jogosTotal,
+      vitorias,
+      empates,
+      derrotas,
+      golosMarcados,
+      golosSofridos
     };
 
-    /* ===============================
-       4️⃣ MARCADORES
-    =============================== */
-
-    const playersRes = await fetch(
-      `https://v3.football.api-sports.io/players?team=${teamId}&season=${season}`,
-      { headers }
-    );
-
-    const playersData = await playersRes.json();
-
-    const marcadores = playersData.response.map(player => ({
-      nome: player.player.name,
-      foto: player.player.photo,
-      golos: player.statistics[0]?.goals?.total || 0,
-      assistencias: player.statistics[0]?.goals?.assists || 0
-    }));
-
-    /* ===============================
+    /* ========================
        RESPOSTA FINAL
-    =============================== */
+    ======================== */
 
     res.status(200).json({
-      jogos: {
-        porJogar,
-        jogados
-      },
+      jogos: { porJogar, jogados },
       classificacoes,
-      estatisticas,
-      marcadores
+      estatisticas
     });
 
   } catch (error) {
-    res.status(500).json({
-      error: error.message
-    });
+    res.status(500).json({ error: error.message });
   }
 }

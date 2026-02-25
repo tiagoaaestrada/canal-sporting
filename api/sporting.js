@@ -64,19 +64,24 @@ async function getLogo(teamName) {
 
     matchesData.matches.forEach(match => {
 
-      const jogo = {
-        id: match.id,
-        competition: match.competition.name,
-        date: match.utcDate,
-        homeTeam: match.homeTeam.name,
-        homeLogo: null,
-        awayTeam: match.awayTeam.name,
-        awayLogo: null,
-        score: {
-          home: match.score.fullTime.home,
-          away: match.score.fullTime.away
-        }
-      };
+      const homeTeam = match.teams.home.name;
+      const awayTeam = match.teams.away.name;
+      
+      const homeLogo = await getLogo(homeTeam);
+      const awayLogo = await getLogo(awayTeam);
+       
+    const jogo = {
+  id: match.fixture.id,
+  date: match.fixture.date,
+  homeTeam,
+  awayTeam,
+  homeLogo,
+  awayLogo,
+  score: {
+    home: match.goals.home,
+    away: match.goals.away
+  }
+};
 
       if (match.status === "SCHEDULED" || match.status === "TIMED") {
         porJogar.push(jogo);

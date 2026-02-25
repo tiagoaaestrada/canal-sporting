@@ -1,55 +1,82 @@
 export default async function handler(req, res) {
-
   try {
-
     const headers = {
       "X-Auth-Token": process.env.FOOTBALL_API_KEY
     };
 
-    const teamId = 498; // Sporting
+    const teamId = 498; // Sporting CP
     const season = 2025;
 
-    /* ================= JOGOS ================= */
+    /* ========================
+       1️⃣ FUNÇÃO PARA BUSCAR JOGOS POR COMPETIÇÃO
+    ======================== */
 
-    const matchesRes = await fetch(
-      `https://api.football-data.org/v4/teams/${teamId}/matches?season=${season}&limit=200`,
-      { headers }
-    );
+    async function getMatchesByCompetition(code, competitionName) {
+      const response = await fetch(
+        `https://api.football-data.org/v4/competitions/${code}/matches?season=${season}`,
+        { headers }
+      );
 
-    const matchesData = await matchesRes.json();
+      const data = await response.json();
+      if (!data.matches) return [];
+
+      return data.matches
+        .filter(match =>
+          match.homeTeam.id === teamId ||
+          match.awayTeam.id === teamId
+        )
+        .map(match => ({
+          id: match.id,
+          competition: competitionName,
+          date: match.utcDate,
+          status: match.status,
+          homeTeam: match.homeTeam.name,
+          awayTeam: match.awayTeam.name,
+          score: {
+            home: match.score.fullTime.home,
+            away: match.score.fullTime.away
+          }
+        }));
+    }
+
+    /* ========================
+       2️⃣ BUSCAR TODAS AS COMPETIÇÕES
+    ======================== */
+
+    const liga = await getMatchesByCompetition("PPL", "Primeira Liga");
+    const champions = await getMatchesByCompetition("CL", "Champions League");
+    const tacaPortugal = await getMatchesByCompetition("TP", "Taça de Portugal");
+    const tacaLiga = await getMatchesByCompetition("CLI", "Taça da Liga");
+
+    const allMatches = [
+      ...liga,
+      ...champions,
+      ...tacaPortugal,
+      ...tacaLiga
+    ];
+
+    /* ========================
+       3️⃣ SEPARAR POR JOGAR / JOGADOS
+    ======================== */
 
     const porJogar = [];
     const jogados = [];
 
-    for (const match of matchesData.matches) {
-
-      const homeTeam = match.homeTeam.name;
-      const awayTeam = match.awayTeam.name;
-
-      const jogo = {
-        id: match.id,
-        date: match.utcDate,
-        homeTeam,
-        awayTeam,
-        score: {
-          home: match.score.fullTime.home,
-          away: match.score.fullTime.away
-        }
-      };
-
+    allMatches.forEach(match => {
       if (match.status === "SCHEDULED" || match.status === "TIMED") {
-        porJogar.push(jogo);
+        porJogar.push(match);
       }
 
       if (match.status === "FINISHED") {
-        jogados.push(jogo);
+        jogados.push(match);
       }
-    }
+    });
 
-    /* ================= CLASSIFICAÇÕES ================= */
+    /* ========================
+       4️⃣ CLASSIFICAÇÕES (só Liga + CL)
+    ======================== */
 
     async function getStandings(code) {
-
       const response = await fetch(
         `https://api.football-data.org/v4/competitions/${code}/standings`,
         { headers }
@@ -75,7 +102,9 @@ export default async function handler(req, res) {
       "UEFA Champions League": await getStandings("CL")
     };
 
-    /* ================= ESTATÍSTICAS ================= */
+    /* ========================
+       5️⃣ ESTATÍSTICAS GERAIS
+    ======================== */
 
     let jogosTotal = 0;
     let vitorias = 0;
@@ -84,7 +113,7 @@ export default async function handler(req, res) {
     let golosMarcados = 0;
     let golosSofridos = 0;
 
-    for (const match of jogados) {
+    jogados.forEach(match => {
 
       const sportingHome = match.homeTeam.includes("Sporting");
 
@@ -97,13 +126,14 @@ export default async function handler(req, res) {
         : match.score.home;
 
       jogosTotal++;
+
       golosMarcados += golosSporting;
       golosSofridos += golosAdversario;
 
       if (golosSporting > golosAdversario) vitorias++;
       else if (golosSporting === golosAdversario) empates++;
       else derrotas++;
-    }
+    });
 
     const estatisticas = {
       jogos: jogosTotal,
@@ -113,6 +143,10 @@ export default async function handler(req, res) {
       golosMarcados,
       golosSofridos
     };
+
+    /* ========================
+       RESPOSTA FINAL
+    ======================== */
 
     res.status(200).json({
       jogos: { porJogar, jogados },

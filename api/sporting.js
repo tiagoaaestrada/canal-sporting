@@ -1,4 +1,45 @@
 export default async function handler(req, res) {
+  
+  const fetch = require("node-fetch");
+
+const logoCache = {};
+
+function normalizeTeamName(name) {
+  if (name.includes("Sporting")) return "Sporting CP";
+  if (name.includes("Benfica")) return "Benfica";
+  if (name.includes("Porto")) return "FC Porto";
+  if (name.includes("Braga")) return "Sporting Braga";
+  return name;
+}
+
+async function getLogo(teamName) {
+
+  const normalized = normalizeTeamName(teamName);
+
+  if (logoCache[normalized]) {
+    return logoCache[normalized];
+  }
+
+  try {
+    const res = await fetch(
+      `https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(normalized)}`
+    );
+
+    const data = await res.json();
+
+    const logo =
+      data.teams?.[0]?.strTeamBadge ||
+      "https://www.thesportsdb.com/images/media/team/badge/unknown.png";
+
+    logoCache[normalized] = logo;
+
+    return logo;
+
+  } catch {
+    return "https://www.thesportsdb.com/images/media/team/badge/unknown.png";
+  }
+}
+  
   try {
     const headers = {
       "X-Auth-Token": process.env.FOOTBALL_API_KEY

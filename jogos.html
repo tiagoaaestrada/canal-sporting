@@ -225,7 +225,35 @@ function formatarData(d) {
   const min = String(date.getMinutes()).padStart(2,"0");
   return `${dia}/${mes}/${ano}, ${hora}:${min}`;
 }
+/* ================= LOGOS (CACHE SIMPLES) ================= */
 
+const logoCache = {};
+
+async function getLogo(teamName) {
+
+  if (logoCache[teamName]) {
+    return logoCache[teamName];
+  }
+
+  try {
+    const res = await fetch(
+      `https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(teamName)}`
+    );
+
+    const data = await res.json();
+
+    const logo =
+      data.teams?.[0]?.strTeamBadge ||
+      "https://www.thesportsdb.com/images/media/team/badge/unknown.png";
+
+    logoCache[teamName] = logo;
+
+    return logo;
+
+  } catch {
+    return "https://www.thesportsdb.com/images/media/team/badge/unknown.png";
+  }
+}
 /* ================= LOGOS AUTOMÁTICOS ================= */
 
 function getLogo(teamName) {
@@ -255,9 +283,9 @@ async function fetchLogo(teamName) {
 
 function isDerby(home, away) {
   return (
-    (home.includes("Sporting") &&
+    (home.includes("Sporting Clube de Portugal") &&
      (away.includes("Porto") || away.includes("Benfica"))) ||
-    (away.includes("Sporting") &&
+    (away.includes("Sporting Clube de Portugal") &&
      (home.includes("Porto") || home.includes("Benfica")))
   );
 }
@@ -286,12 +314,12 @@ async function render(lista, containerId, mostrarResultado) {
 
   for (const j of lista) {
 
-    const sportingHome = j.homeTeam.includes("Sporting");
-    const sportingAway = j.awayTeam.includes("Sporting");
+    const sportingHome = j.homeTeam.includes("Sporting Clube de Portugal");
+    const sportingAway = j.awayTeam.includes("Sporting Clube de Portugal");
     const derby = isDerby(j.homeTeam, j.awayTeam);
 
-    const homeLogo = await fetchLogo(j.homeTeam);
-    const awayLogo = await fetchLogo(j.awayTeam);
+    const homeLogo = await getLogo(j.homeTeam);
+    const awayLogo = await getLogo(j.awayTeam);
 
     container.innerHTML += `
       <div class="match ${derby ? "derby" : ""}">
@@ -302,13 +330,13 @@ async function render(lista, containerId, mostrarResultado) {
 
         <div class="match-main">
 
-          <div class="team-row ${sportingHome ? "sporting" : ""}">
+          <div class="team-row ${sportingHome ? "Sporting Clube de Portugal" : ""}">
             <img src="${homeLogo}" class="team-logo">
             ${j.homeTeam}
             ${mostrarResultado ? `<span class="score">${j.score.home}</span>` : ""}
           </div>
 
-          <div class="team-row ${sportingAway ? "sporting" : ""}">
+          <div class="team-row ${sportingAway ? "Sporting Clube de Portugal" : ""}">
             <img src="${awayLogo}" class="team-logo">
             ${j.awayTeam}
             ${mostrarResultado ? `<span class="score">${j.score.away}</span>` : ""}

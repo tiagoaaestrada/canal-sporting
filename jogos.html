@@ -271,7 +271,11 @@ async function render(lista, containerId, mostrarResultado) {
         </div>
 
         <div class="match-main">
-
+          
+          <div style="font-size:11px; color:#888;">
+            ${j.competition}
+          </div>
+         
           <div class="team-row ${sportingHome ? "sporting" : ""}">
             ${j.homeTeam}
             ${mostrarResultado ? `<span class="score">${j.score.home}</span>` : ""}

@@ -212,9 +212,9 @@ th, td {
 
 </div>
 
-<script>
+<scri<script>
 
-/* ================= HELPERS ================= */
+/* ================= DATA ================= */
 
 function formatarData(d) {
   const date = new Date(d);
@@ -226,23 +226,48 @@ function formatarData(d) {
   return `${dia}/${mes}/${ano}, ${hora}:${min}`;
 }
 
+/* ================= LOGOS AUTOMÁTICOS ================= */
+
+function getLogo(teamName) {
+  return `https://www.thesportsdb.com/images/media/team/badge/unknown.png`;
+}
+
+/* Versão dinâmica */
+async function fetchLogo(teamName) {
+  try {
+    const res = await fetch(
+      `https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(teamName)}`
+    );
+    const data = await res.json();
+
+    if (data.teams && data.teams[0] && data.teams[0].strTeamBadge) {
+      return data.teams[0].strTeamBadge;
+    }
+
+    return "https://www.thesportsdb.com/images/media/team/badge/unknown.png";
+
+  } catch {
+    return "https://www.thesportsdb.com/images/media/team/badge/unknown.png";
+  }
+}
+
+/* ================= DERBY ================= */
+
 function isDerby(home, away) {
   return (
-    (home === "Sporting CP" &&
-     (away === "FC Porto" || away === "Benfica")) ||
-    (away === "Sporting CP" &&
-     (home === "FC Porto" || home === "Benfica"))
+    (home.includes("Sporting") &&
+     (away.includes("Porto") || away.includes("Benfica"))) ||
+    (away.includes("Sporting") &&
+     (home.includes("Porto") || home.includes("Benfica")))
   );
 }
 
-/* ================= LOAD EVERYTHING ================= */
+/* ================= JOGOS ================= */
 
-async function carregarTudo() {
+async function carregarJogos() {
 
   const res = await fetch("/api/sporting");
   const data = await res.json();
-
-  /* ---------- JOGOS ---------- */
 
   const proximos = [...data.jogos.porJogar]
     .sort((a,b)=>new Date(a.date)-new Date(b.date));
@@ -250,86 +275,128 @@ async function carregarTudo() {
   const anteriores = [...data.jogos.jogados]
     .sort((a,b)=>new Date(b.date)-new Date(a.date));
 
-  renderJogos(proximos, "agendaContainer", false);
-  renderJogos(anteriores, "resultadosContainer", true);
-
-  /* ---------- CLASSIFICAÇÕES ---------- */
-
-  renderTabela(data.classificacoes["Primeira Liga"], "ligaContainer");
-  renderTabela(data.classificacoes["UEFA Champions League"], "championsContainer");
-
-  /* ---------- ESTATÍSTICAS ---------- */
-
-  document.getElementById("estatisticasContainer").innerHTML = `
-    <div><strong>Jogos:</strong> ${data.estatisticas.jogos}</div>
-    <div><strong>Vitórias:</strong> ${data.estatisticas.vitorias}</div>
-    <div><strong>Empates:</strong> ${data.estatisticas.empates}</div>
-    <div><strong>Derrotas:</strong> ${data.estatisticas.derrotas}</div>
-    <div><strong>Golos Marcados:</strong> ${data.estatisticas.golosMarcados}</div>
-    <div><strong>Golos Sofridos:</strong> ${data.estatisticas.golosSofridos}</div>
-  `;
+  render(proximos, "agendaContainer", false);
+  render(anteriores, "resultadosContainer", true);
 }
 
-function renderJogos(lista, containerId, mostrarResultado) {
+async function render(lista, containerId, mostrarResultado) {
 
   const container = document.getElementById(containerId);
   container.innerHTML = "";
 
-  lista.forEach(j => {
+  for (const j of lista) {
 
-    const sportingHome = j.homeTeam === "Sporting CP";
-    const sportingAway = j.awayTeam === "Sporting CP";
+    const sportingHome = j.homeTeam.includes("Sporting");
+    const sportingAway = j.awayTeam.includes("Sporting");
     const derby = isDerby(j.homeTeam, j.awayTeam);
+
+    const homeLogo = await fetchLogo(j.homeTeam);
+    const awayLogo = await fetchLogo(j.awayTeam);
 
     container.innerHTML += `
       <div class="match ${derby ? "derby" : ""}">
-        <div class="match-time">${formatarData(j.date)}</div>
+
+        <div class="match-time">
+          ${formatarData(j.date)}
+        </div>
+
         <div class="match-main">
+
           <div class="team-row ${sportingHome ? "sporting" : ""}">
-            <img src="${j.homeLogo}" class="team-logo">
+            <img src="${homeLogo}" class="team-logo">
             ${j.homeTeam}
             ${mostrarResultado ? `<span class="score">${j.score.home}</span>` : ""}
           </div>
+
           <div class="team-row ${sportingAway ? "sporting" : ""}">
-            <img src="${j.awayLogo}" class="team-logo">
+            <img src="${awayLogo}" class="team-logo">
             ${j.awayTeam}
             ${mostrarResultado ? `<span class="score">${j.score.away}</span>` : ""}
           </div>
+
           ${derby ? `<span class="derby-badge">CLÁSSICO</span>` : ""}
+
         </div>
+
       </div>
     `;
-  });
+  }
 }
 
-function renderTabela(lista, containerId) {
+/* ================= CLASSIFICAÇÕES ================= */
 
-  if (!lista) return;
+async function carregarClassificacoes() {
 
-  document.getElementById(containerId).innerHTML = `
-    <table>
-      <tr>
-        <th>#</th><th>Equipa</th><th>J</th>
-        <th>V</th><th>E</th><th>D</th>
-        <th>DG</th><th>Pts</th>
-      </tr>
-      ${lista.map(t => `
-        <tr class="${t.team === "Sporting CP" ? "highlight" : ""}">
-          <td>${t.position}</td>
-          <td>${t.team}</td>
-          <td>${t.played}</td>
-          <td>${t.won}</td>
-          <td>${t.draw}</td>
-          <td>${t.lost}</td>
-          <td>${t.goalDifference}</td>
-          <td>${t.points}</td>
+  const res = await fetch("/api/sporting");
+  const data = await res.json();
+
+  function tabela(lista) {
+    return `
+      <table>
+        <tr>
+          <th>#</th><th>Equipa</th><th>J</th>
+          <th>V</th><th>E</th><th>D</th>
+          <th>DG</th><th>Pts</th>
         </tr>
-      `).join("")}
-    </table>
+        ${lista.map(t => `
+          <tr class="${t.team.includes("Sporting") ? "highlight" : ""}">
+            <td>${t.position}</td>
+            <td>${t.team}</td>
+            <td>${t.played}</td>
+            <td>${t.won}</td>
+            <td>${t.draw}</td>
+            <td>${t.lost}</td>
+            <td>${t.goalDifference}</td>
+            <td>${t.points}</td>
+          </tr>
+        `).join("")}
+      </table>
+    `;
+  }
+
+  if (data.classificacoes["Primeira Liga"])
+    document.getElementById("ligaContainer").innerHTML =
+      tabela(data.classificacoes["Primeira Liga"]);
+
+  if (data.classificacoes["UEFA Champions League"])
+    document.getElementById("championsContainer").innerHTML =
+      tabela(data.classificacoes["UEFA Champions League"]);
+}
+
+/* ================= ESTATÍSTICAS ================= */
+
+async function carregarEstatisticas() {
+
+  const res = await fetch("/api/sporting");
+  const data = await res.json();
+
+  const e = data.estatisticas;
+
+  document.getElementById("estatisticasContainer").innerHTML = `
+    <div><strong>Jogos:</strong> ${e.jogos}</div>
+    <div><strong>Vitórias:</strong> ${e.vitorias}</div>
+    <div><strong>Empates:</strong> ${e.empates}</div>
+    <div><strong>Derrotas:</strong> ${e.derrotas}</div>
+    <div><strong>Golos Marcados:</strong> ${e.golosMarcados}</div>
+    <div><strong>Golos Sofridos:</strong> ${e.golosSofridos}</div>
   `;
 }
 
-carregarTudo();
+/* ================= INIT ================= */
+
+carregarJogos();
+carregarClassificacoes();
+carregarEstatisticas();
+
+setInterval(() => {
+  carregarJogos();
+  carregarClassificacoes();
+  carregarEstatisticas();
+}, 300000);
+
+if (window.location.pathname.includes("jogos")) {
+  document.getElementById("nav-jogos")?.classList.add("active");
+}
 
 </script>
 

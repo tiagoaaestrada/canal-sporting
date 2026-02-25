@@ -228,9 +228,9 @@ function formatarData(d) {
   const min = String(date.getMinutes()).padStart(2,"0");
   return `${dia}/${mes}/${ano}, ${hora}:${min}`;
 }
-/* ================= LOGOS (CACHE SIMPLES) ================= */
 
-const logoCache = {};
+/* ================= LOGOS ================= */
+
 const logoCache = {};
 
 function normalizeTeamName(name) {
@@ -268,30 +268,6 @@ async function getLogo(teamName) {
     return "https://www.thesportsdb.com/images/media/team/badge/unknown.png";
   }
 }
-/* ================= LOGOS AUTOMÁTICOS ================= */
-
-function getLogo(teamName) {
-  return `https://www.thesportsdb.com/images/media/team/badge/unknown.png`;
-}
-
-/* Versão dinâmica */
-async function fetchLogo(teamName) {
-  try {
-    const res = await fetch(
-      `https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${encodeURIComponent(teamName)}`
-    );
-    const data = await res.json();
-
-    if (data.teams && data.teams[0] && data.teams[0].strTeamBadge) {
-      return data.teams[0].strTeamBadge;
-    }
-
-    return "https://www.thesportsdb.com/images/media/team/badge/unknown.png";
-
-  } catch {
-    return "https://www.thesportsdb.com/images/media/team/badge/unknown.png";
-  }
-}
 
 /* ================= DERBY ================= */
 
@@ -317,8 +293,8 @@ async function carregarJogos() {
   const anteriores = [...data.jogos.jogados]
     .sort((a,b)=>new Date(b.date)-new Date(a.date));
 
-  render(proximos, "agendaContainer", false);
-  render(anteriores, "resultadosContainer", true);
+  await render(proximos, "agendaContainer", false);
+  await render(anteriores, "resultadosContainer", true);
 }
 
 async function render(lista, containerId, mostrarResultado) {
@@ -344,13 +320,13 @@ async function render(lista, containerId, mostrarResultado) {
 
         <div class="match-main">
 
-          <div class="team-row ${sportingHome ? "Sporting Clube de Portugal" : ""}">
+          <div class="team-row ${sportingHome ? "sporting" : ""}">
             <img src="${homeLogo}" class="team-logo">
             ${j.homeTeam}
             ${mostrarResultado ? `<span class="score">${j.score.home}</span>` : ""}
           </div>
 
-          <div class="team-row ${sportingAway ? "Sporting Clube de Portugal" : ""}">
+          <div class="team-row ${sportingAway ? "sporting" : ""}">
             <img src="${awayLogo}" class="team-logo">
             ${j.awayTeam}
             ${mostrarResultado ? `<span class="score">${j.score.away}</span>` : ""}
@@ -411,7 +387,6 @@ async function carregarEstatisticas() {
 
   const res = await fetch("/api/sporting");
   const data = await res.json();
-
   const e = data.estatisticas;
 
   document.getElementById("estatisticasContainer").innerHTML = `
@@ -426,19 +401,15 @@ async function carregarEstatisticas() {
 
 /* ================= INIT ================= */
 
-carregarJogos();
-carregarClassificacoes();
-carregarEstatisticas();
-
-setInterval(() => {
-  carregarJogos();
-  carregarClassificacoes();
-  carregarEstatisticas();
-}, 300000);
-
-if (window.location.pathname.includes("jogos")) {
-  document.getElementById("nav-jogos")?.classList.add("active");
+async function init() {
+  await carregarJogos();
+  await carregarClassificacoes();
+  await carregarEstatisticas();
 }
+
+init();
+
+setInterval(init, 300000);
 
 </script>
 

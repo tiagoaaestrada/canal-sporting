@@ -308,8 +308,8 @@ async function render(lista, containerId, mostrarResultado) {
     const sportingAway = j.awayTeam.includes("Sporting Clube de Portugal");
     const derby = isDerby(j.homeTeam, j.awayTeam);
 
-    const homeLogo = await getLogo(j.homeTeam);
-    const awayLogo = await getLogo(j.awayTeam);
+    const homeLogo = j.homeLogo;
+    const awayLogo = j.awayLogo;
 
     container.innerHTML += `
       <div class="match ${derby ? "derby" : ""}">

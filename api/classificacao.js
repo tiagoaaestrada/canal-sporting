@@ -1,19 +1,46 @@
 export default async function handler(req, res) {
   try {
-    const url =
-      "https://www.ligaportugal.pt/calendars-ics/ligaportugalbetclic.ics";
+    const response = await fetch(
+      "https://api.football-data.org/v4/competitions/PPL/standings",
+      {
+        headers: {
+          "X-Auth-Token": process.env.FOOTBALL_DATA_KEY,
+        },
+      }
+    );
 
-    const response = await fetch(url);
-    const icsText = await response.text();
+    const data = await response.json();
 
-    const events = icsText.split("BEGIN:VEVENT");
+    if (!data.standings || !data.standings[0]) {
+      return res.status(500).json({
+        error: "Sem dados de classificação",
+        raw: data,
+      });
+    }
 
-    // Devolve os primeiros 3 eventos completos
+    const tabela = data.standings[0].table;
+
+    const classificacao = tabela.map((team) => ({
+      position: team.position,
+      team: team.team.name,
+      played: team.playedGames,
+      won: team.won,
+      draw: team.draw,
+      lost: team.lost,
+      goalsFor: team.goalsFor,
+      goalsAgainst: team.goalsAgainst,
+      goalDifference: team.goalDifference,
+      points: team.points,
+    }));
+
     res.status(200).json({
-      sample: events.slice(1, 4)
+      "Primeira Liga": classificacao,
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({
+      error: "Erro ao obter classificação",
+    });
   }
 }

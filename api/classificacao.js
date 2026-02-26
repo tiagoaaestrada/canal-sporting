@@ -1,36 +1,35 @@
 export default async function handler(req, res) {
   try {
     const response = await fetch(
-      "https://v3.football.api-sports.io/standings?league=94&season=2025",
+      "https://api.football-data.org/v4/competitions/PPL/standings",
       {
         headers: {
-          "x-apisports-key": process.env.API_FOOTBALL_KEY,
+          "X-Auth-Token": process.env.FOOTBALL_API_KEY,
         },
       }
     );
 
     const data = await response.json();
 
-    if (!data.response || !data.response[0]) {
+    if (!data.standings || !data.standings[0]) {
       return res.status(500).json({
         error: "Sem dados de classificação",
         raw: data,
       });
     }
 
-    const tabela = data.response[0].league.standings[0];
+    const tabela = data.standings[0].table;
 
     const classificacao = tabela.map((team) => ({
-      position: team.rank,
+      position: team.position,
       team: team.team.name,
-      played: team.all.played,
-      won: team.all.win,
-      draw: team.all.draw,
-      lost: team.all.lose,
-      goalsFor: team.all.goals.for,
-      goalsAgainst: team.all.goals.against,
-      goalDifference:
-        team.all.goals.for - team.all.goals.against,
+      played: team.playedGames,
+      won: team.won,
+      draw: team.draw,
+      lost: team.lost,
+      goalsFor: team.goalsFor,
+      goalsAgainst: team.goalsAgainst,
+      goalDifference: team.goalDifference,
       points: team.points,
     }));
 

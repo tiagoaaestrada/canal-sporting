@@ -215,10 +215,7 @@ th, td {
 /* ================= DATA ================= */
 
 function formatarData(d) {
-  if (!d) return "";
   const date = new Date(d);
-  if (isNaN(date)) return "";
-
   const dia = String(date.getDate()).padStart(2,"0");
   const mes = String(date.getMonth()+1).padStart(2,"0");
   const ano = String(date.getFullYear()).slice(-2);
@@ -231,40 +228,38 @@ function formatarData(d) {
 
 function isDerby(home, away) {
   return (
-    (home?.includes("Sporting") &&
-     (away?.includes("Porto") || away?.includes("Benfica"))) ||
-    (away?.includes("Sporting") &&
-     (home?.includes("Porto") || home?.includes("Benfica")))
+    (home.includes("Sporting") &&
+     (away.includes("Porto") || away.includes("Benfica"))) ||
+    (away.includes("Sporting") &&
+     (home.includes("Porto") || home.includes("Benfica")))
   );
 }
 
-/* ================= JOGOS ================= */
-
-async function carregarJogos() {
-
-  const res = await fetch("/api/sporting");
-  const data = await res.json();
-
-  const proximos = [...data.porJogar]
-    .sort((a,b)=>new Date(a.date)-new Date(b.date));
-
-  const anteriores = [...data.jogados]
-    .sort((a,b)=>new Date(b.date)-new Date(a.date));
-
-  render(proximos, "agendaContainer", false);
-  render(anteriores, "resultadosContainer", true);
-}
+/* ================= RENDER ================= */
 
 function render(lista, containerId, mostrarResultado) {
 
   const container = document.getElementById(containerId);
   container.innerHTML = "";
 
-  for (const j of lista) {
+  if (!lista.length) {
+    container.innerHTML = "<div style='color:#777;'>Sem jogos.</div>";
+    return;
+  }
 
-    const sportingHome = j.homeTeam?.includes("Sporting");
-    const sportingAway = j.awayTeam?.includes("Sporting");
+  lista.forEach(j => {
+
+    const sportingHome = j.homeTeam.includes("Sporting");
+    const sportingAway = j.awayTeam.includes("Sporting");
     const derby = isDerby(j.homeTeam, j.awayTeam);
+
+    const scoreHome = (mostrarResultado && j.score.home !== null)
+      ? `<span class="score">${j.score.home}</span>`
+      : "";
+
+    const scoreAway = (mostrarResultado && j.score.away !== null)
+      ? `<span class="score">${j.score.away}</span>`
+      : "";
 
     container.innerHTML += `
       <div class="match ${derby ? "derby" : ""}">
@@ -274,23 +269,19 @@ function render(lista, containerId, mostrarResultado) {
         </div>
 
         <div class="match-main">
-          
-          <div style="font-size:11px; color:#888;">
-            ${j.competition || ""}
+
+          <div style="font-size:11px; color:#888; margin-bottom:4px;">
+            ${j.competition}
           </div>
-         
+
           <div class="team-row ${sportingHome ? "sporting" : ""}">
             ${j.homeTeam}
-            ${mostrarResultado && j.score.home !== null 
-              ? `<span class="score">${j.score.home}</span>` 
-              : ""}
+            ${scoreHome}
           </div>
 
           <div class="team-row ${sportingAway ? "sporting" : ""}">
             ${j.awayTeam}
-            ${mostrarResultado && j.score.away !== null 
-              ? `<span class="score">${j.score.away}</span>` 
-              : ""}
+            ${scoreAway}
           </div>
 
           ${derby ? `<span class="derby-badge">CLÁSSICO</span>` : ""}
@@ -299,14 +290,46 @@ function render(lista, containerId, mostrarResultado) {
 
       </div>
     `;
+  });
+}
+
+/* ================= CARREGAR ================= */
+
+async function carregarTudo() {
+  try {
+
+    const res = await fetch("/api/sporting");
+    const data = await res.json();
+
+    const proximos = [...data.jogos.porJogar]
+      .sort((a,b)=>new Date(a.date)-new Date(b.date));
+
+    const anteriores = [...data.jogos.jogados]
+      .sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+    render(proximos, "agendaContainer", false);
+    render(anteriores, "resultadosContainer", true);
+
+    const e = data.estatisticas;
+
+    document.getElementById("estatisticasContainer").innerHTML = `
+      <div><strong>Jogos:</strong> ${e.jogos}</div>
+      <div><strong>Vitórias:</strong> ${e.vitorias}</div>
+      <div><strong>Empates:</strong> ${e.empates}</div>
+      <div><strong>Derrotas:</strong> ${e.derrotas}</div>
+      <div><strong>Golos Marcados:</strong> ${e.golosMarcados}</div>
+      <div><strong>Golos Sofridos:</strong> ${e.golosSofridos}</div>
+    `;
+
+  } catch (err) {
+    console.error("Erro ao carregar:", err);
   }
 }
 
 /* ================= INIT ================= */
 
-carregarJogos();
-
-setInterval(carregarJogos, 300000);
+carregarTudo();
+setInterval(carregarTudo, 300000);
 
 </script>
 

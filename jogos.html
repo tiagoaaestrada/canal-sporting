@@ -328,7 +328,7 @@ function renderClassificacao(lista) {
 
 /* ================= CARREGAR DADOS ================= */
 
-async function carregarTudo() {
+  async function carregarTudo() {
 
   const resClass = await fetch("/api/classificacao");
   const dataClass = await resClass.json();

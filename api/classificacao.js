@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   try {
-    const url = "
-https://www.ligaportugal.pt/api/v2/competition/standings?competition=ligaportugalbetclic&season=20252026&round=24";
+    const url =
+      "https://www.ligaportugal.pt/competition/854/liga-portugal-betclic/round/20252026?tab=standings";
 
     const response = await fetch(url, {
       headers: {
@@ -12,52 +12,41 @@ https://www.ligaportugal.pt/api/v2/competition/standings?competition=ligaportuga
 
     const html = await response.text();
 
-    // Procurar a tabela dentro do HTML
-    const tableMatch = html.match(/<table[^>]*class="table table-[^"]*"[^>]*>([\s\S]*?)<\/table>/i);
-
-    if (!tableMatch) {
-      return res.status(500).json({ error: "Não encontrei tabela de classificação" });
-    }
-
-    const tableHtml = tableMatch[1];
-
-    // Extrair as linhas da tabela
-    const rows = [...tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)];
+    // Procurar todas as linhas da tabela
+    const rowRegex = /<tr[^>]*>(.*?)<\/tr>/gs;
+    const rows = [...html.matchAll(rowRegex)];
 
     const classificacao = [];
 
     for (const row of rows) {
-      const cols = [...row[1].matchAll(/<t[dh][^>]*>(.*?)<\/t[dh]>/gi)].map(c => c[1].trim());
+      const cols = [...row[1].matchAll(/<t[dh][^>]*>(.*?)<\/t[dh]>/gs)]
+        .map(c => c[1].replace(/<.*?>/g, "").trim())
+        .filter(Boolean);
 
-      // Pular cabeçalhos e linhas inválidas
-      if (cols.length < 7 || !/^\d+$/.test(cols[0])) continue;
-
-      const position = parseInt(cols[0]);
-      const team = cols[1].replace(/<.*?>/g, "").trim();
-      const played = parseInt(cols[2]);
-      const won = parseInt(cols[3]);
-      const draw = parseInt(cols[4]);
-      const lost = parseInt(cols[5]);
-      const diff = parseInt(cols[6].replace(/[^0-9-]/g, "").trim());
-      const points = parseInt(cols[cols.length - 1].replace(/[^0-9]/g, "").trim());
+      // Precisamos de pelo menos 8 colunas numéricas
+      if (cols.length < 8) continue;
+      if (!/^\d+$/.test(cols[0])) continue;
 
       classificacao.push({
-        position,
-        team,
-        played,
-        won,
-        draw,
-        lost,
-        goalDifference: diff,
-        points
+        position: parseInt(cols[0]),
+        team: cols[1],
+        played: parseInt(cols[2]),
+        won: parseInt(cols[3]),
+        draw: parseInt(cols[4]),
+        lost: parseInt(cols[5]),
+        goalDifference: parseInt(cols[6].replace("+","")),
+        points: parseInt(cols[7])
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       "Primeira Liga": classificacao
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    return res.status(500).json({
+      error: "Erro ao obter classificação"
+    });
   }
 }

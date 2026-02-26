@@ -7,7 +7,6 @@ export default async function handler(req, res) {
     );
 
     const text = await response.text();
-
     const eventos = text.split("BEGIN:VEVENT");
 
     const jogos = [];
@@ -22,7 +21,7 @@ export default async function handler(req, res) {
 
       if (!summaryMatch || !dtMatch) return;
 
-      const summary = summaryMatch[1].trim();
+      let summary = summaryMatch[1].trim();
       const dt = dtMatch[1].trim();
 
       const data = new Date(
@@ -32,18 +31,42 @@ export default async function handler(req, res) {
         )
       );
 
-      const equipas = summary.split(" - ");
-      if (equipas.length !== 2) return;
+      // Remover símbolo ▶️
+      summary = summary.replace("▶️ ", "");
 
-      const homeTeam = equipas[0];
-      const awayTeam = equipas[1];
+      // Exemplo jogado:
+      // Sporting CP 1 - 0 FC Famalicão
+      const resultadoRegex = /(.*)\s(\d+)\s-\s(\d+)\s(.*)/;
+
+      let homeTeam, awayTeam, homeScore = null, awayScore = null;
+
+      if (resultadoRegex.test(summary)) {
+
+        const match = summary.match(resultadoRegex);
+
+        homeTeam = match[1].trim();
+        homeScore = parseInt(match[2]);
+        awayScore = parseInt(match[3]);
+        awayTeam = match[4].trim();
+
+      } else {
+
+        const equipas = summary.split(" - ");
+        if (equipas.length !== 2) return;
+
+        homeTeam = equipas[0].trim();
+        awayTeam = equipas[1].trim();
+      }
 
       jogos.push({
         date: data,
-        competition: "Competição",
+        competition: "Liga Portugal",
         homeTeam,
         awayTeam,
-        score: { home: null, away: null }
+        score: {
+          home: homeScore,
+          away: awayScore
+        }
       });
 
     });

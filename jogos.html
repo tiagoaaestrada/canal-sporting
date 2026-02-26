@@ -285,37 +285,54 @@ function renderClassificacao(lista) {
 
   const container = document.getElementById("ligaContainer");
 
+  if (!container) {
+    console.log("ligaContainer não encontrado");
+    return;
+  }
+
   if (!lista || !lista.length) {
     container.innerHTML = "<div style='color:#777;'>Classificação indisponível.</div>";
     return;
   }
 
-  container.innerHTML = `
+  let html = `
     <table>
-      <tr>
-        <th>#</th>
-        <th>Equipa</th>
-        <th>J</th>
-        <th>V</th>
-        <th>E</th>
-        <th>D</th>
-        <th>DG</th>
-        <th>Pts</th>
-      </tr>
-      ${lista.map(t => `
-        <tr class="${t.team.includes("Sporting") ? "highlight" : ""}">
-          <td>${t.position}</td>
-          <td>${t.team}</td>
-          <td>${t.played}</td>
-          <td>${t.won}</td>
-          <td>${t.draw}</td>
-          <td>${t.lost}</td>
-          <td>${t.goalDifference}</td>
-          <td>${t.points}</td>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th style="text-align:left">Equipa</th>
+          <th>J</th>
+          <th>V</th>
+          <th>E</th>
+          <th>D</th>
+          <th>DG</th>
+          <th>Pts</th>
         </tr>
-      `).join("")}
+      </thead>
+      <tbody>
+  `;
+
+  lista.forEach(t => {
+    html += `
+      <tr class="${t.team.includes("Sporting") ? "highlight" : ""}">
+        <td>${t.position}</td>
+        <td style="text-align:left">${t.team}</td>
+        <td>${t.played}</td>
+        <td>${t.won}</td>
+        <td>${t.draw}</td>
+        <td>${t.lost}</td>
+        <td>${t.goalDifference}</td>
+        <td><strong>${t.points}</strong></td>
+      </tr>
+    `;
+  });
+
+  html += `
+      </tbody>
     </table>
   `;
+
+  container.innerHTML = html;
 }
 
 /* ================= CARREGAR TUDO ================= */

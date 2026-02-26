@@ -329,43 +329,20 @@ function renderClassificacao(lista) {
 /* ================= CARREGAR DADOS ================= */
 
 async function carregarTudo() {
-  try {
 
-    /* -------- JOGOS + ESTATÍSTICAS -------- */
+  const resClass = await fetch("/api/classificacao");
+  const dataClass = await resClass.json();
 
-    const resJogos = await fetch("/api/sporting");
-    const dataJogos = await resJogos.json();
+  console.log("Classificação:", dataClass);
 
-    const proximos = [...dataJogos.jogos.porJogar]
-      .sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const container = document.getElementById("ligaContainer");
 
-    const anteriores = [...dataJogos.jogos.jogados]
-      .sort((a,b)=>new Date(b.date)-new Date(a.date));
-
-    render(proximos, "agendaContainer", false);
-    render(anteriores, "resultadosContainer", true);
-
-    const e = dataJogos.estatisticas;
-
-    document.getElementById("estatisticasContainer").innerHTML = `
-      <div><strong>Jogos:</strong> ${e.jogos}</div>
-      <div><strong>Vitórias:</strong> ${e.vitorias}</div>
-      <div><strong>Empates:</strong> ${e.empates}</div>
-      <div><strong>Derrotas:</strong> ${e.derrotas}</div>
-      <div><strong>Golos Marcados:</strong> ${e.golosMarcados}</div>
-      <div><strong>Golos Sofridos:</strong> ${e.golosSofridos}</div>
-    `;
-
-    /* -------- CLASSIFICAÇÃO -------- */
-
-    const resClass = await fetch("/api/classificacao");
-    const dataClass = await resClass.json();
-
-    renderClassificacao(dataClass["Primeira Liga"]);
-
-  } catch (err) {
-    console.error("Erro ao carregar:", err);
+  if (!dataClass["Primeira Liga"]) {
+    container.innerHTML = "Sem classificação.";
+    return;
   }
+
+  container.innerHTML = JSON.stringify(dataClass["Primeira Liga"], null, 2);
 }
 
 /* ================= INIT ================= */

@@ -215,7 +215,10 @@ th, td {
 /* ================= DATA ================= */
 
 function formatarData(d) {
+  if (!d) return "";
   const date = new Date(d);
+  if (isNaN(date)) return "";
+
   const dia = String(date.getDate()).padStart(2,"0");
   const mes = String(date.getMonth()+1).padStart(2,"0");
   const ano = String(date.getFullYear()).slice(-2);
@@ -228,10 +231,10 @@ function formatarData(d) {
 
 function isDerby(home, away) {
   return (
-    (home.includes("Sporting Clube de Portugal") &&
-     (away.includes("Porto") || away.includes("Benfica"))) ||
-    (away.includes("Sporting Clube de Portugal") &&
-     (home.includes("Porto") || home.includes("Benfica")))
+    (home?.includes("Sporting") &&
+     (away?.includes("Porto") || away?.includes("Benfica"))) ||
+    (away?.includes("Sporting") &&
+     (home?.includes("Porto") || home?.includes("Benfica")))
   );
 }
 
@@ -242,25 +245,25 @@ async function carregarJogos() {
   const res = await fetch("/api/sporting");
   const data = await res.json();
 
-  const proximos = [...data.jogos.porJogar]
+  const proximos = [...data.porJogar]
     .sort((a,b)=>new Date(a.date)-new Date(b.date));
 
-  const anteriores = [...data.jogos.jogados]
+  const anteriores = [...data.jogados]
     .sort((a,b)=>new Date(b.date)-new Date(a.date));
 
-  await render(proximos, "agendaContainer", false);
-  await render(anteriores, "resultadosContainer", true);
+  render(proximos, "agendaContainer", false);
+  render(anteriores, "resultadosContainer", true);
 }
 
-async function render(lista, containerId, mostrarResultado) {
+function render(lista, containerId, mostrarResultado) {
 
   const container = document.getElementById(containerId);
   container.innerHTML = "";
 
   for (const j of lista) {
 
-    const sportingHome = j.homeTeam.includes("Sporting Clube de Portugal");
-    const sportingAway = j.awayTeam.includes("Sporting Clube de Portugal");
+    const sportingHome = j.homeTeam?.includes("Sporting");
+    const sportingAway = j.awayTeam?.includes("Sporting");
     const derby = isDerby(j.homeTeam, j.awayTeam);
 
     container.innerHTML += `
@@ -273,17 +276,21 @@ async function render(lista, containerId, mostrarResultado) {
         <div class="match-main">
           
           <div style="font-size:11px; color:#888;">
-            ${j.competition}
+            ${j.competition || ""}
           </div>
          
           <div class="team-row ${sportingHome ? "sporting" : ""}">
             ${j.homeTeam}
-            ${mostrarResultado ? `<span class="score">${j.score.home}</span>` : ""}
+            ${mostrarResultado && j.score.home !== null 
+              ? `<span class="score">${j.score.home}</span>` 
+              : ""}
           </div>
 
           <div class="team-row ${sportingAway ? "sporting" : ""}">
             ${j.awayTeam}
-            ${mostrarResultado ? `<span class="score">${j.score.away}</span>` : ""}
+            ${mostrarResultado && j.score.away !== null 
+              ? `<span class="score">${j.score.away}</span>` 
+              : ""}
           </div>
 
           ${derby ? `<span class="derby-badge">CLÁSSICO</span>` : ""}
@@ -295,75 +302,11 @@ async function render(lista, containerId, mostrarResultado) {
   }
 }
 
-/* ================= CLASSIFICAÇÕES ================= */
-
-async function carregarClassificacoes() {
-
-  const res = await fetch("/api/sporting");
-  const data = await res.json();
-
-  function tabela(lista) {
-    return `
-      <table>
-        <tr>
-          <th>#</th><th>Equipa</th><th>J</th>
-          <th>V</th><th>E</th><th>D</th>
-          <th>DG</th><th>Pts</th>
-        </tr>
-        ${lista.map(t => `
-          <tr class="${t.team.includes("Sporting Clube de Portugal") ? "highlight" : ""}">
-            <td>${t.position}</td>
-            <td>${t.team}</td>
-            <td>${t.played}</td>
-            <td>${t.won}</td>
-            <td>${t.draw}</td>
-            <td>${t.lost}</td>
-            <td>${t.goalDifference}</td>
-            <td>${t.points}</td>
-          </tr>
-        `).join("")}
-      </table>
-    `;
-  }
-
-  if (data.classificacoes["Primeira Liga"])
-    document.getElementById("ligaContainer").innerHTML =
-      tabela(data.classificacoes["Primeira Liga"]);
-
-  if (data.classificacoes["UEFA Champions League"])
-    document.getElementById("championsContainer").innerHTML =
-      tabela(data.classificacoes["UEFA Champions League"]);
-}
-
-/* ================= ESTATÍSTICAS ================= */
-
-async function carregarEstatisticas() {
-
-  const res = await fetch("/api/sporting");
-  const data = await res.json();
-  const e = data.estatisticas;
-
-  document.getElementById("estatisticasContainer").innerHTML = `
-    <div><strong>Jogos:</strong> ${e.jogos}</div>
-    <div><strong>Vitórias:</strong> ${e.vitorias}</div>
-    <div><strong>Empates:</strong> ${e.empates}</div>
-    <div><strong>Derrotas:</strong> ${e.derrotas}</div>
-    <div><strong>Golos Marcados:</strong> ${e.golosMarcados}</div>
-    <div><strong>Golos Sofridos:</strong> ${e.golosSofridos}</div>
-  `;
-}
-
 /* ================= INIT ================= */
 
-async function init() {
-  await carregarJogos();
-  await carregarClassificacoes();
-  await carregarEstatisticas();
-}
+carregarJogos();
 
-init();
-
-setInterval(init, 300000);
+setInterval(carregarJogos, 300000);
 
 </script>
 

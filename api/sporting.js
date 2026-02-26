@@ -1,104 +1,70 @@
 // api/sporting.js
-// Scraping de jogos da época atual de Sporting CP (zerozero.pt)
-
-import fetch from "node-fetch";
 
 export default async function handler(req, res) {
   try {
 
-    // URL da página de jogos do Sporting por época (zerozero.pt)
     const url = "https://www.zerozero.pt/equipa/sporting/jogos?grp=1&epoca_id=155";
 
-    // Fetch HTML
-    const pageRes = await fetch(url);
-    const html = await pageRes.text();
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "text/html"
+      }
+    });
 
-    // ========================================
-    // === Extrair linha por linha os jogos ===
-    // ========================================
+    const html = await response.text();
 
-    // A tabela de jogos no zerozero tem este formato:
-    // <tr class="odd/even">
-    //   <td class="data">27/07/25 20:45</td>
-    //   <td class="competicao">Liga Portugal Bwin</td>
-    //   <td class="casa">Sporting Clube de Portugal</td>
-    //   <td class="visitante">GD Estoril Praia</td>
-    //   <td class="resultado">-</td>
-    //   ...
-    // </tr>
+    if (!html.includes("Sporting")) {
+      return res.status(500).json({ error: "Zerozero bloqueou o request ou HTML inválido" });
+    }
 
-    // 1) Match all <tr ...> rows
     const rows = [...html.matchAll(/<tr[^>]+class="(?:odd|even)"[^>]*>([\s\S]*?)<\/tr>/g)];
 
     const jogos = [];
 
     for (const r of rows) {
-      const rowHtml = r[1];
+      const row = r[1];
 
-      // Data
-      const dateMatch = rowHtml.match(/<td[^>]*class="data"[^>]*>(.*?)<\/td>/);
-      const dateRaw = dateMatch?.[1]?.trim() || "";
+      const dateMatch = row.match(/(\d{2}\/\d{2}\/\d{2}\s+\d{2}:\d{2})/);
+      const compMatch = row.match(/<span[^>]*class="comp"[^>]*>(.*?)<\/span>/);
 
-      // Competition
-      const compMatch = rowHtml.match(/<td[^>]*class="competicao"[^>]*>(.*?)<\/td>/);
-      const competition = compMatch?.[1]?.trim() || "";
+      const teams = [...row.matchAll(/<a[^>]*>(.*?)<\/a>/g)].map(m => m[1]);
 
-      // Home
-      const homeMatch = rowHtml.match(/<td[^>]*class="casa"[^>]*>(.*?)<\/td>/);
-      const homeTeam = homeMatch?.[1]?.trim() || "";
+      if (!dateMatch || teams.length < 2) continue;
 
-      // Away
-      const awayMatch = rowHtml.match(/<td[^>]*class="visitante"[^>]*>(.*?)<\/td>/);
-      const awayTeam = awayMatch?.[1]?.trim() || "";
+      const dateRaw = dateMatch[1];
+      const [DD, MM, YY, HM] = dateRaw.match(/(\d{2})\/(\d{2})\/(\d{2})\s+(\d{2}:\d{2})/).slice(1);
 
-      // Result (if exists)
-      const resMatch = rowHtml.match(/<td[^>]*class="resultado"[^>]*>(.*?)<\/td>/);
-      let scoreHome = null, scoreAway = null;
-      if (resMatch && resMatch[1].includes("-") === false) {
-        const parts = resMatch[1].trim().split("–");
-        if (parts.length === 2) {
-          scoreHome = parseInt(parts[0].trim());
-          scoreAway = parseInt(parts[1].trim());
-        }
+      const isoDate = `20${YY}-${MM}-${DD}T${HM}:00Z`;
+
+      let scoreHome = null;
+      let scoreAway = null;
+
+      const scoreMatch = row.match(/(\d+)\s*-\s*(\d+)/);
+      if (scoreMatch) {
+        scoreHome = parseInt(scoreMatch[1]);
+        scoreAway = parseInt(scoreMatch[2]);
       }
-
-      // Normalizar data
-      // zerozero usa formato "27/07/25 20:45"
-      let isoDate = "";
-      const dParts = dateRaw.match(/(\d{2})\/(\d{2})\/(\d{2})\s+(\d{2}:\d{2})/);
-      if (dParts) {
-        const DD = dParts[1], MM = dParts[2], YY = dParts[3], HM = dParts[4];
-        isoDate = `20${YY}-${MM}-${DD}T${HM}:00Z`;
-      }
-
-      const status = (scoreHome === null ? "scheduled" : "finished");
 
       jogos.push({
         date: isoDate,
-        competition,
-        homeTeam,
-        awayTeam,
+        competition: compMatch?.[1] || "",
+        homeTeam: teams[0],
+        awayTeam: teams[1],
         score: { home: scoreHome, away: scoreAway },
-        status
+        status: scoreHome === null ? "scheduled" : "finished"
       });
     }
 
-    // Ordenar cronologicamente por data
-    jogos.sort((a, b) => new Date(a.date) - new Date(b.date));
+    jogos.sort((a,b)=> new Date(a.date) - new Date(b.date));
 
-    // Separar por jogar / jogados
-    const porJogar = jogos.filter(j => j.status === "scheduled");
-    const jogados = jogos.filter(j => j.status === "finished");
-
-    // Resposta final
     res.status(200).json({
       todos: jogos,
-      porJogar,
-      jogados
+      porJogar: jogos.filter(j=>j.status==="scheduled"),
+      jogados: jogos.filter(j=>j.status==="finished")
     });
 
   } catch (error) {
-    console.error("Erro no scraping /api/sporting:", error);
     res.status(500).json({ error: error.message });
   }
 }

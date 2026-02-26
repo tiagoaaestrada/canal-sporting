@@ -336,13 +336,12 @@ function renderClassificacao(lista) {
   container.innerHTML = html;
 }
 
-/* ================= CARREGAR TUDO ================= */
+/* =================  TUDO ================= */
 
 async function carregarTudo() {
+
+  /* -------- JOGOS -------- */
   try {
-
-    /* -------- JOGOS -------- */
-
     const resJogos = await fetch("/api/sporting");
     const dataJogos = await resJogos.json();
 
@@ -355,8 +354,6 @@ async function carregarTudo() {
     render(proximos, "agendaContainer", false);
     render(anteriores, "resultadosContainer", true);
 
-    /* -------- ESTATÍSTICAS -------- */
-
     const e = dataJogos.estatisticas;
 
     document.getElementById("estatisticasContainer").innerHTML = `
@@ -368,15 +365,19 @@ async function carregarTudo() {
       <div><strong>Golos Sofridos:</strong> ${e.golosSofridos}</div>
     `;
 
-    /* -------- CLASSIFICAÇÃO -------- */
+  } catch (err) {
+    console.error("Erro jogos:", err);
+  }
 
+  /* -------- CLASSIFICAÇÃO -------- */
+  try {
     const resClass = await fetch("/api/classificacao");
     const dataClass = await resClass.json();
 
     renderClassificacao(dataClass["Primeira Liga"]);
 
   } catch (err) {
-    console.error("Erro ao carregar:", err);
+    console.error("Erro classificação:", err);
   }
 }
 

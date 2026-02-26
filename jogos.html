@@ -181,12 +181,6 @@ th, td {
       <div id="ligaContainer"></div>
     </div>
 
-    <div class="section" style="margin-top:25px;">
-      <h2>UEFA Champions League</h2>
-      <div id="championsContainer"></div>
-    </div>
-  </div>
-
   <!-- JOGOS -->
   <div>
     <div class="section">
@@ -235,7 +229,7 @@ function isDerby(home, away) {
   );
 }
 
-/* ================= RENDER ================= */
+/* ================= RENDER JOGOS ================= */
 
 function render(lista, containerId, mostrarResultado) {
 
@@ -293,24 +287,65 @@ function render(lista, containerId, mostrarResultado) {
   });
 }
 
-/* ================= CARREGAR ================= */
+/* ================= RENDER CLASSIFICAÇÃO ================= */
+
+function renderClassificacao(lista) {
+
+  const container = document.getElementById("ligaContainer");
+
+  if (!lista || !lista.length) {
+    container.innerHTML = "<div style='color:#777;'>Classificação indisponível.</div>";
+    return;
+  }
+
+  container.innerHTML = `
+    <table>
+      <tr>
+        <th>#</th>
+        <th>Equipa</th>
+        <th>J</th>
+        <th>V</th>
+        <th>E</th>
+        <th>D</th>
+        <th>DG</th>
+        <th>Pts</th>
+      </tr>
+      ${lista.map(t => `
+        <tr class="${t.team.includes("Sporting") ? "highlight" : ""}">
+          <td>${t.position}</td>
+          <td>${t.team}</td>
+          <td>${t.played}</td>
+          <td>${t.won}</td>
+          <td>${t.draw}</td>
+          <td>${t.lost}</td>
+          <td>${t.goalDifference}</td>
+          <td>${t.points}</td>
+        </tr>
+      `).join("")}
+    </table>
+  `;
+}
+
+/* ================= CARREGAR DADOS ================= */
 
 async function carregarTudo() {
   try {
 
-    const res = await fetch("/api/sporting");
-    const data = await res.json();
+    /* -------- JOGOS + ESTATÍSTICAS -------- */
 
-    const proximos = [...data.jogos.porJogar]
+    const resJogos = await fetch("/api/sporting");
+    const dataJogos = await resJogos.json();
+
+    const proximos = [...dataJogos.jogos.porJogar]
       .sort((a,b)=>new Date(a.date)-new Date(b.date));
 
-    const anteriores = [...data.jogos.jogados]
+    const anteriores = [...dataJogos.jogos.jogados]
       .sort((a,b)=>new Date(b.date)-new Date(a.date));
 
     render(proximos, "agendaContainer", false);
     render(anteriores, "resultadosContainer", true);
 
-    const e = data.estatisticas;
+    const e = dataJogos.estatisticas;
 
     document.getElementById("estatisticasContainer").innerHTML = `
       <div><strong>Jogos:</strong> ${e.jogos}</div>
@@ -320,6 +355,13 @@ async function carregarTudo() {
       <div><strong>Golos Marcados:</strong> ${e.golosMarcados}</div>
       <div><strong>Golos Sofridos:</strong> ${e.golosSofridos}</div>
     `;
+
+    /* -------- CLASSIFICAÇÃO -------- */
+
+    const resClass = await fetch("/api/classificacao");
+    const dataClass = await resClass.json();
+
+    renderClassificacao(dataClass["Primeira Liga"]);
 
   } catch (err) {
     console.error("Erro ao carregar:", err);

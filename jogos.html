@@ -257,31 +257,23 @@ function render(lista, containerId, mostrarResultado) {
 
     container.innerHTML += `
       <div class="match ${derby ? "derby" : ""}">
-
         <div class="match-time">
           ${formatarData(j.date)}
         </div>
-
         <div class="match-main">
-
           <div style="font-size:11px; color:#888; margin-bottom:4px;">
             ${j.competition}
           </div>
-
           <div class="team-row ${sportingHome ? "sporting" : ""}">
             ${j.homeTeam}
             ${scoreHome}
           </div>
-
           <div class="team-row ${sportingAway ? "sporting" : ""}">
             ${j.awayTeam}
             ${scoreAway}
           </div>
-
           ${derby ? `<span class="derby-badge">CLÁSSICO</span>` : ""}
-
         </div>
-
       </div>
     `;
   });
@@ -326,23 +318,48 @@ function renderClassificacao(lista) {
   `;
 }
 
-/* ================= CARREGAR DADOS ================= */
+/* ================= CARREGAR TUDO ================= */
 
-  async function carregarTudo() {
+async function carregarTudo() {
+  try {
 
-  const resClass = await fetch("/api/classificacao");
-  const dataClass = await resClass.json();
+    /* -------- JOGOS -------- */
 
-  console.log("Classificação:", dataClass);
+    const resJogos = await fetch("/api/sporting");
+    const dataJogos = await resJogos.json();
 
-  const container = document.getElementById("ligaContainer");
+    const proximos = [...dataJogos.jogos.porJogar]
+      .sort((a,b)=>new Date(a.date)-new Date(b.date));
 
-  if (!dataClass["Primeira Liga"]) {
-    container.innerHTML = "Sem classificação.";
-    return;
+    const anteriores = [...dataJogos.jogos.jogados]
+      .sort((a,b)=>new Date(b.date)-new Date(a.date));
+
+    render(proximos, "agendaContainer", false);
+    render(anteriores, "resultadosContainer", true);
+
+    /* -------- ESTATÍSTICAS -------- */
+
+    const e = dataJogos.estatisticas;
+
+    document.getElementById("estatisticasContainer").innerHTML = `
+      <div><strong>Jogos:</strong> ${e.jogos}</div>
+      <div><strong>Vitórias:</strong> ${e.vitorias}</div>
+      <div><strong>Empates:</strong> ${e.empates}</div>
+      <div><strong>Derrotas:</strong> ${e.derrotas}</div>
+      <div><strong>Golos Marcados:</strong> ${e.golosMarcados}</div>
+      <div><strong>Golos Sofridos:</strong> ${e.golosSofridos}</div>
+    `;
+
+    /* -------- CLASSIFICAÇÃO -------- */
+
+    const resClass = await fetch("/api/classificacao");
+    const dataClass = await resClass.json();
+
+    renderClassificacao(dataClass["Primeira Liga"]);
+
+  } catch (err) {
+    console.error("Erro ao carregar:", err);
   }
-
-  container.innerHTML = JSON.stringify(dataClass["Primeira Liga"], null, 2);
 }
 
 /* ================= INIT ================= */

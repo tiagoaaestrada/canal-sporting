@@ -1,25 +1,91 @@
-import fs from "fs";
-import path from "path";
-
-export default function handler(req, res) {
+export default async function handler(req, res) {
   try {
-    const filePath = path.join(process.cwd(), "data", "jogos-2025-2026.json");
-    const fileData = fs.readFileSync(filePath, "utf-8");
-    const jogos = JSON.parse(fileData);
+    const icsUrl =
+      "https://ics.ecal.com/ecal-sub/69a028306ebe6600022464b3/Sporting%20CP.ics";
 
-    // Ordenar cronologicamente
-    jogos.sort((a,b) => new Date(a.date) - new Date(b.date));
+    const response = await fetch(icsUrl);
+    const text = await response.text();
 
-    const porJogar = jogos.filter(j => j.score.home === null);
-    const jogados = jogos.filter(j => j.score.home !== null);
+    if (!text.includes("BEGIN:VEVENT")) {
+      return res.status(500).json({
+        error: "Calendário inválido ou bloqueado"
+      });
+    }
+
+    const eventos = text.split("BEGIN:VEVENT").slice(1);
+
+    const agora = new Date();
+    const porJogar = [];
+    const jogados = [];
+
+    eventos.forEach(evento => {
+      const getValue = field => {
+        const match = evento.match(new RegExp(field + ":(.*)"));
+        return match ? match[1].trim() : null;
+      };
+
+      const dtstartRaw = getValue("DTSTART");
+      const summary = getValue("SUMMARY");
+      const description = getValue("DESCRIPTION");
+
+      if (!dtstartRaw || !summary) return;
+
+      // Converter data
+      const ano = dtstartRaw.substring(0, 4);
+      const mes = dtstartRaw.substring(4, 6);
+      const dia = dtstartRaw.substring(6, 8);
+      const hora = dtstartRaw.substring(9, 11) || "00";
+      const min = dtstartRaw.substring(11, 13) || "00";
+
+      const date = new Date(`${ano}-${mes}-${dia}T${hora}:${min}:00`);
+
+      // Extrair equipas
+      let homeTeam = "";
+      let awayTeam = "";
+
+      if (summary.includes(" vs ")) {
+        [homeTeam, awayTeam] = summary.split(" vs ");
+      } else if (summary.includes(" x ")) {
+        [homeTeam, awayTeam] = summary.split(" x ");
+      } else {
+        return;
+      }
+
+      // Detectar competição
+      let competition = "Outra";
+      if (description?.includes("Liga")) competition = "Primeira Liga";
+      if (description?.includes("Taça")) competition = "Taça";
+      if (description?.includes("Champions")) competition = "Champions League";
+      if (description?.includes("Amigável")) competition = "Amigável";
+
+      const jogo = {
+        date,
+        competition,
+        homeTeam,
+        awayTeam,
+        score: { home: null, away: null }
+      };
+
+      if (date > agora) porJogar.push(jogo);
+      else jogados.push(jogo);
+    });
 
     res.status(200).json({
-      todos: jogos,
-      porJogar,
-      jogados
+      jogos: { porJogar, jogados },
+      classificacoes: {},
+      estatisticas: {
+        jogos: jogados.length,
+        vitorias: 0,
+        empates: 0,
+        derrotas: 0,
+        golosMarcados: 0,
+        golosSofridos: 0
+      }
     });
 
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({
+      error: error.message
+    });
   }
 }

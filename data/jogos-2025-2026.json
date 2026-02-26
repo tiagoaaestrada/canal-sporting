@@ -1,0 +1,23 @@
+[
+  {
+    "date": "2025-07-27T20:45:00Z",
+    "competition": "Amigável",
+    "homeTeam": "Sporting Clube de Portugal",
+    "awayTeam": "Sevilha FC",
+    "score": { "home": 2, "away": 1 }
+  },
+  {
+    "date": "2025-08-10T20:30:00Z",
+    "competition": "Primeira Liga",
+    "homeTeam": "Sporting Clube de Portugal",
+    "awayTeam": "GD Estoril Praia",
+    "score": { "home": 3, "away": 0 }
+  },
+  {
+    "date": "2025-08-17T18:00:00Z",
+    "competition": "Primeira Liga",
+    "homeTeam": "FC Porto",
+    "awayTeam": "Sporting Clube de Portugal",
+    "score": { "home": null, "away": null }
+  }
+]

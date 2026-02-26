@@ -1,6 +1,7 @@
 export default async function handler(req, res) {
   try {
-    const url = "https://www.ligaportugal.pt/competition/854/liga-portugal-betclic/round/20252026?tab=standings";
+    const url = "
+https://www.ligaportugal.pt/api/v2/competition/standings?competition=ligaportugalbetclic&season=20252026&round=24";
 
     const response = await fetch(url, {
       headers: {

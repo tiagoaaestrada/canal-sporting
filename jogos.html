@@ -409,9 +409,9 @@ function render(lista, containerId, mostrarResultado) {
             ${homeName}
             ${scoreHome}
           </div>
-
+          
           <div class="team-row ${sportingAway ? "sporting" : ""}">
-            ${homeName}
+            ${awayName}
             ${scoreAway}
           </div>
 
@@ -473,9 +473,12 @@ function renderTodos(lista, containerId, mostrarResultado) {
 
   lista.forEach(j => {
 
-    const sportingHome = j.homeTeam.includes("Sporting Clube de Portugal");
-    const sportingAway = j.awayTeam.includes("Sporting Clube de Portugal");
-    const derby = isDerby(j.homeTeam, j.awayTeam);
+    const homeName = normalizarNomeEquipa(j.homeTeam);
+    const awayName = normalizarNomeEquipa(j.awayTeam);
+
+    const sportingHome = homeName === "Sporting Clube de Portugal";
+    const sportingAway = awayName === "Sporting Clube de Portugal";
+    const derby = isDerby(homeName, awayName);
 
     const scoreHome = (mostrarResultado && j.score.home !== null)
       ? `<span class="score">${j.score.home}</span>`
@@ -500,12 +503,12 @@ function renderTodos(lista, containerId, mostrarResultado) {
           </div>
 
           <div class="team-row ${sportingHome ? "sporting" : ""}">
-            ${j.homeTeam}
+            ${homeName}
             ${scoreHome}
           </div>
 
           <div class="team-row ${sportingAway ? "sporting" : ""}">
-            ${j.awayTeam}
+            ${awayName}
             ${scoreAway}
           </div>
 

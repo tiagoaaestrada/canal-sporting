@@ -178,10 +178,24 @@ th, td {
   font-weight: bold;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 900px) {
+
   .layout {
     grid-template-columns: 1fr;
   }
+
+  .col-jogos {
+    order: 1;
+  }
+
+  .col-classificacao {
+    order: 2;
+  }
+
+  .col-estatisticas {
+    order: 3;
+  }
+
 }
   
 </style>
@@ -203,7 +217,7 @@ th, td {
 <div class="layout">
 
 <!-- CLASSIFICAÇÕES -->
-<div>
+<div class="col-classificacao">
   <div class="section">
     <h2>Primeira Liga</h2>
     <div id="ligaContainer"></div>
@@ -211,7 +225,7 @@ th, td {
 </div>
 
 <!-- JOGOS -->
-<div>
+<div class="col-jogos">
     <div class="section">
       <h2>Agenda</h2>
       <div id="agendaContainer"></div>
@@ -224,7 +238,7 @@ th, td {
   </div>
 
   <!-- ESTATÍSTICAS -->
-  <div>
+  <div class="col-estatisticas">
     <div class="section">
       <h2>Estatísticas da Equipa</h2>
       <div id="estatisticasContainer"></div>

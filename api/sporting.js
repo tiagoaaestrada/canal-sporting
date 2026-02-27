@@ -5,6 +5,10 @@ export default async function handler(req, res) {
     const API_KEY = process.env.FOOTBALL_DATA_KEY;
     const agora = new Date();
 
+    /* =========================
+       1️⃣ FOOTBALL-DATA (Base)
+    ========================== */
+
     const response = await fetch(
       "https://api.football-data.org/v4/teams/498/matches?season=2025",
       {
@@ -30,92 +34,106 @@ export default async function handler(req, res) {
         away: m.score.fullTime.away
       }
     }));
-    
-/* =======================
-   TAÇAS (ICS Sporting)
-======================= */
 
-try {
-  const uefaIcsUrl = "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics";
 
-  const resIcs = await fetch(uefaIcsUrl, {
-    headers: {
-      "User-Agent": "Mozilla/5.0",
-      "Accept": "text/calendar"
-    }
-  });
+    /* =========================
+       2️⃣ TAÇAS VIA ICS
+    ========================== */
 
-  const icsText = await resIcs.text();
+    try {
 
-  const lines = icsText.split("BEGIN:VEVENT");
+      const icsUrl = "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics";
 
-  lines.forEach(evento => {
-
-    if (!evento.includes("SUMMARY")) return;
-
-    // Todos os summaries
-    const summaryMatch = evento.match(/SUMMARY:(.*)/);
-    const dtStartMatch = evento.match(/DTSTART:(.*)/);
-
-    if (!summaryMatch || !dtStartMatch) return;
-
-    let summary = summaryMatch[1].trim();
-    const dtStart = dtStartMatch[1].trim();
-
-    // Converter data
-    const date = new Date(
-      dtStart.replace(
-        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
-        "$1-$2-$3T$4:$5:$6Z"
-      )
-    );
-
-    // Vamos filtrar pelos nomes das Taças
-    // A Taça de Portugal costuma aparecer nesses eventos
-    const lower = summary.toLowerCase();
-
-    if (
-      lower.includes("taça de portugal") ||
-      lower.includes("taca de portugal") ||
-      lower.includes("taça da liga") ||
-      lower.includes("taca da liga")
-    ) {
-
-      // Normalização do texto
-      // Pode vir tipo: “Taça de Portugal: Sporting CP - FC Porto”
-      // Queremos só “Sporting CP - FC Porto”
-      if (summary.includes(":")) {
-        summary = summary.split(":").pop().trim();
-      }
-
-      // Separadores possíveis
-      let teams;
-      if (summary.includes(" - ")) {
-        teams = summary.split(" - ");
-      } else if (summary.includes(" vs ")) {
-        teams = summary.split(" vs ");
-      } else if (summary.includes(" v ")) {
-        teams = summary.split(" v ");
-      } else {
-        return;
-      }
-
-      if (teams.length !== 2) return;
-
-      jogos.push({
-        date,
-        competition: summary.toLowerCase().includes("taça da liga") || summary.toLowerCase().includes("taca da liga") ? "Taça da Liga" : "Taça de Portugal",
-        homeTeam: teams[0].trim(),
-        awayTeam: teams[1].trim(),
-        score: { home: null, away: null }
+      const resIcs = await fetch(icsUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0",
+          "Accept": "text/calendar"
+        }
       });
 
-    }
-  });
+      const icsText = await resIcs.text();
 
-} catch (err) {
-  console.error("Erro ao carregar Taças do ICS:", err.message);
-}
+      const eventos = icsText.split("BEGIN:VEVENT");
+
+      for (const evento of eventos) {
+
+        if (!evento.includes("SUMMARY") || !evento.includes("DTSTART"))
+          continue;
+
+        const summaryMatch = evento.match(/SUMMARY:(.*)/);
+        const dtMatch = evento.match(/DTSTART:(.*)/);
+
+        if (!summaryMatch || !dtMatch) continue;
+
+        let summary = summaryMatch[1].trim();
+        const dtRaw = dtMatch[1].trim();
+
+        const lower = summary.toLowerCase();
+
+        // Apenas Taças
+        if (
+          !lower.includes("taça de portugal") &&
+          !lower.includes("taca de portugal") &&
+          !lower.includes("taça da liga") &&
+          !lower.includes("taca da liga")
+        ) continue;
+
+        // Converter data ICS
+        const formatted = dtRaw.replace(
+          /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
+          "$1-$2-$3T$4:$5:$6Z"
+        );
+
+        const date = new Date(formatted);
+
+        // Limpar prefixo da competição
+        if (summary.includes(":")) {
+          summary = summary.split(":").pop().trim();
+        }
+
+        // Separar equipas
+        let teams = null;
+
+        if (summary.includes(" - "))
+          teams = summary.split(" - ");
+        else if (summary.includes(" vs "))
+          teams = summary.split(" vs ");
+        else if (summary.includes(" v "))
+          teams = summary.split(" v ");
+
+        if (!teams || teams.length !== 2) continue;
+
+        const competitionName =
+          lower.includes("liga")
+            ? "Taça da Liga"
+            : "Taça de Portugal";
+
+        // Evitar duplicados
+        const jaExiste = jogos.some(j =>
+          new Date(j.date).getTime() === date.getTime() &&
+          j.homeTeam === teams[0].trim()
+        );
+
+        if (!jaExiste) {
+          jogos.push({
+            date,
+            competition: competitionName,
+            homeTeam: teams[0].trim(),
+            awayTeam: teams[1].trim(),
+            score: { home: null, away: null }
+          });
+        }
+      }
+
+    } catch (err) {
+      console.log("Erro ao carregar Taças ICS:", err.message);
+    }
+
+
+    /* =========================
+       3️⃣ ORDENAR
+    ========================== */
+
     const porJogar = jogos
       .filter(j => new Date(j.date) >= agora)
       .sort((a,b) => new Date(a.date) - new Date(b.date));
@@ -124,7 +142,10 @@ try {
       .filter(j => new Date(j.date) < agora)
       .sort((a,b) => new Date(b.date) - new Date(a.date));
 
-    /* ===== ESTATÍSTICAS GLOBAIS ===== */
+
+    /* =========================
+       4️⃣ ESTATÍSTICAS
+    ========================== */
 
     let vitorias = 0;
     let empates = 0;
@@ -136,7 +157,7 @@ try {
 
       if (j.score.home === null) return;
 
-      const sportingHome = j.homeTeam.includes("Sporting");
+      const sportingHome = j.homeTeam.toLowerCase().includes("sporting");
 
       const gm = sportingHome ? j.score.home : j.score.away;
       const gs = sportingHome ? j.score.away : j.score.home;
@@ -149,6 +170,11 @@ try {
       else derrotas++;
 
     });
+
+
+    /* =========================
+       5️⃣ RESPONSE
+    ========================== */
 
     res.status(200).json({
       jogos: { porJogar, jogados },
@@ -165,7 +191,7 @@ try {
   } catch (error) {
 
     res.status(500).json({
-      error: "Erro ao carregar jogos football-data",
+      error: "Erro ao carregar jogos",
       detalhe: error.message
     });
 

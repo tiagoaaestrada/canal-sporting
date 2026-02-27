@@ -4,7 +4,7 @@ export default async function handler(req, res) {
       "https://api.football-data.org/v4/competitions/PPL/standings",
       {
         headers: {
-          "X-Auth-Token": process.env.FOOTBALL_API_KEY,
+          "X-Auth-Token": process.env.FOOTBALL_DATA_KEY,
         },
       }
     );

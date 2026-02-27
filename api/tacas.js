@@ -3,7 +3,6 @@ export default async function handler(req, res) {
   try {
 
     const agora = new Date();
-
     const icsUrl = "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics";
 
     const response = await fetch(icsUrl);
@@ -25,7 +24,7 @@ export default async function handler(req, res) {
       if (!summaryMatch || !dtMatch || !descMatch)
         continue;
 
-      const summary = summaryMatch[1].trim();
+      const summaryRaw = summaryMatch[1].trim();
       const description = descMatch[1].toLowerCase();
 
       // Apenas Taças
@@ -44,13 +43,34 @@ export default async function handler(req, res) {
 
       const date = new Date(formatted);
 
+      // Remover emojis e símbolos estranhos
+      const summary = summaryRaw.replace(/[^\p{L}\p{N}\s\.\-\:]/gu, "").trim();
+
+      // 🎯 Extrair resultado se existir (ex: 2-1)
+      const scoreMatch = summary.match(/(\d+)[-–](\d+)/);
+
+      let score = { home: null, away: null };
+
+      if (scoreMatch) {
+        score = {
+          home: parseInt(scoreMatch[1]),
+          away: parseInt(scoreMatch[2])
+        };
+      }
+
+      // Remover o resultado do texto para separar equipas
+      let cleanSummary = summary;
+      if (scoreMatch) {
+        cleanSummary = summary.replace(/(\d+)[-–](\d+)/, "").trim();
+      }
+
       // Separar equipas
       let teams = null;
 
-      if (summary.includes(" vs "))
-        teams = summary.split(" vs ");
-      else if (summary.includes(" - "))
-        teams = summary.split(" - ");
+      if (cleanSummary.includes(" vs "))
+        teams = cleanSummary.split(" vs ");
+      else if (cleanSummary.includes(" - "))
+        teams = cleanSummary.split(" - ");
       else continue;
 
       if (!teams || teams.length !== 2)
@@ -63,19 +83,19 @@ export default async function handler(req, res) {
       jogos.push({
         date,
         competition: competitionName,
-        homeTeam: teams[0].replace(/[^\p{L}\p{N}\s\.\-]/gu, "").trim(),
-        awayTeam: teams[1].replace(/[^\p{L}\p{N}\s\.\-]/gu, "").trim(),
-        score: { home: null, away: null }
+        homeTeam: teams[0].trim(),
+        awayTeam: teams[1].trim(),
+        score
       });
 
     }
 
     const porJogar = jogos
-      .filter(j => new Date(j.date) >= agora)
+      .filter(j => new Date(j.date) >= agora || j.score.home === null)
       .sort((a,b) => new Date(a.date) - new Date(b.date));
 
     const jogados = jogos
-      .filter(j => new Date(j.date) < agora)
+      .filter(j => j.score.home !== null && new Date(j.date) < agora)
       .sort((a,b) => new Date(b.date) - new Date(a.date));
 
     res.status(200).json({

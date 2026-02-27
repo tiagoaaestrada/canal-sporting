@@ -31,19 +31,90 @@ export default async function handler(req, res) {
       }
     }));
     
-/* ===== TAÇAS (ZeroZero) ===== */
+/* =======================
+   TAÇAS (ICS Sporting)
+======================= */
 
 try {
+  const uefaIcsUrl = "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics";
 
-  const resTacas = await fetch(`${req.headers.origin}/api/tacas`);
-  const dataTacas = await resTacas.json();
+  const resIcs = await fetch(uefaIcsUrl, {
+    headers: {
+      "User-Agent": "Mozilla/5.0",
+      "Accept": "text/calendar"
+    }
+  });
 
-  if (dataTacas.jogos && dataTacas.jogos.length) {
-    jogos = jogos.concat(dataTacas.jogos);
-  }
+  const icsText = await resIcs.text();
 
-} catch (e) {
-  console.log("Taças não carregadas");
+  const lines = icsText.split("BEGIN:VEVENT");
+
+  lines.forEach(evento => {
+
+    if (!evento.includes("SUMMARY")) return;
+
+    // Todos os summaries
+    const summaryMatch = evento.match(/SUMMARY:(.*)/);
+    const dtStartMatch = evento.match(/DTSTART:(.*)/);
+
+    if (!summaryMatch || !dtStartMatch) return;
+
+    let summary = summaryMatch[1].trim();
+    const dtStart = dtStartMatch[1].trim();
+
+    // Converter data
+    const date = new Date(
+      dtStart.replace(
+        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
+        "$1-$2-$3T$4:$5:$6Z"
+      )
+    );
+
+    // Vamos filtrar pelos nomes das Taças
+    // A Taça de Portugal costuma aparecer nesses eventos
+    const lower = summary.toLowerCase();
+
+    if (
+      lower.includes("taça de portugal") ||
+      lower.includes("taca de portugal") ||
+      lower.includes("taça da liga") ||
+      lower.includes("taca da liga")
+    ) {
+
+      // Normalização do texto
+      // Pode vir tipo: “Taça de Portugal: Sporting CP - FC Porto”
+      // Queremos só “Sporting CP - FC Porto”
+      if (summary.includes(":")) {
+        summary = summary.split(":").pop().trim();
+      }
+
+      // Separadores possíveis
+      let teams;
+      if (summary.includes(" - ")) {
+        teams = summary.split(" - ");
+      } else if (summary.includes(" vs ")) {
+        teams = summary.split(" vs ");
+      } else if (summary.includes(" v ")) {
+        teams = summary.split(" v ");
+      } else {
+        return;
+      }
+
+      if (teams.length !== 2) return;
+
+      jogos.push({
+        date,
+        competition: summary.toLowerCase().includes("taça da liga") || summary.toLowerCase().includes("taca da liga") ? "Taça da Liga" : "Taça de Portugal",
+        homeTeam: teams[0].trim(),
+        awayTeam: teams[1].trim(),
+        score: { home: null, away: null }
+      });
+
+    }
+  });
+
+} catch (err) {
+  console.error("Erro ao carregar Taças do ICS:", err.message);
 }
     const porJogar = jogos
       .filter(j => new Date(j.date) >= agora)

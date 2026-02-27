@@ -36,100 +36,77 @@ export default async function handler(req, res) {
     }));
 
 
-    /* =========================
-       2️⃣ TAÇAS VIA ICS
-    ========================== */
+/* =========================
+   2️⃣ TAÇAS VIA ICS (FIX REAL)
+========================== */
 
-    try {
+try {
 
-      const icsUrl = "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics";
+  const icsUrl = "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics";
 
-      const resIcs = await fetch(icsUrl, {
-        headers: {
-          "User-Agent": "Mozilla/5.0",
-          "Accept": "text/calendar"
-        }
-      });
+  const resIcs = await fetch(icsUrl);
+  const icsText = await resIcs.text();
 
-      const icsText = await resIcs.text();
+  const eventos = icsText.split("BEGIN:VEVENT");
 
-      const eventos = icsText.split("BEGIN:VEVENT");
+  for (const evento of eventos) {
 
-      for (const evento of eventos) {
+    if (!evento.includes("SUMMARY") || !evento.includes("DTSTART") || !evento.includes("DESCRIPTION"))
+      continue;
 
-        if (!evento.includes("SUMMARY") || !evento.includes("DTSTART"))
-          continue;
+    const summaryMatch = evento.match(/SUMMARY:(.*)/);
+    const dtMatch = evento.match(/DTSTART:(.*)/);
+    const descMatch = evento.match(/DESCRIPTION:(.*)/);
 
-        const summaryMatch = evento.match(/SUMMARY:(.*)/);
-        const dtMatch = evento.match(/DTSTART:(.*)/);
+    if (!summaryMatch || !dtMatch || !descMatch) continue;
 
-        if (!summaryMatch || !dtMatch) continue;
+    const summary = summaryMatch[1].trim();
+    const description = descMatch[1].toLowerCase();
 
-        let summary = summaryMatch[1].trim();
-        const dtRaw = dtMatch[1].trim();
+    // 🎯 AQUI ESTÁ A DIFERENÇA
+    if (
+      !description.includes("taça de portugal") &&
+      !description.includes("taca de portugal") &&
+      !description.includes("taça da liga") &&
+      !description.includes("taca da liga")
+    ) continue;
 
-        const lower = summary.toLowerCase();
+    // Converter data
+    const formatted = dtMatch[1].trim().replace(
+      /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
+      "$1-$2-$3T$4:$5:$6Z"
+    );
 
-        // Apenas Taças
-        if (
-          !lower.includes("taça de portugal") &&
-          !lower.includes("taca de portugal") &&
-          !lower.includes("taça da liga") &&
-          !lower.includes("taca da liga")
-        ) continue;
+    const date = new Date(formatted);
 
-        // Converter data ICS
-        const formatted = dtRaw.replace(
-          /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
-          "$1-$2-$3T$4:$5:$6Z"
-        );
+    // Separar equipas
+    let teams = null;
 
-        const date = new Date(formatted);
+    if (summary.includes(" vs "))
+      teams = summary.split(" vs ");
+    else if (summary.includes(" - "))
+      teams = summary.split(" - ");
+    else continue;
 
-        // Limpar prefixo da competição
-        if (summary.includes(":")) {
-          summary = summary.split(":").pop().trim();
-        }
+    if (!teams || teams.length !== 2) continue;
 
-        // Separar equipas
-        let teams = null;
+    const competitionName = description.includes("liga")
+      ? "Taça da Liga"
+      : "Taça de Portugal";
 
-        if (summary.includes(" - "))
-          teams = summary.split(" - ");
-        else if (summary.includes(" vs "))
-          teams = summary.split(" vs ");
-        else if (summary.includes(" v "))
-          teams = summary.split(" v ");
+    jogos.push({
+      date,
+      competition: competitionName,
+      homeTeam: teams[0].replace(/[\u{1F300}-\u{1FAFF}]/gu, "").trim(),
+      awayTeam: teams[1].replace(/[\u{1F300}-\u{1FAFF}]/gu, "").trim(),
+      score: { home: null, away: null }
+    });
 
-        if (!teams || teams.length !== 2) continue;
+  }
 
-        const competitionName =
-          lower.includes("liga")
-            ? "Taça da Liga"
-            : "Taça de Portugal";
-
-        // Evitar duplicados
-        const jaExiste = jogos.some(j =>
-          new Date(j.date).getTime() === date.getTime() &&
-          j.homeTeam === teams[0].trim()
-        );
-
-        if (!jaExiste) {
-          jogos.push({
-            date,
-            competition: competitionName,
-            homeTeam: teams[0].trim(),
-            awayTeam: teams[1].trim(),
-            score: { home: null, away: null }
-          });
-        }
-      }
-
-    } catch (err) {
-      console.log("Erro ao carregar Taças ICS:", err.message);
-    }
-
-
+} catch (err) {
+  console.log("Erro ao carregar Taças ICS:", err.message);
+}
     /* =========================
        3️⃣ ORDENAR
     ========================== */

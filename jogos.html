@@ -336,6 +336,27 @@ function getCompetitionClass(name) {
   return "comp-liga";
 }
 
+  function normalizarNomeEquipa(nome) {
+
+  if (!nome) return "";
+
+  // Remover emojis
+  nome = nome.replace(/[\u{1F300}-\u{1FAFF}]/gu, "").trim();
+
+  const lower = nome.toLowerCase();
+
+  // Normalizar Sporting
+  if (
+    lower.includes("sporting cp") ||
+    lower === "sporting" ||
+    lower.includes("sporting clube")
+  ) {
+    return "Sporting Clube de Portugal";
+  }
+
+  return nome;
+}
+  
 function render(lista, containerId, mostrarResultado) {
 
   const container = document.getElementById(containerId);
@@ -355,8 +376,11 @@ function render(lista, containerId, mostrarResultado) {
 
   jogosParaMostrar.forEach(j => {
 
-    const sportingHome = j.homeTeam.includes("Sporting Clube de Portugal");
-    const sportingAway = j.awayTeam.includes("Sporting Clube de Portugal");
+    const homeName = normalizarNomeEquipa(j.homeTeam);
+    const awayName = normalizarNomeEquipa(j.awayTeam);
+    
+    const sportingHome = homeName === "Sporting Clube de Portugal";
+    const sportingAway = awayName === "Sporting Clube de Portugal";
     const derby = isDerby(j.homeTeam, j.awayTeam);
 
     const scoreHome = (mostrarResultado && j.score.home !== null)
@@ -382,12 +406,12 @@ function render(lista, containerId, mostrarResultado) {
           </div>
 
           <div class="team-row ${sportingHome ? "sporting" : ""}">
-            ${j.homeTeam}
+            ${homeName}
             ${scoreHome}
           </div>
 
           <div class="team-row ${sportingAway ? "sporting" : ""}">
-            ${j.awayTeam}
+            ${homeName}
             ${scoreAway}
           </div>
 

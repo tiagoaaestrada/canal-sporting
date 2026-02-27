@@ -2,50 +2,102 @@ export default async function handler(req, res) {
 
   try {
 
-    const API_KEY = process.env.FOOTBALL_API_KEY;
+    const API_KEY = process.env.FOOTBALL_DATA_KEY;
 
-    const response = await fetch(
+    const agora = new Date();
+    let jogos = [];
+
+    /* =======================
+       PRIMEIRA LIGA (API)
+    ======================== */
+
+    const ligaRes = await fetch(
       "https://api.football-data.org/v4/competitions/PPL/matches?season=2025",
       {
-        headers: {
-          "X-Auth-Token": API_KEY
-        }
+        headers: { "X-Auth-Token": API_KEY }
       }
     );
 
-    const data = await response.json();
+    const ligaData = await ligaRes.json();
 
-    if (!data.matches) {
-      return res.status(500).json({ error: "Sem dados de jogos" });
+    if (ligaData.matches) {
+
+      const jogosLiga = ligaData.matches
+        .filter(m => m.homeTeam.id === 498 || m.awayTeam.id === 498)
+        .map(m => ({
+          date: m.utcDate,
+          competition: "Primeira Liga",
+          homeTeam: m.homeTeam.name,
+          awayTeam: m.awayTeam.name,
+          score: {
+            home: m.score.fullTime.home,
+            away: m.score.fullTime.away
+          }
+        }));
+
+      jogos = jogos.concat(jogosLiga);
     }
 
-    const agora = new Date();
+    /* =======================
+       CHAMPIONS (ICS UEFA)
+    ======================== */
 
-    const jogosSporting = data.matches
-      .filter(m => 
-        m.homeTeam.id === 498 || 
-        m.awayTeam.id === 498
-      )
-      .map(m => ({
-        date: m.utcDate,
-        competition: m.competition.name,
-        homeTeam: m.homeTeam.name,
-        awayTeam: m.awayTeam.name,
-        score: {
-          home: m.score.fullTime.home,
-          away: m.score.fullTime.away
-        }
-      }));
-
-    const porJogar = jogosSporting.filter(j =>
-      new Date(j.date) >= agora
+    const uefaRes = await fetch(
+      "https://calendar.uefa.com/v1/calendar.ics?competitionId=1&countryCode=PT&language=PT&reminder=60&teamId=50149"
     );
 
-    const jogados = jogosSporting.filter(j =>
-      new Date(j.date) < agora
+    const uefaText = await uefaRes.text();
+
+    const eventos = uefaText.split("BEGIN:VEVENT");
+
+    eventos.forEach(evento => {
+
+      if (!evento.includes("SUMMARY")) return;
+
+      const summaryMatch = evento.match(/SUMMARY:(.*)/);
+      const dtMatch = evento.match(/DTSTART:(.*)/);
+
+      if (!summaryMatch || !dtMatch) return;
+
+      let summary = summaryMatch[1].trim();
+      const dt = dtMatch[1].trim();
+
+      const data = new Date(
+        dt.replace(
+          /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
+          "$1-$2-$3T$4:$5:$6Z"
+        )
+      );
+
+      // Formato normal: Sporting CP - Real Madrid
+      const equipas = summary.split(" - ");
+      if (equipas.length !== 2) return;
+
+      jogos.push({
+        date: data,
+        competition: "Champions League",
+        homeTeam: equipas[0].trim(),
+        awayTeam: equipas[1].trim(),
+        score: { home: null, away: null }
+      });
+
+    });
+
+    /* =======================
+       ORDENAR E SEPARAR
+    ======================== */
+
+    jogos.sort((a,b) => new Date(a.date) - new Date(b.date));
+
+    const porJogar = jogos.filter(j => new Date(j.date) >= agora);
+    const jogados = jogos.filter(j => 
+      new Date(j.date) < agora &&
+      j.score.home !== null
     );
 
-    /* ===== CALCULAR ESTATÍSTICAS ===== */
+    /* =======================
+       ESTATÍSTICAS
+    ======================== */
 
     let vitorias = 0;
     let empates = 0;
@@ -55,9 +107,7 @@ export default async function handler(req, res) {
 
     jogados.forEach(j => {
 
-      if (j.score.home === null) return;
-
-      const sportingHome = j.homeTeam.includes("Sporting Clube de Portugal");
+      const sportingHome = j.homeTeam.includes("Sporting");
 
       const gm = sportingHome ? j.score.home : j.score.away;
       const gs = sportingHome ? j.score.away : j.score.home;
@@ -72,10 +122,7 @@ export default async function handler(req, res) {
     });
 
     res.status(200).json({
-      jogos: {
-        porJogar,
-        jogados
-      },
+      jogos: { porJogar, jogados },
       estatisticas: {
         jogos: jogados.length,
         vitorias,
@@ -88,7 +135,7 @@ export default async function handler(req, res) {
 
   } catch (error) {
 
-    res.status(500).json({ error: "Erro ao carregar jogos football-data" });
+    res.status(500).json({ error: "Erro ao carregar jogos" });
 
   }
 }

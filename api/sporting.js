@@ -57,7 +57,7 @@ export default async function handler(req, res) {
 
       if (j.score.home === null) return;
 
-      const sportingHome = j.homeTeam.includes("Sporting");
+      const sportingHome = j.homeTeam.includes("Sporting Clube de Portugal");
 
       const gm = sportingHome ? j.score.home : j.score.away;
       const gs = sportingHome ? j.score.away : j.score.home;

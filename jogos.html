@@ -340,12 +340,11 @@ function normalizarNomeEquipa(nome) {
 
   if (!nome) return "";
 
-  // Remover emojis
-  nome = nome.replace(/[\u{1F300}-\u{1FAFF}]/gu, "").trim();
+  // Remove qualquer emoji ou símbolo gráfico
+  nome = nome.replace(/[^\p{L}\p{N}\s\.\-]/gu, "").trim();
 
   const lower = nome.toLowerCase();
 
-  // Apenas normalizar Sporting se for exatamente Sporting CP
   if (
     lower === "sporting cp" ||
     lower === "sporting" ||

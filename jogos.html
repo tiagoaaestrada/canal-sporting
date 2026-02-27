@@ -336,7 +336,7 @@ function getCompetitionClass(name) {
   return "comp-liga";
 }
 
-  function normalizarNomeEquipa(nome) {
+function normalizarNomeEquipa(nome) {
 
   if (!nome) return "";
 
@@ -345,11 +345,11 @@ function getCompetitionClass(name) {
 
   const lower = nome.toLowerCase();
 
-  // Normalizar Sporting
+  // Apenas normalizar Sporting se for exatamente Sporting CP
   if (
-    lower.includes("sporting cp") ||
+    lower === "sporting cp" ||
     lower === "sporting" ||
-    lower.includes("sporting clube")
+    lower === "sporting clube de portugal"
   ) {
     return "Sporting Clube de Portugal";
   }

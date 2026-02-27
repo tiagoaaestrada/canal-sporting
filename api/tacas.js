@@ -27,7 +27,6 @@ export default async function handler(req, res) {
       const summaryRaw = summaryMatch[1].trim();
       const description = descMatch[1].toLowerCase();
 
-      // Apenas Taças
       if (
         !description.includes("taça de portugal") &&
         !description.includes("taca de portugal") &&
@@ -35,7 +34,6 @@ export default async function handler(req, res) {
         !description.includes("taca da liga")
       ) continue;
 
-      // Converter data
       const formatted = dtMatch[1].trim().replace(
         /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
         "$1-$2-$3T$4:$5:$6Z"
@@ -43,10 +41,11 @@ export default async function handler(req, res) {
 
       const date = new Date(formatted);
 
-      // Remover emojis e símbolos estranhos
-      const summary = summaryRaw.replace(/[^\p{L}\p{N}\s\.\-\:]/gu, "").trim();
+      const summary = summaryRaw
+        .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
+        .replace(/[^\w\s\.\-\:]/g, "")
+        .trim();
 
-      // 🎯 Extrair resultado se existir (ex: 2-1)
       const scoreMatch = summary.match(/(\d+)[-–](\d+)/);
 
       let score = { home: null, away: null };
@@ -58,13 +57,11 @@ export default async function handler(req, res) {
         };
       }
 
-      // Remover o resultado do texto para separar equipas
       let cleanSummary = summary;
       if (scoreMatch) {
         cleanSummary = summary.replace(/(\d+)[-–](\d+)/, "").trim();
       }
 
-      // Separar equipas
       let teams = null;
 
       if (cleanSummary.includes(" vs "))
@@ -91,11 +88,11 @@ export default async function handler(req, res) {
     }
 
     const porJogar = jogos
-      .filter(j => new Date(j.date) >= agora || j.score.home === null)
+      .filter(j => j.score.home === null && new Date(j.date) >= agora)
       .sort((a,b) => new Date(a.date) - new Date(b.date));
 
     const jogados = jogos
-      .filter(j => j.score.home !== null && new Date(j.date) < agora)
+      .filter(j => j.score.home !== null || new Date(j.date) < agora)
       .sort((a,b) => new Date(b.date) - new Date(a.date));
 
     res.status(200).json({
@@ -103,6 +100,8 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
+
+    console.log("ERRO INTERNO:", error);
 
     res.status(500).json({
       error: "Erro ao carregar Taças",

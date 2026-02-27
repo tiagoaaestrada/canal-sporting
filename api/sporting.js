@@ -20,7 +20,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Sem jogos disponíveis" });
     }
 
-    const jogos = data.matches.map(m => ({
+    let jogos = data.matches.map(m => ({
       date: m.utcDate,
       competition: m.competition.name,
       homeTeam: m.homeTeam.name,
@@ -30,7 +30,21 @@ export default async function handler(req, res) {
         away: m.score.fullTime.away
       }
     }));
+    
+/* ===== TAÇAS (ZeroZero) ===== */
 
+try {
+
+  const resTacas = await fetch(`${req.headers.origin}/api/tacas`);
+  const dataTacas = await resTacas.json();
+
+  if (dataTacas.jogos && dataTacas.jogos.length) {
+    jogos = jogos.concat(dataTacas.jogos);
+  }
+
+} catch (e) {
+  console.log("Taças não carregadas");
+}
     const porJogar = jogos
       .filter(j => new Date(j.date) >= agora)
       .sort((a,b) => new Date(a.date) - new Date(b.date));

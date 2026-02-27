@@ -53,54 +53,54 @@ const uefaRes = await fetch(
 
 const uefaText = await uefaRes.text();
 
-if (!uefaText.includes("BEGIN:VEVENT")) {
-  console.log("UEFA ICS bloqueado ou inválido");
-} else {
+const eventos = uefaText.split("BEGIN:VEVENT");
 
-  const eventos = uefaText.split("BEGIN:VEVENT");
+eventos.forEach(evento => {
 
-  eventos.forEach(evento => {
+  const summaryMatch = evento.match(/SUMMARY:(.*)/);
+  const dtMatch = evento.match(/DTSTART:(.*)/);
 
-    const summaryMatch = evento.match(/SUMMARY:(.*)/);
-    const dtMatch = evento.match(/DTSTART:(.*)/);
+  if (!summaryMatch || !dtMatch) return;
 
-    if (!summaryMatch || !dtMatch) return;
+  let summary = summaryMatch[1].trim();
+  const dt = dtMatch[1].trim();
 
-    let summary = summaryMatch[1].trim();
-    const dt = dtMatch[1].trim();
+  // Remover tudo antes do último ":"
+  if (summary.includes(":")) {
+    summary = summary.split(":").pop().trim();
+  }
 
-    const data = new Date(
-      dt.replace(
-        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
-        "$1-$2-$3T$4:$5:$6Z"
-      )
-    );
+  const data = new Date(
+    dt.replace(
+      /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
+      "$1-$2-$3T$4:$5:$6Z"
+    )
+  );
 
-    let equipas;
+  // Aceitar vários separadores
+  let equipas;
 
-    if (summary.includes(" - ")) {
-      equipas = summary.split(" - ");
-    } else if (summary.includes(" vs ")) {
-      equipas = summary.split(" vs ");
-    } else if (summary.includes(" v ")) {
-      equipas = summary.split(" v ");
-    } else {
-      return;
-    }
+  if (summary.includes(" - ")) {
+    equipas = summary.split(" - ");
+  } else if (summary.includes(" vs ")) {
+    equipas = summary.split(" vs ");
+  } else if (summary.includes(" v ")) {
+    equipas = summary.split(" v ");
+  } else {
+    return;
+  }
 
-    if (equipas.length !== 2) return;
+  if (equipas.length !== 2) return;
 
-    jogos.push({
-      date: data,
-      competition: "Champions League",
-      homeTeam: equipas[0].trim(),
-      awayTeam: equipas[1].trim(),
-      score: { home: null, away: null }
-    });
-
+  jogos.push({
+    date: data,
+    competition: "Champions League",
+    homeTeam: equipas[0].trim(),
+    awayTeam: equipas[1].trim(),
+    score: { home: null, away: null }
   });
 
-}
+});
     /* =======================
        ORDENAR E SEPARAR
     ======================== */

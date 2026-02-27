@@ -286,6 +286,105 @@ function render(lista, containerId, mostrarResultado) {
     return;
   }
 
+  const maxVisiveis = 3;
+  const precisaBotao = lista.length > maxVisiveis;
+
+  const jogosParaMostrar = precisaBotao
+    ? lista.slice(0, maxVisiveis)
+    : lista;
+
+  jogosParaMostrar.forEach(j => {
+
+    const sportingHome = j.homeTeam.includes("Sporting Clube de Portugal");
+    const sportingAway = j.awayTeam.includes("Sporting Clube de Portugal");
+    const derby = isDerby(j.homeTeam, j.awayTeam);
+
+    const scoreHome = (mostrarResultado && j.score.home !== null)
+      ? `<span class="score">${j.score.home}</span>`
+      : "";
+
+    const scoreAway = (mostrarResultado && j.score.away !== null)
+      ? `<span class="score">${j.score.away}</span>`
+      : "";
+
+    container.innerHTML += `
+      <div class="match">
+        <div class="match-time">
+          ${formatarData(j.date)}
+        </div>
+        <div class="match-main">
+
+          <div>
+            <span class="comp-badge ${getCompetitionClass(j.competition)}">
+              ${j.competition}
+            </span>
+            ${derby ? `<span class="derby-label">CLÁSSICO</span>` : ""}
+          </div>
+
+          <div class="team-row ${sportingHome ? "sporting" : ""}">
+            ${j.homeTeam}
+            ${scoreHome}
+          </div>
+
+          <div class="team-row ${sportingAway ? "sporting" : ""}">
+            ${j.awayTeam}
+            ${scoreAway}
+          </div>
+
+        </div>
+      </div>
+    `;
+  });
+
+  if (precisaBotao) {
+    container.innerHTML += `
+      <div style="text-align:center; margin-top:10px;">
+        <button 
+          onclick="toggleJogos('${containerId}')" 
+          style="
+            background:#0a5c2a;
+            color:white;
+            border:none;
+            padding:6px 12px;
+            border-radius:8px;
+            font-size:12px;
+            cursor:pointer;
+          "
+        >
+          Ver Mais
+        </button>
+      </div>
+    `;
+  }
+
+  // Guardar lista completa no elemento
+  container.dataset.lista = JSON.stringify(lista);
+  container.dataset.mostrarResultado = mostrarResultado;
+}
+  function toggleJogos(containerId) {
+
+  const container = document.getElementById(containerId);
+  const lista = JSON.parse(container.dataset.lista);
+  const mostrarResultado = container.dataset.mostrarResultado === "true";
+
+  const jaExpandido = container.dataset.expandido === "true";
+
+  if (jaExpandido) {
+    container.dataset.expandido = "false";
+    render(lista, containerId, mostrarResultado);
+  } else {
+    container.dataset.expandido = "true";
+    renderTodos(lista, containerId, mostrarResultado);
+  }
+}
+
+
+  
+function renderTodos(lista, containerId, mostrarResultado) {
+
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
   lista.forEach(j => {
 
     const sportingHome = j.homeTeam.includes("Sporting Clube de Portugal");
@@ -328,8 +427,26 @@ function render(lista, containerId, mostrarResultado) {
       </div>
     `;
   });
-}
 
+  container.innerHTML += `
+    <div style="text-align:center; margin-top:10px;">
+      <button 
+        onclick="toggleJogos('${containerId}')"
+        style="
+          background:#888;
+          color:white;
+          border:none;
+          padding:6px 12px;
+          border-radius:8px;
+          font-size:12px;
+          cursor:pointer;
+        "
+      >
+        Mostrar Menos
+      </button>
+    </div>
+  `;
+}
 /* ================= RENDER CLASSIFICAÇÃO ================= */
 
 function renderClassificacao(lista) {

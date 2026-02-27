@@ -3,7 +3,7 @@ export default async function handler(req, res) {
   try {
 
     const response = await fetch(
-      "https://ics.ecal.com/ecal-sub/69a028306ebe6600022464b3/Sporting%20CP.ics"
+      "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics"
     );
 
     const text = await response.text();

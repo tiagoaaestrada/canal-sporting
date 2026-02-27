@@ -1,98 +1,88 @@
 export default async function handler(req, res) {
-
   try {
 
     const agora = new Date();
-    const icsUrl = "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics";
 
-    const response = await fetch(icsUrl);
-    const icsText = await response.text();
+    const url = "https://www.zerozero.pt/equipa/sporting/jogos?grp=1&ond=&epoca_id=155&compet_id_jogos=9&comfim=0&equipa_1=16&menu=allmatches&type=season";
 
-    const eventos = icsText.split("BEGIN:VEVENT");
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0"
+      }
+    });
+
+    const html = await response.text();
+
+    const linhas = html.split('<tr data-lj="h2"');
 
     let jogos = [];
 
-    for (const evento of eventos) {
+    for (let linha of linhas) {
 
-      if (!evento.includes("SUMMARY") || !evento.includes("DTSTART") || !evento.includes("DESCRIPTION"))
-        continue;
+      if (!linha.includes("Taça de Portugal")) continue;
 
-      const summaryMatch = evento.match(/SUMMARY:(.*)/);
-      const dtMatch = evento.match(/DTSTART:(.*)/);
-      const descMatch = evento.match(/DESCRIPTION:(.*)/);
+      // Data
+      const dataMatch = linha.match(/<td class="double"\s*>(.*?)<\/td>/);
+      if (!dataMatch) continue;
 
-      if (!summaryMatch || !dtMatch || !descMatch)
-        continue;
+      const data = dataMatch[1].trim();
 
-      const summaryRaw = summaryMatch[1].trim();
-      const description = descMatch[1].toLowerCase();
+      // Hora
+      const horaMatch = linha.match(/<\/td><td>(\d{2}:\d{2})<\/td>/);
+      const hora = horaMatch ? horaMatch[1] : "00:00";
 
-      if (
-        !description.includes("taça de portugal") &&
-        !description.includes("taca de portugal") &&
-        !description.includes("taça da liga") &&
-        !description.includes("taca da liga")
-      ) continue;
+      const date = new Date(`${data}T${hora}:00`);
 
-      const formatted = dtMatch[1].trim().replace(
-        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
-        "$1-$2-$3T$4:$5:$6Z"
-      );
+      // Adversário
+      const teamMatch = linha.match(/<td class="text".*?>(.*?)<\/a>/);
+      if (!teamMatch) continue;
 
-      const date = new Date(formatted);
-
-      const summary = summaryRaw
-        .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
-        .replace(/[^\w\s\.\-\:]/g, "")
+      const adversario = teamMatch[1]
+        .replace(/<.*?>/g, "")
         .trim();
 
-      const scoreMatch = summary.match(/(\d+)[-–](\d+)/);
-
+      // Resultado
+      const resultMatch = linha.match(/<td class="result">.*?>(.*?)<\/a>/);
       let score = { home: null, away: null };
 
-      if (scoreMatch) {
-        score = {
-          home: parseInt(scoreMatch[1]),
-          away: parseInt(scoreMatch[2])
-        };
+      if (resultMatch) {
+        const marcador = resultMatch[1];
+        const scoreMatch = marcador.match(/(\d+)-(\d+)/);
+        if (scoreMatch) {
+          score = {
+            home: parseInt(scoreMatch[1]),
+            away: parseInt(scoreMatch[2])
+          };
+        }
       }
 
-      let cleanSummary = summary;
-      if (scoreMatch) {
-        cleanSummary = summary.replace(/(\d+)[-–](\d+)/, "").trim();
-      }
+      // Fase
+      const faseMatch = linha.match(/<td class="away">(.*?)<\/td>/);
+      const fase = faseMatch ? faseMatch[1] : "";
 
-      let teams = null;
+      // Casa ou Fora
+      const casaForaMatch = linha.match(/\((C|F)\)/);
+      const casa = casaForaMatch && casaForaMatch[1] === "C";
 
-      if (cleanSummary.includes(" vs "))
-        teams = cleanSummary.split(" vs ");
-      else if (cleanSummary.includes(" - "))
-        teams = cleanSummary.split(" - ");
-      else continue;
-
-      if (!teams || teams.length !== 2)
-        continue;
-
-      const competitionName = description.includes("liga")
-        ? "Taça da Liga"
-        : "Taça de Portugal";
+      const homeTeam = casa ? "Sporting Clube de Portugal" : adversario;
+      const awayTeam = casa ? adversario : "Sporting Clube de Portugal";
 
       jogos.push({
         date,
-        competition: competitionName,
-        homeTeam: teams[0].trim(),
-        awayTeam: teams[1].trim(),
+        competition: "Taça de Portugal",
+        fase,
+        homeTeam,
+        awayTeam,
         score
       });
-
     }
 
     const porJogar = jogos
-      .filter(j => j.score.home === null && new Date(j.date) >= agora)
+      .filter(j => j.score.home === null)
       .sort((a,b) => new Date(a.date) - new Date(b.date));
 
     const jogados = jogos
-      .filter(j => j.score.home !== null || new Date(j.date) < agora)
+      .filter(j => j.score.home !== null)
       .sort((a,b) => new Date(b.date) - new Date(a.date));
 
     res.status(200).json({
@@ -101,10 +91,8 @@ export default async function handler(req, res) {
 
   } catch (error) {
 
-    console.log("ERRO INTERNO:", error);
-
     res.status(500).json({
-      error: "Erro ao carregar Taças",
+      error: "Erro ao carregar Taça de Portugal",
       detalhe: error.message
     });
 

@@ -244,8 +244,8 @@ function render(lista, containerId, mostrarResultado) {
 
   lista.forEach(j => {
 
-    const sportingHome = j.homeTeam.includes("Sporting");
-    const sportingAway = j.awayTeam.includes("Sporting");
+    const sportingHome = j.homeTeam.includes("Sporting Clube de Portugal");
+    const sportingAway = j.awayTeam.includes("Sporting Clube de Portugal");
     const derby = isDerby(j.homeTeam, j.awayTeam);
 
     const scoreHome = (mostrarResultado && j.score.home !== null)

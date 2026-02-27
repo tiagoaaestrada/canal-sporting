@@ -2,77 +2,74 @@ export default async function handler(req, res) {
 
   try {
 
+    const API_KEY = process.env.FOOTBALL_DATA_KEY;
+
     const response = await fetch(
-      "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics"
+      "https://api.football-data.org/v4/competitions/PPL/matches?season=2025",
+      {
+        headers: {
+          "X-Auth-Token": API_KEY
+        }
+      }
     );
 
-    const text = await response.text();
-    const eventos = text.split("BEGIN:VEVENT");
+    const data = await response.json();
 
-    const jogos = [];
+    if (!data.matches) {
+      return res.status(500).json({ error: "Sem dados de jogos" });
+    }
+
     const agora = new Date();
 
-    eventos.forEach(evento => {
-
-      if (!evento.includes("SUMMARY")) return;
-
-      const summaryMatch = evento.match(/SUMMARY:(.*)/);
-      const dtMatch = evento.match(/DTSTART:(.*)/);
-
-      if (!summaryMatch || !dtMatch) return;
-
-      let summary = summaryMatch[1].trim();
-      const dt = dtMatch[1].trim();
-
-      const data = new Date(
-        dt.replace(
-          /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
-          "$1-$2-$3T$4:$5:$6Z"
-        )
-      );
-
-      // Remover símbolo ▶️
-      summary = summary.replace("▶️ ", "");
-
-      // Exemplo jogado:
-      // Sporting CP 1 - 0 FC Famalicão
-      const resultadoRegex = /(.*)\s(\d+)\s-\s(\d+)\s(.*)/;
-
-      let homeTeam, awayTeam, homeScore = null, awayScore = null;
-
-      if (resultadoRegex.test(summary)) {
-
-        const match = summary.match(resultadoRegex);
-
-        homeTeam = match[1].trim();
-        homeScore = parseInt(match[2]);
-        awayScore = parseInt(match[3]);
-        awayTeam = match[4].trim();
-
-      } else {
-
-        const equipas = summary.split(" - ");
-        if (equipas.length !== 2) return;
-
-        homeTeam = equipas[0].trim();
-        awayTeam = equipas[1].trim();
-      }
-
-      jogos.push({
-        date: data,
-        competition: "Liga Portugal",
-        homeTeam,
-        awayTeam,
+    const jogosSporting = data.matches
+      .filter(m => 
+        m.homeTeam.id === 498 || 
+        m.awayTeam.id === 498
+      )
+      .map(m => ({
+        date: m.utcDate,
+        competition: m.competition.name,
+        homeTeam: m.homeTeam.name,
+        awayTeam: m.awayTeam.name,
         score: {
-          home: homeScore,
-          away: awayScore
+          home: m.score.fullTime.home,
+          away: m.score.fullTime.away
         }
-      });
+      }));
+
+    const porJogar = jogosSporting.filter(j =>
+      new Date(j.date) >= agora
+    );
+
+    const jogados = jogosSporting.filter(j =>
+      new Date(j.date) < agora
+    );
+
+    /* ===== CALCULAR ESTATÍSTICAS ===== */
+
+    let vitorias = 0;
+    let empates = 0;
+    let derrotas = 0;
+    let golosMarcados = 0;
+    let golosSofridos = 0;
+
+    jogados.forEach(j => {
+
+      if (j.score.home === null) return;
+
+      const sportingHome = j.homeTeam.includes("Sporting");
+
+      const gm = sportingHome ? j.score.home : j.score.away;
+      const gs = sportingHome ? j.score.away : j.score.home;
+
+      golosMarcados += gm;
+      golosSofridos += gs;
+
+      if (gm > gs) vitorias++;
+      else if (gm === gs) empates++;
+      else derrotas++;
 
     });
-
-    const porJogar = jogos.filter(j => new Date(j.date) >= agora);
-    const jogados = jogos.filter(j => new Date(j.date) < agora);
 
     res.status(200).json({
       jogos: {
@@ -81,17 +78,17 @@ export default async function handler(req, res) {
       },
       estatisticas: {
         jogos: jogados.length,
-        vitorias: 0,
-        empates: 0,
-        derrotas: 0,
-        golosMarcados: 0,
-        golosSofridos: 0
+        vitorias,
+        empates,
+        derrotas,
+        golosMarcados,
+        golosSofridos
       }
     });
 
   } catch (error) {
 
-    res.status(500).json({ error: "Erro ao carregar ICS Sporting" });
+    res.status(500).json({ error: "Erro ao carregar jogos football-data" });
 
   }
 }

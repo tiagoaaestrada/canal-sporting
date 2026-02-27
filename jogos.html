@@ -197,6 +197,46 @@ th, td {
   }
 
 }
+
+/* ===== MOBILE TABS ===== */
+
+.mobile-tabs {
+  display: none;
+}
+
+@media (max-width: 900px) {
+
+  .mobile-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 8px;
+    background: #eee;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .tab-btn.active {
+    background: #0a5c2a;
+    color: white;
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+}
   
 </style>
 </head>
@@ -215,9 +255,15 @@ th, td {
 </header>
 
 <div class="layout">
+  
+  <div class="mobile-tabs">
+  <button class="tab-btn active" onclick="mostrarTab('jogos')">Jogos</button>
+  <button class="tab-btn" onclick="mostrarTab('classificacao')">Classificação</button>
+  <button class="tab-btn" onclick="mostrarTab('estatisticas')">Estatísticas</button>
+</div>
 
 <!-- CLASSIFICAÇÕES -->
-<div class="col-classificacao">
+<div class="col-classificacao tab-content" data-tab="classificacao">
   <div class="section">
     <h2>Primeira Liga</h2>
     <div id="ligaContainer"></div>
@@ -225,7 +271,7 @@ th, td {
 </div>
 
 <!-- JOGOS -->
-<div class="col-jogos">
+<div class="col-jogos tab-content" data-tab="jogos">
     <div class="section">
       <h2>Agenda</h2>
       <div id="agendaContainer"></div>
@@ -238,7 +284,7 @@ th, td {
   </div>
 
   <!-- ESTATÍSTICAS -->
-  <div class="col-estatisticas">
+<div class="col-estatisticas tab-content" data-tab="estatisticas">
     <div class="section">
       <h2>Estatísticas da Equipa</h2>
       <div id="estatisticasContainer"></div>
@@ -375,6 +421,8 @@ function render(lista, containerId, mostrarResultado) {
   container.dataset.lista = JSON.stringify(lista);
   container.dataset.mostrarResultado = mostrarResultado;
 }
+
+  
   function toggleJogos(containerId) {
 
   const container = document.getElementById(containerId);
@@ -600,6 +648,33 @@ async function carregarTudo() {
   }
 }
 
+if (window.innerWidth <= 900) {
+  mostrarTab("jogos");
+}
+  
+function mostrarTab(tab) {
+
+  // Botões
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.classList.remove("active");
+  });
+
+  document.querySelectorAll(".tab-content").forEach(sec => {
+    sec.classList.remove("active");
+  });
+
+  // Ativar botão correto
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    if (btn.textContent.toLowerCase().includes(tab)) {
+      btn.classList.add("active");
+    }
+  });
+
+  // Ativar conteúdo correto
+  const sec = document.querySelector(`.tab-content[data-tab="${tab}"]`);
+  if (sec) sec.classList.add("active");
+}
+  
 /* ================= INIT ================= */
 
 carregarTudo();

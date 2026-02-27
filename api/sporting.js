@@ -5,66 +5,39 @@ export default async function handler(req, res) {
     const API_KEY = process.env.FOOTBALL_DATA_KEY;
     const agora = new Date();
 
-    const headers = {
-      "X-Auth-Token": API_KEY
-    };
-
-    const competicoes = [
-      { code: "PPL", nome: "Primeira Liga" },
-      { code: "CL", nome: "Champions League" },
-      { code: "CPD", nome: "Taça de Portugal" },
-      { code: "LC", nome: "Taça da Liga" }
-    ];
-
-    let jogos = [];
-
-    for (const comp of competicoes) {
-
-      try {
-
-        const response = await fetch(
-          `https://api.football-data.org/v4/competitions/${comp.code}/matches?season=2025`,
-          { headers }
-        );
-
-        const data = await response.json();
-
-        if (!data.matches) continue;
-
-        const jogosCompeticao = data.matches
-          .filter(m =>
-            m.homeTeam.id === 498 ||
-            m.awayTeam.id === 498
-          )
-          .map(m => ({
-            date: m.utcDate,
-            competition: comp.nome,
-            homeTeam: m.homeTeam.name,
-            awayTeam: m.awayTeam.name,
-            score: {
-              home: m.score.fullTime.home,
-              away: m.score.fullTime.away
-            }
-          }));
-
-        jogos = jogos.concat(jogosCompeticao);
-
-      } catch {
-        // Se competição não disponível no plano, ignorar
-        continue;
+    const response = await fetch(
+      "https://api.football-data.org/v4/teams/498/matches?season=2025",
+      {
+        headers: {
+          "X-Auth-Token": API_KEY
+        }
       }
+    );
+
+    const data = await response.json();
+
+    if (!data.matches) {
+      return res.status(500).json({ error: "Sem jogos disponíveis" });
     }
 
-    // Ordenar cronologicamente
-    jogos.sort((a,b) => new Date(a.date) - new Date(b.date));
+    const jogos = data.matches.map(m => ({
+      date: m.utcDate,
+      competition: m.competition.name,
+      homeTeam: m.homeTeam.name,
+      awayTeam: m.awayTeam.name,
+      score: {
+        home: m.score.fullTime.home,
+        away: m.score.fullTime.away
+      }
+    }));
 
-    const porJogar = jogos.filter(j =>
-      new Date(j.date) >= agora
-    );
+    const porJogar = jogos
+      .filter(j => new Date(j.date) >= agora)
+      .sort((a,b) => new Date(a.date) - new Date(b.date));
 
-    const jogados = jogos.filter(j =>
-      new Date(j.date) < agora
-    );
+    const jogados = jogos
+      .filter(j => new Date(j.date) < agora)
+      .sort((a,b) => new Date(b.date) - new Date(a.date));
 
     /* ===== ESTATÍSTICAS GLOBAIS ===== */
 
@@ -107,7 +80,7 @@ export default async function handler(req, res) {
   } catch (error) {
 
     res.status(500).json({
-      error: "Erro ao carregar competições",
+      error: "Erro ao carregar jogos football-data",
       detalhe: error.message
     });
 

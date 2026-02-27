@@ -2,7 +2,7 @@ export default async function handler(req, res) {
 
   try {
 
-    const API_KEY = process.env.FOOTBALL_DATA_KEY;
+    const API_KEY = process.env.FOOTBALL_API_KEY;
 
     const response = await fetch(
       "https://api.football-data.org/v4/competitions/PPL/matches?season=2025",

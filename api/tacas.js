@@ -2,68 +2,90 @@ export default async function handler(req, res) {
 
   try {
 
-    const url = "https://www.zerozero.pt/equipa/sporting/16/jogos?epoca_id=155"; 
-    // epoca_id=155 normalmente é 2025/2026 (ajustamos se necessário)
+    const agora = new Date();
 
-    const response = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "text/html"
-      }
-    });
+    const icsUrl = "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics";
 
-    const html = await response.text();
+    const response = await fetch(icsUrl);
+    const icsText = await response.text();
 
-    const jogos = [];
+    const eventos = icsText.split("BEGIN:VEVENT");
 
-    // Procurar apenas linhas de jogos da Taça
-    const regex = /Taça de Portugal|Taça da Liga/gi;
+    let jogos = [];
 
-    if (!regex.test(html)) {
-      return res.status(200).json({ jogos: [] });
+    for (const evento of eventos) {
+
+      if (!evento.includes("SUMMARY") || !evento.includes("DTSTART") || !evento.includes("DESCRIPTION"))
+        continue;
+
+      const summaryMatch = evento.match(/SUMMARY:(.*)/);
+      const dtMatch = evento.match(/DTSTART:(.*)/);
+      const descMatch = evento.match(/DESCRIPTION:(.*)/);
+
+      if (!summaryMatch || !dtMatch || !descMatch)
+        continue;
+
+      const summary = summaryMatch[1].trim();
+      const description = descMatch[1].toLowerCase();
+
+      // Apenas Taças
+      if (
+        !description.includes("taça de portugal") &&
+        !description.includes("taca de portugal") &&
+        !description.includes("taça da liga") &&
+        !description.includes("taca da liga")
+      ) continue;
+
+      // Converter data
+      const formatted = dtMatch[1].trim().replace(
+        /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
+        "$1-$2-$3T$4:$5:$6Z"
+      );
+
+      const date = new Date(formatted);
+
+      // Separar equipas
+      let teams = null;
+
+      if (summary.includes(" vs "))
+        teams = summary.split(" vs ");
+      else if (summary.includes(" - "))
+        teams = summary.split(" - ");
+      else continue;
+
+      if (!teams || teams.length !== 2)
+        continue;
+
+      const competitionName = description.includes("liga")
+        ? "Taça da Liga"
+        : "Taça de Portugal";
+
+      jogos.push({
+        date,
+        competition: competitionName,
+        homeTeam: teams[0].replace(/[^\p{L}\p{N}\s\.\-]/gu, "").trim(),
+        awayTeam: teams[1].replace(/[^\p{L}\p{N}\s\.\-]/gu, "").trim(),
+        score: { home: null, away: null }
+      });
+
     }
 
-    const linhas = html.split("\n");
+    const porJogar = jogos
+      .filter(j => new Date(j.date) >= agora)
+      .sort((a,b) => new Date(a.date) - new Date(b.date));
 
-    linhas.forEach(l => {
+    const jogados = jogos
+      .filter(j => new Date(j.date) < agora)
+      .sort((a,b) => new Date(b.date) - new Date(a.date));
 
-      if (
-        l.includes("Taça de Portugal") ||
-        l.includes("Taça da Liga")
-      ) {
-
-        // Extração muito simples (ajustamos depois se preciso)
-        const dataMatch = l.match(/\d{2}-\d{2}-\d{4}/);
-        const equipasMatch = l.match(/Sporting.*?-.*?</);
-
-        if (dataMatch && equipasMatch) {
-
-          const equipasTexto = equipasMatch[0]
-            .replace("<", "")
-            .trim();
-
-          const partes = equipasTexto.split(" - ");
-
-          jogos.push({
-            date: new Date(dataMatch[0].split("-").reverse().join("-")),
-            competition: "Taça",
-            homeTeam: partes[0],
-            awayTeam: partes[1],
-            score: { home: null, away: null }
-          });
-
-        }
-
-      }
-
+    res.status(200).json({
+      jogos: { porJogar, jogados }
     });
-
-    res.status(200).json({ jogos });
 
   } catch (error) {
 
     res.status(500).json({
-      error: "Erro ao carregar Taças ZeroZero",
+      error: "Erro ao carregar Taças",
       detalhe: error.message
     });
 

@@ -96,7 +96,7 @@ body {
 .match-main {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .team-row {
@@ -118,20 +118,48 @@ body {
   border-radius: 6px;
 }
 
-.derby {
-  background: #fff5f5;
-  border-left: 3px solid #cc0000;
-  padding-left: 8px;
+/* ===== COMPETIÇÕES ===== */
+
+.comp-badge {
+  display: inline-block;
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-weight: 600;
 }
 
-.derby-badge {
+.comp-liga {
+  background: #e6f5ec;
+  color: #0a5c2a;
+}
+
+.comp-champions {
+  background: #e6ecff;
+  color: #1a2e8a;
+}
+
+.comp-taca {
+  background: #fff0f0;
+  color: #a00000;
+}
+
+.comp-liga-taca {
+  background: #fff6e6;
+  color: #b36b00;
+}
+
+/* ===== CLÁSSICO DISCRETO ===== */
+
+.derby-label {
+  font-size: 10px;
   background: #cc0000;
   color: white;
-  font-size: 10px;
   padding: 2px 6px;
   border-radius: 4px;
   margin-left: 6px;
 }
+
+/* ================= TABLE ================= */
 
 table {
   width: 100%;
@@ -155,7 +183,7 @@ th, td {
     grid-template-columns: 1fr;
   }
 }
-
+  
 </style>
 </head>
 
@@ -232,6 +260,22 @@ function isDerby(home, away) {
 
 /* ================= RENDER JOGOS ================= */
 
+function getCompetitionClass(name) {
+
+  const n = name.toLowerCase();
+
+  if (n.includes("champions"))
+    return "comp-champions";
+
+  if (n.includes("taça de portugal") || n.includes("taca de portugal"))
+    return "comp-taca";
+
+  if (n.includes("taça da liga") || n.includes("taca da liga"))
+    return "comp-liga-taca";
+
+  return "comp-liga";
+}
+
 function render(lista, containerId, mostrarResultado) {
 
   const container = document.getElementById(containerId);
@@ -257,23 +301,29 @@ function render(lista, containerId, mostrarResultado) {
       : "";
 
     container.innerHTML += `
-      <div class="match ${derby ? "derby" : ""}">
+      <div class="match">
         <div class="match-time">
           ${formatarData(j.date)}
         </div>
         <div class="match-main">
-          <div style="font-size:11px; color:#888; margin-bottom:4px;">
-            ${j.competition}
+
+          <div>
+            <span class="comp-badge ${getCompetitionClass(j.competition)}">
+              ${j.competition}
+            </span>
+            ${derby ? `<span class="derby-label">CLÁSSICO</span>` : ""}
           </div>
+
           <div class="team-row ${sportingHome ? "sporting" : ""}">
             ${j.homeTeam}
             ${scoreHome}
           </div>
+
           <div class="team-row ${sportingAway ? "sporting" : ""}">
             ${j.awayTeam}
             ${scoreAway}
           </div>
-          ${derby ? `<span class="derby-badge">CLÁSSICO</span>` : ""}
+
         </div>
       </div>
     `;

@@ -257,9 +257,9 @@ th, td {
 <div class="layout">
   
   <div class="mobile-tabs">
-  <button class="tab-btn active" onclick="mostrarTab('jogos')">Jogos</button>
-  <button class="tab-btn" onclick="mostrarTab('classificacao')">Classificação</button>
-  <button class="tab-btn" onclick="mostrarTab('estatisticas')">Estatísticas</button>
+    <button class="tab-btn active" data-tab="jogos" onclick="mostrarTab('jogos')">Jogos</button>
+    <button class="tab-btn" data-tab="classificacao" onclick="mostrarTab('classificacao')">Classificação</button>
+    <button class="tab-btn" data-tab="estatisticas" onclick="mostrarTab('estatisticas')">Estatísticas</button>
 </div>
 
 <!-- CLASSIFICAÇÕES -->
@@ -654,25 +654,23 @@ if (window.innerWidth <= 900) {
   
 function mostrarTab(tab) {
 
-  // Botões
+  // Remover active de todos os botões
   document.querySelectorAll(".tab-btn").forEach(btn => {
     btn.classList.remove("active");
   });
 
+  // Remover active de todos os conteúdos
   document.querySelectorAll(".tab-content").forEach(sec => {
     sec.classList.remove("active");
   });
 
   // Ativar botão correto
-  document.querySelectorAll(".tab-btn").forEach(btn => {
-    if (btn.textContent.toLowerCase().includes(tab)) {
-      btn.classList.add("active");
-    }
-  });
+  const btnAtivo = document.querySelector(`.tab-btn[data-tab="${tab}"]`);
+  if (btnAtivo) btnAtivo.classList.add("active");
 
   // Ativar conteúdo correto
-  const sec = document.querySelector(`.tab-content[data-tab="${tab}"]`);
-  if (sec) sec.classList.add("active");
+  const secAtiva = document.querySelector(`.tab-content[data-tab="${tab}"]`);
+  if (secAtiva) secAtiva.classList.add("active");
 }
   
 /* ================= INIT ================= */

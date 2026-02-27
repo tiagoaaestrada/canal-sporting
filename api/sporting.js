@@ -37,52 +37,59 @@ export default async function handler(req, res) {
 
       jogos = jogos.concat(jogosLiga);
     }
+/* =======================
+   CHAMPIONS (ICS UEFA)
+======================= */
 
-    /* =======================
-       CHAMPIONS (ICS UEFA)
-    ======================== */
+const uefaRes = await fetch(
+  "https://calendar.uefa.com/v1/calendar.ics?competitionId=1&countryCode=PT&language=PT&reminder=60&teamId=50149"
+);
 
-    const uefaRes = await fetch(
-      "https://calendar.uefa.com/v1/calendar.ics?competitionId=1&countryCode=PT&language=PT&reminder=60&teamId=50149"
-    );
+const uefaText = await uefaRes.text();
+const eventos = uefaText.split("BEGIN:VEVENT");
 
-    const uefaText = await uefaRes.text();
+eventos.forEach(evento => {
 
-    const eventos = uefaText.split("BEGIN:VEVENT");
+  if (!evento.includes("SUMMARY")) return;
 
-    eventos.forEach(evento => {
+  const summaryMatch = evento.match(/SUMMARY:(.*)/);
+  const dtMatch = evento.match(/DTSTART:(.*)/);
 
-      if (!evento.includes("SUMMARY")) return;
+  if (!summaryMatch || !dtMatch) return;
 
-      const summaryMatch = evento.match(/SUMMARY:(.*)/);
-      const dtMatch = evento.match(/DTSTART:(.*)/);
+  let summary = summaryMatch[1].trim();
+  const dt = dtMatch[1].trim();
 
-      if (!summaryMatch || !dtMatch) return;
+  const data = new Date(
+    dt.replace(
+      /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
+      "$1-$2-$3T$4:$5:$6Z"
+    )
+  );
 
-      let summary = summaryMatch[1].trim();
-      const dt = dtMatch[1].trim();
+  let equipas;
 
-      const data = new Date(
-        dt.replace(
-          /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
-          "$1-$2-$3T$4:$5:$6Z"
-        )
-      );
+  if (summary.includes(" - ")) {
+    equipas = summary.split(" - ");
+  } else if (summary.includes(" vs ")) {
+    equipas = summary.split(" vs ");
+  } else if (summary.includes(" v ")) {
+    equipas = summary.split(" v ");
+  } else {
+    return;
+  }
 
-      // Formato normal: Sporting CP - Real Madrid
-      const equipas = summary.split(" - ");
-      if (equipas.length !== 2) return;
+  if (equipas.length !== 2) return;
 
-      jogos.push({
-        date: data,
-        competition: "Champions League",
-        homeTeam: equipas[0].trim(),
-        awayTeam: equipas[1].trim(),
-        score: { home: null, away: null }
-      });
+  jogos.push({
+    date: data,
+    competition: "Champions League",
+    homeTeam: equipas[0].trim(),
+    awayTeam: equipas[1].trim(),
+    score: { home: null, away: null }
+  });
 
-    });
-
+});
     /* =======================
        ORDENAR E SEPARAR
     ======================== */

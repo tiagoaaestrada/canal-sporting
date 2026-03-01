@@ -334,15 +334,23 @@ async function loadFeed() {
   const container = document.getElementById("feed-container");
   container.innerHTML = "";
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date();
+  const todayDay = today.getDate();
+  const todayMonth = today.getMonth();
+  const todayYear = today.getFullYear();
 
   data.forEach(item => {
     const div = document.createElement("div");
     div.className = "feed-item";
 
-    const itemDate = item.date?.split("T")[0];
+    const itemDate = new Date(item.date);
 
-    if (itemDate !== today) {
+    const isToday =
+      itemDate.getDate() === todayDay &&
+      itemDate.getMonth() === todayMonth &&
+      itemDate.getFullYear() === todayYear;
+
+    if (!isToday) {
       div.classList.add("hidden-news");
     }
 

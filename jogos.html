@@ -237,6 +237,10 @@ th, td {
   }
 
 }
+
+.hidden-stat {
+  display: none;
+}
   
 </style>
 </head>
@@ -853,14 +857,32 @@ setInterval(carregarTudo, 300000);
 function renderEstatisticasSeparadas(stats) {
 
   const container = document.getElementById("estatisticasContainer");
+
+  const ordemCompeticoes = [
+    "Primeira Liga",
+    "UEFA Champions League",
+    "Taça de Portugal",
+    "Taça da Liga",
+    "Supertaça Cândido de Oliveira",
+    "Amigável"
+  ];
+
   let html = "";
 
-  Object.keys(stats).forEach(comp => {
+  ordemCompeticoes.forEach(comp => {
+
+    if (!stats[comp]) return;
 
     const e = stats[comp];
 
+    const visivelInicial =
+      comp === "Primeira Liga" ||
+      comp === "UEFA Champions League";
+
     html += `
-      <div style="margin-bottom:22px; padding-bottom:15px; border-bottom:1px solid #eee;">
+      <div class="bloco-estatistica ${visivelInicial ? "" : "hidden-stat"}"
+           data-comp="${comp}"
+           style="margin-bottom:22px; padding-bottom:15px; border-bottom:1px solid #eee;">
 
         <h3 style="margin:0 0 10px 0; font-size:15px;">
           ${comp}
@@ -887,19 +909,84 @@ function renderEstatisticasSeparadas(stats) {
 
         <div style="margin-top:6px;">
           <strong>Golos Marcados:</strong><br>
-          ${e.golosMarcados}(Casa ${e.golosMarcadosCasa} | Fora ${e.golosMarcadosFora})
+          ${e.golosMarcados}
+          <span style="color:#777;">
+            (Casa ${e.golosMarcadosCasa} | Fora ${e.golosMarcadosFora})
+          </span>
         </div>
 
         <div>
           <strong>Golos Sofridos:</strong><br>
-          ${e.golosSofridos} (Casa ${e.golosSofridosCasa} | Fora ${e.golosSofridosFora})
+          ${e.golosSofridos}
+          <span style="color:#777;">
+            (Casa ${e.golosSofridosCasa} | Fora ${e.golosSofridosFora})
+          </span>
         </div>
 
       </div>
     `;
   });
 
+  // Botão Ver Mais / Ver Menos
+  html += `
+    <div style="text-align:center; margin-top:15px;">
+      <button id="toggleStatsBtn"
+        style="
+          background:#0a5c2a;
+          color:white;
+          border:none;
+          padding:8px 14px;
+          border-radius:8px;
+          font-size:13px;
+          cursor:pointer;
+        "
+      >
+        Ver Mais
+      </button>
+    </div>
+
+    <div style="text-align:center; margin-top:15px;">
+      <a 
+        href="https://maisfutebol.iol.pt/sporting/estatisticas/1576"
+        target="_blank"
+        style="
+          display:inline-block;
+          background:#eee;
+          color:#333;
+          padding:8px 14px;
+          border-radius:8px;
+          text-decoration:none;
+          font-size:12px;
+          font-weight:600;
+        "
+      >
+        Ver Estatísticas Oficiais
+      </a>
+    </div>
+  `;
+
   container.innerHTML = html;
+
+  ativarToggleEstatisticas();
+}
+
+function ativarToggleEstatisticas() {
+
+  const btn = document.getElementById("toggleStatsBtn");
+  const hidden = document.querySelectorAll(".hidden-stat");
+
+  let expandido = false;
+
+  btn.addEventListener("click", function() {
+
+    expandido = !expandido;
+
+    hidden.forEach(el => {
+      el.style.display = expandido ? "block" : "none";
+    });
+
+    btn.textContent = expandido ? "Ver Menos" : "Ver Mais";
+  });
 }
   
 </script>

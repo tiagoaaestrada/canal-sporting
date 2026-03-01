@@ -545,6 +545,25 @@ function renderTodos(lista, containerId, mostrarResultado) {
     `;
   });
 
+  // 🔥 Botão Ver Menos no fim
+  container.innerHTML += `
+    <div style="text-align:center; margin-top:12px;">
+      <button 
+        onclick="toggleJogos('${containerId}')"
+        style="
+          background:#0a5c2a;
+          color:white;
+          border:none;
+          padding:6px 12px;
+          border-radius:8px;
+          font-size:12px;
+          cursor:pointer;
+        "
+      >
+        Ver Menos
+      </button>
+    </div>
+  `;
 }
 /* ================= RENDER CLASSIFICAÇÃO ================= */
 

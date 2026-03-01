@@ -283,15 +283,6 @@ th, td {
   
 </style>
 </head>
-  
-<div id="matchPopup" class="popup-overlay" style="display:none;">
-  <div class="popup-box">
-    <h3>🔔 Dia de Jogo!</h3>
-    <p id="popupContent"></p>
-    <button onclick="fecharPopup()">Fechar</button>
-  </div>
-</div>
-  
 <body>
 
 <header class="main-header">
@@ -404,7 +395,6 @@ function normalizarNomeEquipa(nome) {
 
   if (
     lower === "sporting cp" ||
-    lower === "sporting" ||
     lower === "sporting clube de portugal"
   ) {
     return "Sporting Clube de Portugal";
@@ -437,7 +427,7 @@ function render(lista, containerId, mostrarResultado) {
     
     const sportingHome = homeName === "Sporting Clube de Portugal";
     const sportingAway = awayName === "Sporting Clube de Portugal";
-    const derby = isDerby(j.homeTeam, j.awayTeam);
+    const derby = isDerby(homeName, awayName);
 
     const scoreHome = (mostrarResultado && j.score.home !== null)
       ? `<span class="score">${j.score.home}</span>`
@@ -767,7 +757,9 @@ function calcularEstatisticasPorCompeticao(listaJogos) {
   const stats = {};
 
   listaJogos.forEach(j => {
-
+    
+    if (!j.score || j.score.home === null || j.score.away === null) return;
+    
     const comp = j.competition || "Outros";
 
     if (!stats[comp]) {
@@ -794,7 +786,9 @@ function calcularEstatisticasPorCompeticao(listaJogos) {
       };
     }
 
-    const sportingHome = j.homeTeam.includes("Sporting");
+    const homeNormal = normalizarNomeEquipa(j.homeTeam);
+    const sportingHome = homeNormal === "Sporting Clube de Portugal";
+    
     const gm = sportingHome ? j.score.home : j.score.away;
     const gs = sportingHome ? j.score.away : j.score.home;
 
@@ -862,6 +856,7 @@ async function carregarTudo() {
 
       render(proximos, "agendaContainer", false);
       render(anteriores, "resultadosContainer", true);
+      verificarDiaDeJogo(proximos);
 
       // 🔥 CALCULAR ESTATÍSTICAS POR COMPETIÇÃO
 const todosJogosFinalizados = anteriores;
@@ -889,8 +884,6 @@ renderEstatisticasSeparadas(estatisticasPorComp);
     console.error("Erro classificação:", err);
   }
 }
-
-  verificarDiaDeJogo(proximos);
 
   if (window.innerWidth <= 900) {
   mostrarTab("jogos");
@@ -1059,30 +1052,36 @@ function ativarToggleEstatisticas() {
 
 function verificarDiaDeJogo(listaProximos) {
 
+  if (!listaProximos || !listaProximos.length) return;
+
   const hoje = new Date();
   const hojeISO = hoje.toISOString().split("T")[0];
 
-  const jogoHoje = listaProximos.find(j => {
-    return j.date.startsWith(hojeISO);
-  });
+  const jogoHoje = listaProximos.find(j =>
+    j.date && j.date.startsWith(hojeISO)
+  );
 
   if (!jogoHoje) return;
 
-  // evitar repetir no mesmo dia
+  // Evitar repetir no mesmo dia
   const jaMostrado = localStorage.getItem("popupJogo");
   if (jaMostrado === hojeISO) return;
 
-  const adversario =
-    j.homeTeam.includes("Sporting")
-      ? j.awayTeam
-      : j.homeTeam;
+  const homeNormal = normalizarNomeEquipa(jogoHoje.homeTeam);
+  const awayNormal = normalizarNomeEquipa(jogoHoje.awayTeam);
+
+  const sportingCasa = homeNormal === "Sporting Clube de Portugal";
+
+  const adversario = sportingCasa ? awayNormal : homeNormal;
+  const local = sportingCasa ? "🏠 Em Casa" : "✈️ Fora";
 
   const hora = new Date(jogoHoje.date)
     .toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
 
   document.getElementById("popupContent").innerHTML = `
     <strong>${jogoHoje.competition}</strong><br><br>
-    Sporting CP vs ${adversario}<br>
+    Sporting Clube de Portugal vs ${adversario}<br>
+    ${local}<br>
     🕒 ${hora}
   `;
 
@@ -1097,5 +1096,13 @@ function fecharPopup() {
   
 </script>
 
+<div id="matchPopup" class="popup-overlay" style="display:none;">
+  <div class="popup-box">
+    <h3>🔔 Dia de Jogo!</h3>
+    <p id="popupContent"></p>
+    <button onclick="fecharPopup()">Fechar</button>
+  </div>
+</div>
+  
 </body>
 </html>

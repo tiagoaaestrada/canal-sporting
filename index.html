@@ -230,7 +230,37 @@ body {
   }
 
 }
+/* ===== FEED EXPANSION ===== */
 
+.feed-controls {
+  text-align: center;
+  margin-top: 10px;
+}
+
+#toggleFeedBtn {
+  background: none;
+  border: none;
+  color: #0a5c2a;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+#toggleFeedBtn span {
+  margin-left: 5px;
+}
+
+.hidden-news {
+  display: none;
+}
+
+.feed-collapsed .hidden-news {
+  display: none;
+}
+
+.feed-expanded .hidden-news {
+  display: block;
+}
 </style>
   
 </head>
@@ -285,7 +315,12 @@ body {
     </div>
 
     <div id="feed-container">A carregar...</div>
-
+    
+    <div class="feed-controls">
+      <button id="toggleFeedBtn">
+        Ver mais <span id="feedArrow">▼</span>
+      </button>
+    </div>
   </div>
 
 </div>
@@ -299,17 +334,29 @@ async function loadFeed() {
   const container = document.getElementById("feed-container");
   container.innerHTML = "";
 
+  const today = new Date().toISOString().split("T")[0];
+
   data.forEach(item => {
     const div = document.createElement("div");
     div.className = "feed-item";
+
+    const itemDate = item.date?.split("T")[0];
+
+    if (itemDate !== today) {
+      div.classList.add("hidden-news");
+    }
+
     div.innerHTML = `
       <div class="source">
         ${item.source} • ${item.formattedDate}
       </div>
       <a href="${item.link}" target="_blank">${item.title}</a>
     `;
+
     container.appendChild(div);
   });
+
+  container.classList.add("feed-collapsed");
 }
 
 document.getElementById("refreshBtn").addEventListener("click", loadFeed);
@@ -348,7 +395,21 @@ if (path.includes("jogos")) {
 if (path.includes("mercado")) {
   document.getElementById("nav-mercado")?.classList.add("active");
 }
+const toggleBtn = document.getElementById("toggleFeedBtn");
+const feedContainer = document.getElementById("feed-container");
+const arrow = document.getElementById("feedArrow");
 
+toggleBtn.addEventListener("click", () => {
+  if (feedContainer.classList.contains("feed-collapsed")) {
+    feedContainer.classList.remove("feed-collapsed");
+    feedContainer.classList.add("feed-expanded");
+    toggleBtn.innerHTML = 'Ver menos <span id="feedArrow">▲</span>';
+  } else {
+    feedContainer.classList.remove("feed-expanded");
+    feedContainer.classList.add("feed-collapsed");
+    toggleBtn.innerHTML = 'Ver mais <span id="feedArrow">▼</span>';
+  }
+});
 </script>
 
 </body>

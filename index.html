@@ -62,23 +62,11 @@ body {
   margin: 40px auto;
   padding: 0 25px 60px 25px;
   display: grid;
-  grid-template-columns: 420px 1fr 260px;
+  grid-template-columns: 420px 1fr;
   gap: 35px;
 }
 
-.section {
-  background: white;
-  padding: 22px;
-  border-radius: 18px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-}
-
-.section h2 {
-  margin-top: 0;
-  font-size: 18px;
-}
-
-/* ================= CAPAS DESKTOP ================= */
+/* ================= CAPAS ================= */
 
 .covers-column {
   display: flex;
@@ -164,41 +152,42 @@ body {
   color: #0a5c2a;
 }
 
+/* Feed toggle */
+
+.feed-controls {
+  text-align: center;
+  margin-top: 10px;
+}
+
+#toggleFeedBtn {
+  background: none;
+  border: none;
+  color: #0a5c2a;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.hidden-news {
+  display: none;
+}
+
 /* ================= MOBILE ================= */
 
-@media (max-width: 1000px) {
-
-  body {
-    background: #000;
-  }
+@media (max-width: 900px) {
 
   .layout {
     grid-template-columns: 1fr;
-    margin: 0;
-    padding: 0;
-    gap: 10px; /* MAIS COMPACTO */
+    margin: 20px auto;
+    padding: 0 15px 40px 15px;
+    gap: 20px;
   }
-
-  .main-header {
-    padding: 14px 0 6px 0;
-  }
-
-  .header-title a {
-    font-size: 20px;
-  }
-
-  .header-nav {
-    gap: 16px;
-    font-size: 12px;
-  }
-
-  /* ===== COVERS ===== */
 
   .covers-column {
     flex-direction: row;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    gap: 0;
+    gap: 15px;
   }
 
   .covers-column::-webkit-scrollbar {
@@ -206,41 +195,158 @@ body {
   }
 
   .cover-box {
-    min-width: 100vw;
-    height: auto;
-    background: #000;
-    padding: 15px 10px 5px 10px; /* menos espaço inferior */
-    border-radius: 0;
-    box-shadow: none;
+    min-width: 80%;
+    flex-shrink: 0;
     scroll-snap-align: start;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .cover-box h3 {
-    color: white;
-    font-size: 14px;
-    margin-bottom: 10px;
-  }
-
-  .cover-box img {
-    max-width: 88%;
-    max-height: 75vh;
-    object-fit: contain;
-    border-radius: 6px;
-  }
-
-  /* ===== FEED ===== */
-
-  .feed {
-    background: white;
-    margin: 5px 12px 25px 12px; /* muito mais próximo das capas */
-    padding: 18px;
-    border-radius: 14px;
   }
 
 }
+
+</style>
+</head>
+
+<body>
+
+<header class="main-header">
+  <div class="header-title">
+    <a href="/">Canal Sporting</a>
+  </div>
+  <nav class="header-nav">
+    <a href="/" id="nav-feed">Feed</a>
+    <a href="/jogos.html" id="nav-jogos">Jogos</a>
+    <a href="/mercado.html" id="nav-mercado">Transferências</a>
+  </nav>
+</header>
+
+<div class="layout">
+
+  <!-- CAPAS -->
+  <div class="covers-column">
+
+    <div class="cover-box">
+      <h3>Record</h3>
+      <img id="record-cover" src="/record.png">
+    </div>
+
+    <div class="cover-box">
+      <h3>A Bola</h3>
+      <img id="bola-cover" src="/abola.png">
+    </div>
+
+    <div class="cover-box">
+      <h3>O Jogo</h3>
+      <img id="ojogo-cover" src="/ojogo.png">
+    </div>
+
+  </div>
+
+  <!-- FEED -->
+  <div class="feed">
+
+    <div class="feed-header">
+      <h2>Feed Geral Sporting</h2>
+      <button id="refreshBtn">Atualizar</button>
+    </div>
+
+    <div id="feed-container">A carregar...</div>
+
+    <div class="feed-controls">
+      <button id="toggleFeedBtn">Ver mais ▼</button>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+/* ================= FEED ================= */
+
+async function loadFeed() {
+  const res = await fetch("/api/feed");
+  const data = await res.json();
+  const container = document.getElementById("feed-container");
+  container.innerHTML = "";
+
+  const today = new Date();
+
+  data.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "feed-item";
+
+    const itemDate = new Date(item.timestamp);
+
+    const isToday =
+      itemDate.getDate() === today.getDate() &&
+      itemDate.getMonth() === today.getMonth() &&
+      itemDate.getFullYear() === today.getFullYear();
+
+    if (!isToday) {
+      div.classList.add("hidden-news");
+    }
+
+    div.innerHTML = `
+      <div class="source">
+        ${item.source} • ${item.formattedDate}
+      </div>
+      <a href="${item.link}" target="_blank">${item.title}</a>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+document.getElementById("refreshBtn").addEventListener("click", loadFeed);
+
+document.getElementById("toggleFeedBtn").addEventListener("click", function() {
+  const hidden = document.querySelectorAll(".hidden-news");
+  const isHidden = hidden[0]?.style.display !== "block";
+
+  hidden.forEach(el => {
+    el.style.display = isHidden ? "block" : "none";
+  });
+
+  this.textContent = isHidden ? "Ver menos ▲" : "Ver mais ▼";
+});
+
+/* ================= CAPAS ================= */
+
+async function loadCover(endpoint, imgId) {
+  const res = await fetch(endpoint);
+  const data = await res.json();
+  const img = document.getElementById(imgId);
+  img.src = data.cover;
+  img.onclick = () => window.open(data.coverLink, "_blank");
+}
+
+loadCover("/api/record","record-cover");
+loadCover("/api/bola","bola-cover");
+loadCover("/api/ojogo","ojogo-cover");
+
+loadFeed();
+
+/* ================= NAV ACTIVE ================= */
+
+const path = window.location.pathname;
+
+if (path === "/" || path === "/index.html") {
+  document.getElementById("nav-feed").classList.add("active");
+}
+
+if (path.includes("jogos")) {
+  document.getElementById("nav-jogos").classList.add("active");
+}
+
+if (path.includes("mercado")) {
+  document.getElementById("nav-mercado").classList.add("active");
+}
+
+/* ================= PWA ================= */
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js");
+}
+
 </script>
 
 </body>

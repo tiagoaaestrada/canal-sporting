@@ -166,14 +166,14 @@ body {
 
 /* ================= RESPONSIVO ================= */
 
-@media (max-width: 1000px) {
+  @media (max-width: 1000px) {
 
   /* ===== LAYOUT ===== */
 
   .layout {
     grid-template-columns: 1fr;
     margin: 20px auto;
-    padding: 0 15px 40px 15px;
+    padding: 0;
     gap: 25px;
   }
 
@@ -193,14 +193,13 @@ body {
     font-size: 13px;
   }
 
-  /* ===== COVERS MOBILE STYLE ===== */
+  /* ===== COVERS FULL SCREEN ===== */
 
   .covers-column {
     flex-direction: row;
     overflow-x: auto;
-    gap: 15px;
-    padding-bottom: 5px;
     scroll-snap-type: x mandatory;
+    gap: 0;
   }
 
   .covers-column::-webkit-scrollbar {
@@ -208,33 +207,30 @@ body {
   }
 
   .cover-box {
-    min-width: 200px;
+    min-width: 100vw;
     flex-shrink: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 15px;
     scroll-snap-align: start;
-    padding: 14px;
   }
 
   .cover-box h3 {
-    font-size: 14px;
+    font-size: 15px;
+    margin-bottom: 10px;
+  }
+
+  .cover-box img {
+    width: 100%;
+    border-radius: 12px;
   }
 
   /* ===== FEED ===== */
 
   .feed {
+    margin: 0 15px;
     padding: 20px;
     border-radius: 16px;
-  }
-
-  .feed-header h2 {
-    font-size: 17px;
-  }
-
-  .feed-item {
-    padding: 16px 0;
-  }
-
-  .feed-item a {
-    font-size: 15px;
   }
 
 }

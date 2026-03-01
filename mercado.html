@@ -6,8 +6,8 @@
 <title>Transferências - Canal Sporting</title>
 
 <style>
-  
-  /* ================= GLOBAL ================= */
+
+/* ================= GLOBAL ================= */
 
 body {
   font-family: Arial, Helvetica, sans-serif;
@@ -15,6 +15,7 @@ body {
   margin: 0;
   font-size: 14px;
 }
+
 /* ================= HEADER ================= */
 
 .main-header {
@@ -51,88 +52,119 @@ body {
   border-bottom: 3px solid #0a5c2a;
 }
 
-  /* ================= LAYOUT ================= */
-
-.layout {
-  max-width: 1300px;
-  margin: 40px auto;
-  padding: 0 25px 60px 25px;
-  display: grid;
-  grid-template-columns: 420px 1fr 260px;
-  gap: 35px;
-}
-
-.section {
-  background: white;
-  padding: 22px;
-  border-radius: 18px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-}
-
-.section h2 {
-  margin-top: 0;
-  font-size: 18px;
-
-@media (max-width: 768px) {
-  .header-nav {
-    gap: 18px;
-    font-size: 14px;
-  }
-}
-  
-body {
-  font-family: Arial;
-  background: #f5f7f6;
-  margin: 0;
-  padding: 0;
-}
-
-h1 {
-  text-align: center;
-  color: #0a5c2a;
-  margin: 20px 0;
-}
-
-.top-nav {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  background: white;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-}
-
-.top-nav a {
-  text-decoration: none;
-  font-weight: 600;
-  color: #0a5c2a;
-}
+/* ================= CONTAINER ================= */
 
 .container {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px 60px 20px;
 }
 
-.mercado-section {
+/* ================= MERCADO CARDS ================= */
+
+.mercado-card {
   background: white;
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 20px;
+  border-radius: 18px;
   box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  margin-bottom: 30px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.mercado-section a {
-  display: block;
+.mercado-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.15);
+}
+
+/* TOP */
+
+.card-top {
+  display: flex;
+  gap: 20px;
+  padding: 22px;
+  align-items: center;
+}
+
+.player-photo {
+  width: 110px;
+  height: 110px;
+  border-radius: 14px;
+  object-fit: cover;
+  background: #eee;
+}
+
+.player-info h2 {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  color: #1f6f8b;
+}
+
+.player-info div {
   margin-bottom: 6px;
+  color: #333;
+  font-size: 14px;
+}
+
+/* BOTTOM */
+
+.card-bottom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  padding: 20px;
+  border-top: 1px solid #eee;
+}
+
+.club-logo {
+  height: 70px;
+}
+
+.transfer-arrow {
+  font-size: 28px;
+  color: #1f6f8b;
+}
+
+/* LINK FOOTER */
+
+.card-link {
+  display: block;
+  text-align: center;
+  padding: 12px;
+  background: #f7f7f7;
   text-decoration: none;
   color: #333;
+  font-weight: 600;
+  font-size: 13px;
+  border-top: 1px solid #eee;
 }
+
+.card-link:hover {
+  background: #e6f5ec;
+  color: #0a5c2a;
+}
+
+/* ================= MOBILE ================= */
+
+@media (max-width: 768px) {
+
+  .card-top {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .card-bottom {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+}
+
 </style>
 </head>
 
 <body>
-  
+
 <header class="main-header">
 
   <div class="header-title">
@@ -140,68 +172,86 @@ h1 {
   </div>
 
   <nav class="header-nav">
-    <a href="/" id="nav-feed">Feed</a>
-    <a href="/jogos.html" id="nav-jogos">Jogos</a>
-    <a href="/mercado.html" id="nav-mercado">Transferências</a>
+    <a href="/">Feed</a>
+    <a href="/jogos.html">Jogos</a>
+    <a href="/mercado.html" class="active">Transferências</a>
   </nav>
 
 </header>
 
 <div class="container">
-
-  <div class="mercado-section">
-    <h3>Sporting</h3>
-    <div id="mercado-sporting"></div>
-  </div>
-
-  <div class="mercado-section">
-    <h3>Nacional</h3>
-    <div id="mercado-nacional"></div>
-  </div>
-
-  <div class="mercado-section">
-    <h3>Internacional</h3>
-    <div id="mercado-internacional"></div>
-  </div>
-
+  <div id="mercadoCards">A carregar...</div>
 </div>
 
 <script>
-async function loadMercado() {
-  const res = await fetch("/api/mercado");
-  const data = await res.json();
 
-  ["sporting","nacional","internacional"].forEach(section => {
-    const container = document.getElementById("mercado-"+section);
+async function loadMercado() {
+
+  try {
+
+    const res = await fetch("/api/mercado");
+    const data = await res.json();
+
+    const container = document.getElementById("mercadoCards");
     container.innerHTML = "";
-    data[section].forEach(item => {
-      const a = document.createElement("a");
-      a.href = item.link;
-      a.target = "_blank";
-      a.textContent = `${item.title} (${item.formattedDate})`;
-      container.appendChild(a);
+
+    const todos = [
+      ...(data.sporting || []),
+      ...(data.nacional || []),
+      ...(data.internacional || [])
+    ];
+
+    if (!todos.length) {
+      container.innerHTML = "<div style='color:#777;'>Sem rumores disponíveis.</div>";
+      return;
+    }
+
+    todos.forEach(item => {
+
+      const card = document.createElement("div");
+      card.className = "mercado-card";
+
+      card.innerHTML = `
+        <div class="card-top">
+          <img src="/player-placeholder.png" class="player-photo">
+
+          <div class="player-info">
+            <h2>${item.title}</h2>
+            <div><strong>Data:</strong> ${item.formattedDate}</div>
+            <div><strong>Categoria:</strong> Mercado</div>
+          </div>
+        </div>
+
+        <div class="card-bottom">
+          <img src="/scp.png" class="club-logo">
+          <div class="transfer-arrow">➜</div>
+          <img src="/club.png" class="club-logo">
+        </div>
+
+        <a href="${item.link}" target="_blank" class="card-link">
+          Ver notícia completa
+        </a>
+      `;
+
+      container.appendChild(card);
     });
-  });
+
+  } catch (err) {
+    document.getElementById("mercadoCards").innerHTML =
+      "<div style='color:red;'>Erro ao carregar mercado.</div>";
+  }
 }
 
 loadMercado();
 
-/* ================= NAV ACTIVE ================= */
+/* NAV ACTIVE */
 
 const path = window.location.pathname;
 
-if (path === "/" || path === "/index.html") {
-  document.getElementById("nav-feed")?.classList.add("active");
-}
-
-if (path.includes("jogos")) {
-  document.getElementById("nav-jogos")?.classList.add("active");
-}
-
 if (path.includes("mercado")) {
-  document.getElementById("nav-mercado")?.classList.add("active");
+  document.querySelector(".header-nav a[href='/mercado.html']").classList.add("active");
 }
-  
+
 </script>
 
 </body>

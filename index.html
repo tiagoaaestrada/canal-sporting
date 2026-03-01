@@ -331,21 +331,25 @@ body {
 async function loadFeed() {
   const res = await fetch("/api/feed");
   const data = await res.json();
-  console.log(data);
   const container = document.getElementById("feed-container");
   container.innerHTML = "";
 
   const today = new Date();
-  const todayISO = today.toISOString().split("T")[0]; // yyyy-mm-dd
+  const todayDay = today.getDate();
+  const todayMonth = today.getMonth();
+  const todayYear = today.getFullYear();
 
   data.forEach(item => {
     const div = document.createElement("div");
     div.className = "feed-item";
 
-    // ⚠️ TROCA AQUI se o campo tiver outro nome
-    const itemISO = item.date?.split("T")[0];
+    // Converter timestamp para data real
+    const itemDate = new Date(item.timestamp);
 
-    const isToday = itemISO === todayISO;
+    const isToday =
+      itemDate.getDate() === todayDay &&
+      itemDate.getMonth() === todayMonth &&
+      itemDate.getFullYear() === todayYear;
 
     if (!isToday) {
       div.classList.add("hidden-news");

@@ -597,30 +597,98 @@ function renderClassificacao(lista) {
 
   container.innerHTML = html;
 }
-/* ================= JOGOS EXTRA MANUAIS ================= */
+/* ================= JOGOS HISTÓRICOS MANUAIS ================= */
 
 const jogosExtra = [
+
+  /* ================= SUPERTAÇA ================= */
+
   {
-    date: "2025-07-30T20:45:00",
+    date: "2025-07-31T20:45:00",
     homeTeam: "Sporting Clube de Portugal",
-    awayTeam: "FC Porto",
-    competition: "Supertaça",
-    score: { home: 2, away: 1 }
+    awayTeam: "SL Benfica",
+    competition: "Supertaça Cândido de Oliveira",
+    score: { home: 0, away: 1 }
   },
+
+  /* ================= AMIGÁVEIS ================= */
+
   {
-    date: "2025-01-10T20:00:00",
+    date: "2025-07-25T20:00:00",
     homeTeam: "Sporting Clube de Portugal",
-    awayTeam: "SC Braga",
-    competition: "Taça da Liga",
+    awayTeam: "Villarreal",
+    competition: "Amigável",
     score: { home: 1, away: 0 }
   },
+
   {
-    date: "2025-07-20T19:00:00",
+    date: "2025-07-21T20:00:00",
     homeTeam: "Sporting Clube de Portugal",
-    awayTeam: "Sevilla",
+    awayTeam: "Sunderland",
     competition: "Amigável",
+    score: { home: 1, away: 0 }
+  },
+
+  {
+    date: "2025-07-16T20:00:00",
+    homeTeam: "Sporting Clube de Portugal",
+    awayTeam: "Celtic",
+    competition: "Amigável",
+    score: { home: 0, away: 2 }
+  },
+
+  /* ================= TAÇA DE PORTUGAL ================= */
+
+  {
+    date: "2025-10-18T20:00:00",
+    homeTeam: "Paços Ferreira",
+    awayTeam: "Sporting Clube de Portugal",
+    competition: "Taça de Portugal",
+    score: { home: 2, away: 3 }
+  },
+
+  {
+    date: "2025-11-22T20:00:00",
+    homeTeam: "Sporting Clube de Portugal",
+    awayTeam: "Marinhense",
+    competition: "Taça de Portugal",
+    score: { home: 3, away: 0 }
+  },
+
+  {
+    date: "2025-12-18T20:00:00",
+    homeTeam: "Santa Clara",
+    awayTeam: "Sporting Clube de Portugal",
+    competition: "Taça de Portugal",
+    score: { home: 2, away: 3 }
+  },
+
+  {
+    date: "2026-02-05T20:45:00",
+    homeTeam: "Sporting Clube de Portugal",
+    awayTeam: "AFS",
+    competition: "Taça de Portugal",
     score: { home: 3, away: 2 }
+  },
+
+  /* ================= TAÇA DA LIGA ================= */
+
+  {
+    date: "2025-10-28T20:00:00",
+    homeTeam: "Sporting Clube de Portugal",
+    awayTeam: "Alverca",
+    competition: "Taça da Liga",
+    score: { home: 5, away: 1 }
+  },
+
+  {
+    date: "2026-01-06T20:00:00",
+    homeTeam: "Sporting Clube de Portugal",
+    awayTeam: "Vitória SC",
+    competition: "Taça da Liga",
+    score: { home: 1, away: 2 }
   }
+
 ];
   /* ================= CALCULAR ESTATÍSTICAS POR COMPETIÇÃO ================= */
 

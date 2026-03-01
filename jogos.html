@@ -703,11 +703,24 @@ function calcularEstatisticasPorCompeticao(listaJogos) {
     if (!stats[comp]) {
       stats[comp] = {
         jogos: 0,
+
         vitorias: 0,
         empates: 0,
         derrotas: 0,
+
+        vitoriasCasa: 0,
+        vitoriasFora: 0,
+        empatesCasa: 0,
+        empatesFora: 0,
+        derrotasCasa: 0,
+        derrotasFora: 0,
+
         golosMarcados: 0,
-        golosSofridos: 0
+        golosSofridos: 0,
+        golosMarcadosCasa: 0,
+        golosMarcadosFora: 0,
+        golosSofridosCasa: 0,
+        golosSofridosFora: 0
       };
     }
 
@@ -716,16 +729,36 @@ function calcularEstatisticasPorCompeticao(listaJogos) {
     const gs = sportingHome ? j.score.away : j.score.home;
 
     stats[comp].jogos++;
+
     stats[comp].golosMarcados += gm;
     stats[comp].golosSofridos += gs;
 
-    if (gm > gs) stats[comp].vitorias++;
-    else if (gm === gs) stats[comp].empates++;
-    else stats[comp].derrotas++;
+    if (sportingHome) {
+      stats[comp].golosMarcadosCasa += gm;
+      stats[comp].golosSofridosCasa += gs;
+    } else {
+      stats[comp].golosMarcadosFora += gm;
+      stats[comp].golosSofridosFora += gs;
+    }
+
+    if (gm > gs) {
+      stats[comp].vitorias++;
+      sportingHome ? stats[comp].vitoriasCasa++ : stats[comp].vitoriasFora++;
+    }
+    else if (gm === gs) {
+      stats[comp].empates++;
+      sportingHome ? stats[comp].empatesCasa++ : stats[comp].empatesFora++;
+    }
+    else {
+      stats[comp].derrotas++;
+      sportingHome ? stats[comp].derrotasCasa++ : stats[comp].derrotasFora++;
+    }
+
   });
 
   return stats;
 }
+  
 /* =================  TUDO ================= */
 
 async function carregarTudo() {
@@ -820,7 +853,6 @@ setInterval(carregarTudo, 300000);
 function renderEstatisticasSeparadas(stats) {
 
   const container = document.getElementById("estatisticasContainer");
-
   let html = "";
 
   Object.keys(stats).forEach(comp => {
@@ -828,14 +860,41 @@ function renderEstatisticasSeparadas(stats) {
     const e = stats[comp];
 
     html += `
-      <div style="margin-bottom:18px; padding-bottom:12px; border-bottom:1px solid #eee;">
-        <h3 style="margin:0 0 8px 0; font-size:14px;">${comp}</h3>
+      <div style="margin-bottom:22px; padding-bottom:15px; border-bottom:1px solid #eee;">
+
+        <h3 style="margin:0 0 10px 0; font-size:15px;">
+          ${comp}
+        </h3>
+
         <div><strong>Jogos:</strong> ${e.jogos}</div>
         <div><strong>Vitórias:</strong> ${e.vitorias}</div>
         <div><strong>Empates:</strong> ${e.empates}</div>
         <div><strong>Derrotas:</strong> ${e.derrotas}</div>
-        <div><strong>Golos Marcados:</strong> ${e.golosMarcados}</div>
-        <div><strong>Golos Sofridos:</strong> ${e.golosSofridos}</div>
+
+        <div style="margin-top:6px;">
+          <strong>Casa:</strong> 
+          V ${e.vitoriasCasa} | 
+          E ${e.empatesCasa} | 
+          D ${e.derrotasCasa}
+        </div>
+
+        <div>
+          <strong>Fora:</strong> 
+          V ${e.vitoriasFora} | 
+          E ${e.empatesFora} | 
+          D ${e.derrotasFora}
+        </div>
+
+        <div style="margin-top:6px;">
+          <strong>Golos Marcados:</strong> ${e.golosMarcados}
+          (Casa ${e.golosMarcadosCasa} | Fora ${e.golosMarcadosFora})
+        </div>
+
+        <div>
+          <strong>Golos Sofridos:</strong> ${e.golosSofridos}
+          (Casa ${e.golosSofridosCasa} | Fora ${e.golosSofridosFora})
+        </div>
+
       </div>
     `;
   });

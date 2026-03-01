@@ -237,14 +237,61 @@ th, td {
   }
 
 }
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
 
+.popup-box {
+  background: white;
+  padding: 22px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  animation: popupFade 0.3s ease;
+}
+
+.popup-box h3 {
+  margin-top: 0;
+  color: #0a5c2a;
+}
+
+.popup-box button {
+  margin-top: 12px;
+  background: #0a5c2a;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+@keyframes popupFade {
+  from { transform: translateY(15px); opacity:0; }
+  to { transform: translateY(0); opacity:1; }
+}
 .hidden-stat {
   display: none;
 }
   
 </style>
 </head>
-
+  
+<div id="matchPopup" class="popup-overlay" style="display:none;">
+  <div class="popup-box">
+    <h3>🔔 Dia de Jogo!</h3>
+    <p id="popupContent"></p>
+    <button onclick="fecharPopup()">Fechar</button>
+  </div>
+</div>
+  
 <body>
 
 <header class="main-header">
@@ -843,7 +890,9 @@ renderEstatisticasSeparadas(estatisticasPorComp);
   }
 }
 
-if (window.innerWidth <= 900) {
+  verificarDiaDeJogo(proximos);
+
+  if (window.innerWidth <= 900) {
   mostrarTab("jogos");
 }
   
@@ -1006,6 +1055,44 @@ function ativarToggleEstatisticas() {
 
     btn.textContent = expandido ? "Ver Menos" : "Ver Mais";
   });
+}
+
+function verificarDiaDeJogo(listaProximos) {
+
+  const hoje = new Date();
+  const hojeISO = hoje.toISOString().split("T")[0];
+
+  const jogoHoje = listaProximos.find(j => {
+    return j.date.startsWith(hojeISO);
+  });
+
+  if (!jogoHoje) return;
+
+  // evitar repetir no mesmo dia
+  const jaMostrado = localStorage.getItem("popupJogo");
+  if (jaMostrado === hojeISO) return;
+
+  const adversario =
+    j.homeTeam.includes("Sporting")
+      ? j.awayTeam
+      : j.homeTeam;
+
+  const hora = new Date(jogoHoje.date)
+    .toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+
+  document.getElementById("popupContent").innerHTML = `
+    <strong>${jogoHoje.competition}</strong><br><br>
+    Sporting CP vs ${adversario}<br>
+    🕒 ${hora}
+  `;
+
+  document.getElementById("matchPopup").style.display = "flex";
+
+  localStorage.setItem("popupJogo", hojeISO);
+}
+
+function fecharPopup() {
+  document.getElementById("matchPopup").style.display = "none";
 }
   
 </script>

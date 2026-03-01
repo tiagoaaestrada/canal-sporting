@@ -334,6 +334,11 @@ function getCompetitionClass(name) {
     return "comp-liga-taca";
 
   return "comp-liga";
+    if (n.includes("supertaça") || n.includes("supertaca"))
+      return "comp-liga-taca";
+    
+    if (n.includes("amig"))
+      return "comp-liga";
 }
 
 function normalizarNomeEquipa(nome) {
@@ -591,7 +596,32 @@ function renderClassificacao(lista) {
 
   container.innerHTML = html;
 }
+/* ================= JOGOS EXTRA MANUAIS ================= */
 
+const jogosExtra = [
+  {
+    date: "2025-07-30T20:45:00",
+    homeTeam: "Sporting Clube de Portugal",
+    awayTeam: "FC Porto",
+    competition: "Supertaça",
+    score: { home: 2, away: 1 }
+  },
+  {
+    date: "2025-01-10T20:00:00",
+    homeTeam: "Sporting Clube de Portugal",
+    awayTeam: "SC Braga",
+    competition: "Taça da Liga",
+    score: { home: 1, away: 0 }
+  },
+  {
+    date: "2025-07-20T19:00:00",
+    homeTeam: "Sporting Clube de Portugal",
+    awayTeam: "Sevilla",
+    competition: "Amigável",
+    score: { home: 3, away: 2 }
+  }
+];
+  
 /* =================  TUDO ================= */
 
 async function carregarTudo() {
@@ -611,6 +641,9 @@ async function carregarTudo() {
       var anteriores = dataJogos.jogos.jogados
         ? dataJogos.jogos.jogados.slice()
         : [];
+      
+      // 🔥 JUNTAR JOGOS EXTRA
+      anteriores = anteriores.concat(jogosExtra);
 
       proximos.sort(function(a,b){
         return new Date(a.date) - new Date(b.date);

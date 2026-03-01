@@ -24,14 +24,14 @@ body {
 .main-header {
   background: white;
   border-bottom: 1px solid #eee;
-  padding: 16px 0 6px 0;
+  padding: 18px 0 8px 0;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 .header-title a {
   text-decoration: none;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: bold;
   color: #0a5c2a;
 }
@@ -39,16 +39,15 @@ body {
 .header-nav {
   display: flex;
   justify-content: center;
-  gap: 22px;
-  margin-top: 8px;
+  gap: 30px;
+  margin-top: 12px;
 }
 
-.-nav a {
+.header-nav a {
   text-decoration: none;
   font-weight: 600;
   color: #666;
   padding-bottom: 6px;
-  font-size: 13px;
 }
 
 .header-nav a.active {
@@ -60,11 +59,23 @@ body {
 
 .layout {
   max-width: 1300px;
-  margin: 30px auto;
-  padding: 0 20px 40px 20px;
+  margin: 40px auto;
+  padding: 0 25px 60px 25px;
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 420px 1fr 260px;
   gap: 35px;
+}
+
+.section {
+  background: white;
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.section h2 {
+  margin-top: 0;
+  font-size: 18px;
 }
 
 /* ================= CAPAS DESKTOP ================= */

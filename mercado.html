@@ -55,18 +55,12 @@ body {
 /* ================= CONTAINER ================= */
 
 .container {
-  max-width: 1100px;
+  max-width: 950px;
   margin: 40px auto;
   padding: 0 20px 60px 20px;
 }
 
 /* ================= MERCADO CARDS ================= */
-
-.container {
-  max-width: 950px;
-  margin: 40px auto;
-  padding: 0 20px 60px 20px;
-}
 
 .mercado-card {
   background: white;
@@ -80,8 +74,6 @@ body {
 .mercado-card:hover {
   transform: translateY(-3px);
 }
-
-/* TOP */
 
 .card-top {
   display: flex;
@@ -114,13 +106,9 @@ body {
   color: #555;
 }
 
-/* DIVIDER */
-
 .card-divider {
   border-top: 1px solid #eee;
 }
-
-/* BOTTOM */
 
 .card-bottom {
   display: flex;
@@ -142,8 +130,6 @@ body {
   color: #1f6f8b;
 }
 
-/* FOOTER LINK */
-
 .card-link {
   display: block;
   text-align: center;
@@ -162,19 +148,6 @@ body {
 }
 
 /* MOBILE */
-
-@media (max-width: 768px) {
-  .card-top {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .card-bottom {
-    gap: 20px;
-  }
-}
-
-/* ================= MOBILE ================= */
 
 @media (max-width: 768px) {
 
@@ -196,17 +169,14 @@ body {
 <body>
 
 <header class="main-header">
-
   <div class="header-title">
     <a href="/">Canal Sporting</a>
   </div>
-
   <nav class="header-nav">
     <a href="/">Feed</a>
     <a href="/jogos.html">Jogos</a>
     <a href="/mercado.html" class="active">Transferências</a>
   </nav>
-
 </header>
 
 <div class="container">
@@ -241,31 +211,30 @@ async function loadMercado() {
       const card = document.createElement("div");
       card.className = "mercado-card";
 
-      ccard.innerHTML = `
-  <div class="card-top">
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="player-photo">📰</div>
 
-    <div class="player-photo">📰</div>
+          <div class="player-info">
+            <h2>${item.title}</h2>
+            <div><strong>Data:</strong> ${item.formattedDate}</div>
+            <div><strong>Categoria:</strong> Mercado</div>
+          </div>
+        </div>
 
-    <div class="player-info">
-      <h2>${item.title}</h2>
-      <div><strong>Data:</strong> ${item.formattedDate}</div>
-      <div><strong>Categoria:</strong> Mercado</div>
-    </div>
+        <div class="card-divider"></div>
 
-  </div>
+        <div class="card-bottom">
+          <div class="club-placeholder"></div>
+          <div class="transfer-arrow">➜</div>
+          <div class="club-placeholder"></div>
+        </div>
 
-  <div class="card-divider"></div>
+        <a href="${item.link}" target="_blank" class="card-link">
+          Ver notícia completa
+        </a>
+      `;
 
-  <div class="card-bottom">
-    <div class="club-placeholder"></div>
-    <div class="transfer-arrow">➜</div>
-    <div class="club-placeholder"></div>
-  </div>
-
-  <a href="${item.link}" target="_blank" class="card-link">
-    Ver notícia completa
-  </a>
-`;
       container.appendChild(card);
     });
 
@@ -276,14 +245,6 @@ async function loadMercado() {
 }
 
 loadMercado();
-
-/* NAV ACTIVE */
-
-const path = window.location.pathname;
-
-if (path.includes("mercado")) {
-  document.querySelector(".header-nav a[href='/mercado.html']").classList.add("active");
-}
 
 </script>
 

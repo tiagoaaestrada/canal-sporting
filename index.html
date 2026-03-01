@@ -43,7 +43,7 @@ body {
   margin-top: 8px;
 }
 
-.header-nav a {
+.-nav a {
   text-decoration: none;
   font-weight: 600;
   color: #666;
@@ -155,13 +155,7 @@ body {
 
 /* ================= MOBILE ================= */
 
-/* ================= MOBILE ================= */
-
 @media (max-width: 900px) {
-
-  body {
-    background: #f5f7f6;
-  }
 
   .layout {
     grid-template-columns: 1fr;
@@ -171,32 +165,20 @@ body {
   }
 
   .covers-column {
-    flex-direction: column;
-    gap: 18px;
+    flex-direction: row;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    gap: 15px;
+  }
+
+  .covers-column::-webkit-scrollbar {
+    display: none;
   }
 
   .cover-box {
-    padding: 14px;
-    border-radius: 14px;
-    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
-  }
-
-  .cover-box h3 {
-    font-size: 14px;
-    margin-bottom: 8px;
-  }
-
-  .cover-box img {
-    border-radius: 8px;
-  }
-
-  .feed {
-    padding: 20px;
-    border-radius: 16px;
-  }
-
-  .feed-header h2 {
-    font-size: 17px;
+    min-width: 80%;
+    flex-shrink: 0;
+    scroll-snap-align: start;
   }
 
 }
@@ -238,17 +220,14 @@ body {
 <body>
 
 <header class="main-header">
-
   <div class="header-title">
     <a href="/">Canal Sporting</a>
   </div>
-
   <nav class="header-nav">
     <a href="/" id="nav-feed">Feed</a>
     <a href="/jogos.html" id="nav-jogos">Jogos</a>
     <a href="/mercado.html" id="nav-mercado">Transferências</a>
   </nav>
-
 </header>
 
 <div class="layout">

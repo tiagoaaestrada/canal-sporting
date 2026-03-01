@@ -195,36 +195,37 @@ body {
 
   /* ===== COVERS FULL SCREEN ===== */
 
-  .covers-column {
-    flex-direction: row;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    gap: 0;
-  }
+/* ===== COVERS FULL SCREEN CORRETO ===== */
 
-  .covers-column::-webkit-scrollbar {
-    display: none;
-  }
+.covers-column {
+  flex-direction: row;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 0;
+}
 
-  .cover-box {
-    min-width: 100vw;
-    flex-shrink: 0;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 15px;
-    scroll-snap-align: start;
-  }
+.covers-column::-webkit-scrollbar {
+  display: none;
+}
 
-  .cover-box h3 {
-    font-size: 15px;
-    margin-bottom: 10px;
-  }
+.cover-box {
+  min-width: 100vw;
+  height: calc(100vh - 120px); /* desconta header aproximado */
+  flex-shrink: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 10px 15px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
 
-  .cover-box img {
-    width: 100%;
-    border-radius: 12px;
-  }
-
+.cover-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
   /* ===== FEED ===== */
 
   .feed {

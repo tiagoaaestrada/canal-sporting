@@ -333,12 +333,13 @@ function getCompetitionClass(name) {
   if (n.includes("taça da liga") || n.includes("taca da liga"))
     return "comp-liga-taca";
 
+  if (n.includes("supertaça") || n.includes("supertaca"))
+    return "comp-liga-taca";
+
+  if (n.includes("amig"))
+    return "comp-liga";
+
   return "comp-liga";
-    if (n.includes("supertaça") || n.includes("supertaca"))
-      return "comp-liga-taca";
-    
-    if (n.includes("amig"))
-      return "comp-liga";
 }
 
 function normalizarNomeEquipa(nome) {
@@ -692,46 +693,11 @@ async function carregarTudo() {
       render(anteriores, "resultadosContainer", true);
 
       // 🔥 CALCULAR ESTATÍSTICAS POR COMPETIÇÃO
-const todasCompeticoes = anteriores.concat(proximos);
-const estatisticasPorComp = calcularEstatisticasPorCompeticao(anteriores);
+const todosJogosFinalizados = anteriores;
+const estatisticasPorComp = calcularEstatisticasPorCompeticao(todosJogosFinalizados);
 
 renderEstatisticasSeparadas(estatisticasPorComp);
     
-      // Juntar jogos extra se existirem
-
-      anteriores = anteriores.concat(jogosExtra || []);
-    }
-
-    if (dataJogos && dataJogos.estatisticas) {
-      var e = dataJogos.estatisticas;
-
-      document.getElementById("estatisticasContainer").innerHTML = `
-        <div><strong>Jogos:</strong> ${e.jogos}</div>
-        <div><strong>Vitórias:</strong> ${e.vitorias}</div>
-        <div><strong>Empates:</strong> ${e.empates}</div>
-        <div><strong>Derrotas:</strong> ${e.derrotas}</div>
-        <div><strong>Golos Marcados:</strong> ${e.golosMarcados}</div>
-        <div><strong>Golos Sofridos:</strong> ${e.golosSofridos}</div>
-
-        <div style="margin-top:15px;">
-          <a 
-            href="https://www.ligaportugal.pt/team/303/sporting-cp/ligaportugalbetclic/20252026?tab=stats" 
-            target="_blank"
-            style="
-              display:inline-block;
-              background:#0a5c2a;
-              color:white;
-              padding:8px 12px;
-              border-radius:8px;
-              text-decoration:none;
-              font-size:12px;
-              font-weight:600;
-            "
-          >
-            Ver Estatísticas Oficiais
-          </a>
-        </div>
-      `;
     }
 
   } catch (err) {

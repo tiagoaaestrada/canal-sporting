@@ -166,20 +166,39 @@ body {
 
 /* ================= MOBILE ================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1000px) {
+
+  body {
+    background: #000;
+  }
 
   .layout {
     grid-template-columns: 1fr;
-    margin: 20px auto;
-    padding: 0 15px 40px 15px;
-    gap: 20px;
+    margin: 0;
+    padding: 0;
+    gap: 10px; /* MAIS COMPACTO */
   }
+
+  .main-header {
+    padding: 14px 0 6px 0;
+  }
+
+  .header-title a {
+    font-size: 20px;
+  }
+
+  .header-nav {
+    gap: 16px;
+    font-size: 12px;
+  }
+
+  /* ===== COVERS ===== */
 
   .covers-column {
     flex-direction: row;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    gap: 15px;
+    gap: 0;
   }
 
   .covers-column::-webkit-scrollbar {
@@ -187,198 +206,41 @@ body {
   }
 
   .cover-box {
-    min-width: 80%;
-    flex-shrink: 0;
+    min-width: 100vw;
+    height: auto;
+    background: #000;
+    padding: 15px 10px 5px 10px; /* menos espaço inferior */
+    border-radius: 0;
+    box-shadow: none;
     scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cover-box h3 {
+    color: white;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .cover-box img {
+    max-width: 88%;
+    max-height: 75vh;
+    object-fit: contain;
+    border-radius: 6px;
+  }
+
+  /* ===== FEED ===== */
+
+  .feed {
+    background: white;
+    margin: 5px 12px 25px 12px; /* muito mais próximo das capas */
+    padding: 18px;
+    border-radius: 14px;
   }
 
 }
-/* ===== FEED EXPANSION ===== */
-
-.feed-controls {
-  text-align: center;
-  margin-top: 10px;
-}
-
-#toggleFeedBtn {
-  background: none;
-  border: none;
-  color: #0a5c2a;
-  font-weight: 600;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-#toggleFeedBtn span {
-  margin-left: 5px;
-}
-
-.hidden-news {
-  display: none;
-}
-
-.feed-collapsed .hidden-news {
-  display: none;
-}
-
-.feed-expanded .hidden-news {
-  display: block;
-}
-</style>
-  
-</head>
-
-<body>
-
-<header class="main-header">
-  <div class="header-title">
-    <a href="/">Canal Sporting</a>
-  </div>
-  <nav class="header-nav">
-    <a href="/" id="nav-feed">Feed</a>
-    <a href="/jogos.html" id="nav-jogos">Jogos</a>
-    <a href="/mercado.html" id="nav-mercado">Transferências</a>
-  </nav>
-</header>
-
-<div class="layout">
-
-  <!-- CAPAS ESQUERDA -->
-  <div class="covers-column">
-
-    <!-- 1º Record -->
-    <div class="cover-box">
-      <h3>Record</h3>
-      <img id="record-cover" src="/record.png">
-    </div>
-
-    <!-- 2º A Bola -->
-    <div class="cover-box">
-      <h3>A Bola</h3>
-      <img id="bola-cover" src="/abola.png">
-    </div>
-
-    <!-- 3º O Jogo -->
-    <div class="cover-box">
-      <h3>O Jogo</h3>
-      <img id="ojogo-cover" src="/ojogo.png">
-    </div>
-
-  </div>
-
-  <!-- FEED DIREITA -->
-  <div class="feed">
-
-    <div class="feed-header">
-      <h2>Feed Geral Sporting</h2>
-      <button id="refreshBtn">Atualizar</button>
-    </div>
-
-    <div id="feed-container">A carregar...</div>
-    
-    <div class="feed-controls">
-      <button id="toggleFeedBtn">
-        Ver mais <span id="feedArrow">▼</span>
-      </button>
-    </div>
-  </div>
-
-</div>
-
-<script>
-
-/* FEED */
-async function loadFeed() {
-  const res = await fetch("/api/feed");
-  const data = await res.json();
-  const container = document.getElementById("feed-container");
-  container.innerHTML = "";
-
-  const today = new Date();
-  const todayDay = today.getDate();
-  const todayMonth = today.getMonth();
-  const todayYear = today.getFullYear();
-
-  data.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "feed-item";
-
-    // Converter timestamp para data real
-    const itemDate = new Date(item.timestamp);
-
-    const isToday =
-      itemDate.getDate() === todayDay &&
-      itemDate.getMonth() === todayMonth &&
-      itemDate.getFullYear() === todayYear;
-
-    if (!isToday) {
-      div.classList.add("hidden-news");
-    }
-
-    div.innerHTML = `
-      <div class="source">
-        ${item.source} • ${item.formattedDate}
-      </div>
-      <a href="${item.link}" target="_blank">${item.title}</a>
-    `;
-
-    container.appendChild(div);
-  });
-
-  container.classList.add("feed-collapsed");
-}
-
-document.getElementById("refreshBtn").addEventListener("click", loadFeed);
-
-/* CAPAS */
-async function loadCover(endpoint, imgId) {
-  const res = await fetch(endpoint);
-  const data = await res.json();
-  const img = document.getElementById(imgId);
-  img.src = data.cover;
-  img.onclick = () => window.open(data.coverLink, "_blank");
-}
-
-loadCover("/api/record","record-cover");
-loadCover("/api/bola","bola-cover");
-loadCover("/api/ojogo","ojogo-cover");
-
-loadFeed();
-
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js");
-}
-
-/* NAV ACTIVE */
-
-const path = window.location.pathname;
-
-if (path === "/" || path === "/index.html") {
-  document.getElementById("nav-feed")?.classList.add("active");
-}
-
-if (path.includes("jogos")) {
-  document.getElementById("nav-jogos")?.classList.add("active");
-}
-
-if (path.includes("mercado")) {
-  document.getElementById("nav-mercado")?.classList.add("active");
-}
-const toggleBtn = document.getElementById("toggleFeedBtn");
-const feedContainer = document.getElementById("feed-container");
-const arrow = document.getElementById("feedArrow");
-
-toggleBtn.addEventListener("click", () => {
-  if (feedContainer.classList.contains("feed-collapsed")) {
-    feedContainer.classList.remove("feed-collapsed");
-    feedContainer.classList.add("feed-expanded");
-    toggleBtn.innerHTML = 'Ver menos <span id="feedArrow">▲</span>';
-  } else {
-    feedContainer.classList.remove("feed-expanded");
-    feedContainer.classList.add("feed-collapsed");
-    toggleBtn.innerHTML = 'Ver mais <span id="feedArrow">▼</span>';
-  }
-});
 </script>
 
 </body>

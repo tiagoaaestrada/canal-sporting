@@ -195,9 +195,18 @@ body {
   }
 
   .cover-box {
-    min-width: 80%;
+    min-width: 75%;          /* largura ideal no mobile */
+    max-width: 320px;        /* evita exageros em ecrãs maiores */
     flex-shrink: 0;
     scroll-snap-align: start;
+    padding: 14px;
+  }
+
+  .cover-box img {
+    width: 100%;
+    height: auto;
+    max-height: 420px;       /* controla altura máxima */
+    object-fit: contain;
   }
 
 }

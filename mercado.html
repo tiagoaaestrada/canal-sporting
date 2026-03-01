@@ -13,7 +13,6 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background: #f5f7f6;
   margin: 0;
-  font-size: 14px;
 }
 
 /* ================= HEADER ================= */
@@ -55,52 +54,54 @@ body {
 /* ================= CONTAINER ================= */
 
 .container {
-  max-width: 950px;
+  max-width: 1100px;
   margin: 40px auto;
   padding: 0 20px 60px 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
 }
 
-/* ================= MERCADO CARDS ================= */
+/* ================= SECTION TITLE ================= */
+
+.section-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #0a5c2a;
+  border-bottom: 2px solid #0a5c2a;
+  padding-bottom: 5px;
+}
+
+/* ================= CARD ================= */
 
 .mercado-card {
   background: white;
-  border-radius: 18px;
+  border-radius: 16px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  margin-bottom: 35px;
+  margin-bottom: 25px;
   overflow: hidden;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
-
-.mercado-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 35px rgba(0,0,0,0.15);
-}
-
-/* TOP */
 
 .card-top {
   display: flex;
-  gap: 20px;
-  padding: 24px;
+  gap: 18px;
+  padding: 20px;
   align-items: center;
 }
 
 .player-photo {
-  width: 95px;
-  height: 95px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, #e8f5ef, #d7ece3);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:28px;
+  width: 85px;
+  height: 85px;
+  border-radius: 16px;
+  object-fit: cover;
+  background: #eee;
 }
 
 .player-info h2 {
-  margin: 0 0 8px 0;
-  font-size: 21px;
+  margin: 0 0 6px 0;
+  font-size: 18px;
   color: #0a5c2a;
-  line-height:1.35;
 }
 
 .player-info div {
@@ -108,47 +109,56 @@ body {
   color: #666;
 }
 
-/* DIVIDER */
-
-.card-divider {
-  border-top: 1px solid #f0f0f0;
+.badge {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: bold;
+  border-radius: 6px;
+  margin-top: 6px;
 }
 
-/* BOTTOM */
+.badge.oficial {
+  background: #0a5c2a;
+  color: white;
+}
+
+.badge.rumor {
+  background: #f5b400;
+  color: black;
+}
+
+.card-divider {
+  border-top: 1px solid #eee;
+}
 
 .card-bottom {
-  background: #fafafa;
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 50px;
-  padding: 28px 0;
+  gap: 25px;
+  padding: 18px 0;
 }
 
-.club-placeholder {
-  width: 75px;
-  height: 75px;
-  background: #eaeaea;
-  border-radius: 18px;
+.club-logo {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
 }
 
 .transfer-arrow {
-  font-size: 30px;
+  font-size: 22px;
   color: #0a5c2a;
 }
-
-/* FOOTER LINK */
 
 .card-link {
   display: block;
   text-align: center;
-  padding: 16px;
-  background: #f4f4f4;
+  padding: 12px;
+  background: #f7f7f7;
   text-decoration: none;
   font-weight: 600;
   color: #333;
-  border-top: 1px solid #eee;
-  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .card-link:hover {
@@ -156,20 +166,12 @@ body {
   color: white;
 }
 
-/* MOBILE */
+/* ================= MOBILE ================= */
 
-@media (max-width: 768px) {
-
-  .card-top {
-    flex-direction: column;
-    text-align: center;
+@media (max-width: 900px) {
+  .container {
+    grid-template-columns: 1fr;
   }
-
-  .card-bottom {
-    flex-direction: column;
-    gap: 18px;
-  }
-
 }
 
 </style>
@@ -189,68 +191,80 @@ body {
 </header>
 
 <div class="container">
-  <div id="mercadoCards">A carregar...</div>
+
+  <div>
+    <div class="section-title">Entradas</div>
+    <div id="entradas"></div>
+  </div>
+
+  <div>
+    <div class="section-title">Saídas</div>
+    <div id="saidas"></div>
+  </div>
+
 </div>
 
 <script>
 
 async function loadMercado() {
 
-  try {
+  const res = await fetch("/api/mercado");
+  const data = await res.json();
 
-    const res = await fetch("/api/mercado");
-    const data = await res.json();
+  const todos = [
+    ...(data.sporting || []),
+    ...(data.nacional || []),
+    ...(data.internacional || [])
+  ];
 
-    const container = document.getElementById("mercadoCards");
-    container.innerHTML = "";
+  const entradasContainer = document.getElementById("entradas");
+  const saidasContainer = document.getElementById("saidas");
 
-    const todos = [
-      ...(data.sporting || []),
-      ...(data.nacional || []),
-      ...(data.internacional || [])
-    ];
+  entradasContainer.innerHTML = "";
+  saidasContainer.innerHTML = "";
 
-    if (!todos.length) {
-      container.innerHTML = "<div style='color:#777;'>Sem rumores disponíveis.</div>";
-      return;
+  todos.forEach(item => {
+
+    const tipo = item.type || "entrada"; 
+    const status = item.status || "rumor";
+
+    const card = document.createElement("div");
+    card.className = "mercado-card";
+
+    card.innerHTML = `
+      <div class="card-top">
+        <img src="${item.playerPhoto || '/player-placeholder.png'}" class="player-photo">
+
+        <div class="player-info">
+          <h2>${item.title}</h2>
+          <div>${item.formattedDate}</div>
+          <span class="badge ${status}">
+            ${status === "oficial" ? "OFICIAL" : "RUMOR"}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-divider"></div>
+
+      <div class="card-bottom">
+        <img src="${item.fromLogo || '/club.png'}" class="club-logo">
+        <div class="transfer-arrow">➜</div>
+        <img src="${item.toLogo || '/scp.png'}" class="club-logo">
+      </div>
+
+      <a href="${item.link}" target="_blank" class="card-link">
+        Ver notícia completa
+      </a>
+    `;
+
+    if (tipo === "saida") {
+      saidasContainer.appendChild(card);
+    } else {
+      entradasContainer.appendChild(card);
     }
 
-    todos.forEach(item => {
+  });
 
-      const card = document.createElement("div");
-      card.className = "mercado-card";
-
-      card.innerHTML = `
-        <div class="card-top">
-          <div class="player-photo">📰</div>
-
-          <div class="player-info">
-            <h2>${item.title}</h2>
-            <div><strong>Data:</strong> ${item.formattedDate}</div>
-            <div><strong>Categoria:</strong> Mercado</div>
-          </div>
-        </div>
-
-        <div class="card-divider"></div>
-
-        <div class="card-bottom">
-          <div class="club-placeholder"></div>
-          <div class="transfer-arrow">➜</div>
-          <div class="club-placeholder"></div>
-        </div>
-
-        <a href="${item.link}" target="_blank" class="card-link">
-          Ver notícia completa
-        </a>
-      `;
-
-      container.appendChild(card);
-    });
-
-  } catch (err) {
-    document.getElementById("mercadoCards").innerHTML =
-      "<div style='color:red;'>Erro ao carregar mercado.</div>";
-  }
 }
 
 loadMercado();

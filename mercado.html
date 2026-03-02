@@ -132,6 +132,35 @@ body {
   }
 }
 
+.btn-player, .btn-news {
+  display: inline-block;
+  margin-top: 8px;
+  margin-right: 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.btn-player {
+  background-color: #0a7d34;
+  color: white;
+}
+
+.btn-news {
+  background-color: #1d4ed8;
+  color: white;
+}
+
+.btn-player:hover {
+  background-color: #065f2a;
+}
+
+.btn-news:hover {
+  background-color: #1e40af;
+}
+	
 </style>
 </head>
 
@@ -217,10 +246,6 @@ async function loadMercado() {
 
     const jogador = await buscarDadosJogador(item.playerName);
 
-    const age = jogador?.age || "-";
-    const nationality = jogador?.nationality || "-";
-    const position = jogador?.position || "-";
-
     const tipo = item.type || "entrada";
     const status = item.status || "rumor";
 
@@ -230,10 +255,6 @@ async function loadMercado() {
     card.innerHTML = `
       <div class="transfer-main">
         <h2>${jogador?.name || item.playerName}</h2>
-
-        <p class="player-meta">
-          ${age} anos • ${nationality} • ${position}
-        </p>
 
         <div class="transfer-line">
           <strong>${item.fromClub || "?"}</strong>
@@ -247,13 +268,13 @@ async function loadMercado() {
           ${status === "oficial" ? "OFICIAL" : "RUMOR"}
         </span>
 
-        <a href="${item.zerozeroLink}" target="_blank" class="card-link">
-	  Ver jogador no ZeroZero
-	</a>
+		<a href="${player.zerozeroLink}" target="_blank" class="btn-player">
+		  👤 Ver jogador
+		</a>
 
-	<a href="${item.link}" target="_blank" class="card-link">
-	  Ver rumor no Transfermarkt
-	</a>
+		<a href="${player.link}" target="_blank" class="btn-news">
+		  📰 Ver notícia
+		</a>
 
       </div>
     `;

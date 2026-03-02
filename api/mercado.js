@@ -34,35 +34,30 @@ if (href) {
   const slugMatch = href.match(/\/([^\/]+)\/thread/);
 
   if (slugMatch) {
-    let slug = slugMatch[1];
+    let slug = slugMatch[1].replace(/^-/, "");
 
-    slug = slug.replace(/^-/, "");
-
-    const parts = slug.split("-");
-
-    const stopWords = [
-      "to","join","zu","vers","al",
-      "interessato","apontado",
-      "wechselt","ile","iquest",
-      "ssc","jk","fc"
+    const separators = [
+      "-to-",
+      "-join-",
+      "-zu-",
+      "-vers-",
+      "-al-",
+      "-interessato-",
+      "-apontado-",
+      "-ile-"
     ];
 
-    const clubWords = [
-      "newcastle","arsenal","crystal","palace",
-      "zska","moskau","besiktas",
-      "marseille","atletico","madrid",
-      "napoli","shabab"
-    ];
+    for (const sep of separators) {
+      if (slug.includes(sep)) {
+        slug = slug.split(sep)[0];
+        break;
+      }
+    }
 
-    const nameParts = parts.filter(word =>
-      word.length > 2 &&
-      !stopWords.includes(word.toLowerCase()) &&
-      !clubWords.includes(word.toLowerCase())
-    );
+    const nameParts = slug.split("-");
 
-    if (nameParts.length >= 2) {
+    if (nameParts.length >= 1) {
       playerName = nameParts
-        .slice(0, 3)
         .map(word =>
           word.charAt(0).toUpperCase() + word.slice(1)
         )

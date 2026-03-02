@@ -193,35 +193,6 @@ body {
 
 <script>
 
-const playerCache = {};
-
-/* =========================
-   BUSCAR DADOS DO JOGADOR
-========================= */
-
-async function buscarDadosJogador(nome) {
-
-  if (!nome) return null;
-
-  if (playerCache[nome]) {
-    return playerCache[nome];
-  }
-
-  try {
-    const data = await res.json();
-
-    playerCache[nome] = data;
-    return data;
-
-  } catch {
-    return null;
-  }
-}
-
-/* =========================
-   CARREGAR MERCADO
-========================= */
-
 async function loadMercado() {
 
   const res = await fetch("/api/mercado");
@@ -243,8 +214,6 @@ async function loadMercado() {
 
     if (!item.playerName) continue;
 
-    const jogador = await buscarDadosJogador(item.playerName);
-
     const tipo = item.type || "entrada";
     const status = item.status || "rumor";
 
@@ -253,7 +222,7 @@ async function loadMercado() {
 
     card.innerHTML = `
       <div class="transfer-main">
-        <h2>${jogador?.name || item.playerName}</h2>
+        <h2>${item.playerName}</h2>
 
         <div class="transfer-line">
           <strong>${item.fromClub || "?"}</strong>
@@ -267,14 +236,15 @@ async function loadMercado() {
           ${status === "oficial" ? "OFICIAL" : "RUMOR"}
         </span>
 
-		<a href="${player.zerozeroLink}" target="_blank" class="btn-player">
-		  👤 Ver jogador
-		</a>
+        <div class="buttons">
+          <a href="${item.zerozeroLink}" target="_blank" class="btn-player">
+            👤 Ver jogador
+          </a>
 
-		<a href="${player.link}" target="_blank" class="btn-news">
-		  📰 Ver notícia
-		</a>
-
+          <a href="${item.link}" target="_blank" class="btn-news">
+            📰 Ver notícia
+          </a>
+        </div>
       </div>
     `;
 

@@ -215,13 +215,13 @@ body {
 
 <script>
 
-async function buscarImagemGyokeres() {
+  async function buscarImagemWikipedia(nome, fallback) {
   try {
-    const res = await fetch("/api/wiki-image?name=Viktor Gyökeres");
+    const res = await fetch(`/api/wiki-image?name=${encodeURIComponent(nome)}`);
     const data = await res.json();
-    return data.image || "/default-player.png";
+    return data.image || fallback;
   } catch {
-    return "/default-player.png";
+    return fallback;
   }
 }
 
@@ -244,8 +244,33 @@ async function loadMercado() {
 
   for (const item of todos) {
 
-    let photo = item.playerPhoto || "/default-player.png";
+    let playerPhoto = item.playerPhoto || "/default-player.png";
+let fromLogo = item.fromLogo || "/default-club.png";
+let toLogo = item.toLogo || "/scp.png";
 
+/* 🔎 Buscar imagem jogador automaticamente */
+if (!item.playerPhoto && item.playerName) {
+  playerPhoto = await buscarImagemWikipedia(
+    item.playerName,
+    "/default-player.png"
+  );
+}
+
+/* 🔎 Buscar logo clube origem */
+if (!item.fromLogo && item.fromClub) {
+  fromLogo = await buscarImagemWikipedia(
+    item.fromClub,
+    "/default-club.png"
+  );
+}
+
+/* 🔎 Buscar logo clube destino */
+if (!item.toLogo && item.toClub) {
+  toLogo = await buscarImagemWikipedia(
+    item.toClub,
+    "/default-club.png"
+  );
+}
     if (
       item.title.toLowerCase().includes("gyökeres") ||
       item.title.toLowerCase().includes("gyokeres")
@@ -262,7 +287,7 @@ async function loadMercado() {
     card.innerHTML = `
       <div class="card-top">
         <img 
-          src="${photo}"
+          src="${playerPhoto}"
           class="player-photo"
           onerror="this.src='/default-player.png'"
         >
@@ -280,13 +305,13 @@ async function loadMercado() {
 
       <div class="card-bottom">
         <img 
-          src="${item.fromLogo || '/default-club.png'}" 
+          src="${fromLogo}"
           class="club-logo"
           onerror="this.src='/default-club.png'"
         >
         <div class="transfer-arrow">➜</div>
         <img 
-          src="${item.toLogo || '/scp.png'}" 
+          src="${toLogo}"
           class="club-logo"
           onerror="this.src='/default-club.png'"
         >

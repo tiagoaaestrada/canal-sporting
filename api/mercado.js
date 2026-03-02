@@ -42,6 +42,12 @@ if (href) {
     slug = slug.replace(/^besiktas-jk-/, "");
     slug = slug.replace(/^iquest-/, "");
 
+    // Caso especial italiano (nome vem depois de "-a-")
+
+if (slug.includes("-interessato-a-")) {
+  slug = slug.split("-interessato-a-")[1];
+}
+
     const separators = [
       "-to-",
       "-join-",

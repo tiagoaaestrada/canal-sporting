@@ -208,7 +208,6 @@ async function buscarDadosJogador(nome) {
   }
 
   try {
-    const res = await fetch(`/api/player?name=${encodeURIComponent(nome)}`);
     const data = await res.json();
 
     playerCache[nome] = data;

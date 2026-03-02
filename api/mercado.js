@@ -100,7 +100,7 @@ resultados.push({
   fromClub: "Sporting Clube de Portugal",
   toClub: clubeDestino,
   type: "saida",
-  status: "rumor"
+  status: "rumor",
   zerozeroLink: generateZeroZeroLink(playerName)
 });
       }

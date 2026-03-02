@@ -80,6 +80,18 @@ if (slug.includes("-interessato-a-")) {
   }
 }
 
+function generateZeroZeroLink(playerName) {
+  return (
+    "https://www.zerozero.pt/jogador/" +
+    playerName
+      .toLowerCase()
+      .normalize("NFD") // remove acentos
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-") +
+    "/"
+  );
+}
+
 resultados.push({
   title: text,
   link: "https://www.transfermarkt.pt" + href,
@@ -89,6 +101,7 @@ resultados.push({
   toClub: clubeDestino,
   type: "saida",
   status: "rumor"
+  zerozeroLink: generateZeroZeroLink(playerName)
 });
       }
     });

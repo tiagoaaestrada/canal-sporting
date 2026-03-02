@@ -247,9 +247,14 @@ async function loadMercado() {
           ${status === "oficial" ? "OFICIAL" : "RUMOR"}
         </span>
 
-        <a href="${item.link}" target="_blank" class="news-link">
-          Ver notícia
-        </a>
+        <a href="${item.zerozeroLink}" target="_blank" class="card-link">
+	  Ver jogador no ZeroZero
+	</a>
+
+	<a href="${item.link}" target="_blank" class="card-link">
+	  Ver rumor no Transfermarkt
+	</a>
+
       </div>
     `;
 

@@ -62,8 +62,6 @@ body {
   gap: 40px;
 }
 
-/* ================= SECTION TITLE ================= */
-
 .section-title {
   font-size: 20px;
   font-weight: bold;
@@ -89,12 +87,11 @@ body {
   box-shadow: 0 15px 35px rgba(0,0,0,0.08);
   margin-bottom: 30px;
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease;
 }
 
 .mercado-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 25px 45px rgba(0,0,0,0.15);
 }
 
 .card-top {
@@ -122,6 +119,7 @@ body {
   font-size: 13px;
   color: #666;
 }
+
 .badge {
   display: inline-block;
   padding: 5px 10px;
@@ -129,7 +127,6 @@ body {
   font-weight: bold;
   border-radius: 8px;
   margin-top: 8px;
-  letter-spacing: 0.5px;
 }
 
 .badge.oficial {
@@ -147,7 +144,11 @@ body {
 }
 
 .card-bottom {
-  background: linear-gradient(to right, #f9f9f9, #f3f3f3);
+  padding: 18px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
 }
 
 .club-logo {
@@ -176,8 +177,6 @@ body {
   color: white;
 }
 
-/* ================= MOBILE ================= */
-
 @media (max-width: 900px) {
   .container {
     grid-template-columns: 1fr;
@@ -202,17 +201,13 @@ body {
 
 <div class="container">
 
-  <div class="mercado-coluna">
-    <div class="section-title entradas">
-      🟢 Entradas
-    </div>
+  <div>
+    <div class="section-title entradas">🟢 Entradas</div>
     <div id="entradas"></div>
   </div>
 
-  <div class="mercado-coluna">
-    <div class="section-title saidas">
-      🔴 Saídas
-    </div>
+  <div>
+    <div class="section-title saidas">🔴 Saídas</div>
     <div id="saidas"></div>
   </div>
 
@@ -224,12 +219,12 @@ async function buscarImagemGyokeres() {
   try {
     const res = await fetch("/api/wiki-image?name=Viktor Gyökeres");
     const data = await res.json();
-    return data.image || "/images/players/default-player.png";
+    return data.image || "/default-player.png";
   } catch {
-    return "/images/players/default-player.png";
+    return "/default-player.png";
   }
 }
-  
+
 async function loadMercado() {
 
   const res = await fetch("/api/mercado");
@@ -249,58 +244,58 @@ async function loadMercado() {
 
   for (const item of todos) {
 
-    let photo = "/images/players/default-player.png";
-    
+    let photo = item.playerPhoto || "/default-player.png";
+
     if (
       item.title.toLowerCase().includes("gyökeres") ||
       item.title.toLowerCase().includes("gyokeres")
     ) {
       photo = await buscarImagemGyokeres();
     }
-    
-    const tipo = item.type || "entrada"; 
+
+    const tipo = item.type || "entrada";
     const status = item.status || "rumor";
 
     const card = document.createElement("div");
     card.className = "mercado-card";
 
     card.innerHTML = `
-  <div class="card-top">
-    <img 
-      src="${playerPhoto}"
-      class="player-photo"
-      onerror="this.src='/default-player.png'"
-    >
+      <div class="card-top">
+        <img 
+          src="${photo}"
+          class="player-photo"
+          onerror="this.src='/default-player.png'"
+        >
 
-    <div class="player-info">
-      <h2>${item.title}</h2>
-      <div>${item.formattedDate}</div>
-      <span class="badge ${status}">
-        ${status === "oficial" ? "OFICIAL" : "RUMOR"}
-      </span>
-    </div>
-  </div>
+        <div class="player-info">
+          <h2>${item.title}</h2>
+          <div>${item.formattedDate}</div>
+          <span class="badge ${status}">
+            ${status === "oficial" ? "OFICIAL" : "RUMOR"}
+          </span>
+        </div>
+      </div>
 
-  <div class="card-divider"></div>
+      <div class="card-divider"></div>
 
-  <div class="card-bottom">
-    <img 
-      src="${item.fromLogo || '/default-club.png'}" 
-      class="club-logo"
-      onerror="this.src='/default-club.png'"
-    >
-    <div class="transfer-arrow">➜</div>
-    <img 
-      src="${item.toLogo || '/scp.png'}" 
-      class="club-logo"
-      onerror="this.src='/default-club.png'"
-    >
-  </div>
+      <div class="card-bottom">
+        <img 
+          src="${item.fromLogo || '/default-club.png'}" 
+          class="club-logo"
+          onerror="this.src='/default-club.png'"
+        >
+        <div class="transfer-arrow">➜</div>
+        <img 
+          src="${item.toLogo || '/scp.png'}" 
+          class="club-logo"
+          onerror="this.src='/default-club.png'"
+        >
+      </div>
 
-  <a href="${item.link}" target="_blank" class="card-link">
-    Ver notícia completa
-  </a>
-`;
+      <a href="${item.link}" target="_blank" class="card-link">
+        Ver notícia completa
+      </a>
+    `;
 
     if (tipo === "saida") {
       saidasContainer.appendChild(card);

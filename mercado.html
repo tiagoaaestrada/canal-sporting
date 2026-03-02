@@ -220,6 +220,16 @@ body {
 
 <script>
 
+async function buscarImagemGyokeres() {
+  try {
+    const res = await fetch("/api/wiki-image?name=Viktor Gyökeres");
+    const data = await res.json();
+    return data.image || "/images/players/default-player.png";
+  } catch {
+    return "/images/players/default-player.png";
+  }
+}
+  
 async function loadMercado() {
 
   const res = await fetch("/api/mercado");
@@ -237,8 +247,17 @@ async function loadMercado() {
   entradasContainer.innerHTML = "";
   saidasContainer.innerHTML = "";
 
-  todos.forEach(item => {
+  for (const item of todos) {
 
+    let photo = "/images/players/default-player.png";
+    
+    if (
+      item.title.toLowerCase().includes("gyökeres") ||
+      item.title.toLowerCase().includes("gyokeres")
+    ) {
+      photo = await buscarImagemGyokeres();
+    }
+    
     const tipo = item.type || "entrada"; 
     const status = item.status || "rumor";
 
@@ -248,7 +267,7 @@ async function loadMercado() {
     card.innerHTML = `
   <div class="card-top">
     <img 
-      src="${item.playerPhoto || '/default-player.png'}" 
+      src="${playerPhoto}"
       class="player-photo"
       onerror="this.src='/default-player.png'"
     >
@@ -289,7 +308,7 @@ async function loadMercado() {
       entradasContainer.appendChild(card);
     }
 
-  });
+  }
 
 }
 

@@ -1,0 +1,25 @@
+{
+  "name": "canal-sporting",
+  "version": "1.0.0",
+  "description": "Notícias do Sporting",
+  "main": "sw.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tiagoaaestrada/canal-sporting.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tiagoaaestrada/canal-sporting/issues"
+  },
+  "homepage": "https://github.com/tiagoaaestrada/canal-sporting#readme",
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "node-fetch": "^3.3.2"
+  }
+}

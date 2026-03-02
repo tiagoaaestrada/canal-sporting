@@ -105,6 +105,33 @@ body {
   margin-top: 10px;
 }
 
+.transfer-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.transfer-line .arrow {
+  font-size: 18px;
+  margin: 4px 0;
+  color: #666;
+}
+
+.transfer-line .club {
+  text-align: center;
+  line-height: 1.3;
+}
+	
+	.transfer-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* centraliza horizontalmente */
+  justify-content: center; /* centraliza verticalmente */
+  gap: 8px;
+}
+	
 .badge {
   padding: 6px 12px;
   border-radius: 8px;
@@ -225,10 +252,18 @@ async function loadMercado() {
         <h2>${item.playerName}</h2>
 
         <div class="transfer-line">
-          <strong>${item.fromClub || "?"}</strong>
-          →
-          <strong>${item.toClub || "?"}</strong>
-        </div>
+		  <div class="club from">
+		    ${item.fromClub || "?"}
+		  </div>
+		
+		  <div class="arrow">
+		    ↓
+		  </div>
+		
+		  <div class="club to">
+		    ${item.toClub || "?"}
+		  </div>
+		</div>
       </div>
 
       <div class="transfer-side">

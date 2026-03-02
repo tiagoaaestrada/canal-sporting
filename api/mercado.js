@@ -26,8 +26,9 @@ module.exports = async (req, res) => {
           : "";
 
         const title = rawTitle.replace(/<!\[CDATA\[|\]\]>/g, "");
+        const lower = title.toLowerCase();
 
-        /* ================= EXTRAÇÃO INTELIGENTE ================= */
+        /* ================= EXTRAÇÃO ================= */
 
         let playerName = null;
         let fromClub = null;
@@ -39,7 +40,8 @@ module.exports = async (req, res) => {
           "As","Janela"
         ];
 
-        // Jogador (Unicode real)
+        /* ===== Jogador (Unicode real) ===== */
+
         let match = title.match(/por\s+([\p{L}]+(?:\s[\p{L}]+)?)/u);
         if (match && !stopWords.includes(match[1])) {
           playerName = match[1];
@@ -59,23 +61,53 @@ module.exports = async (req, res) => {
           }
         }
 
-        // Clube origem (ex: "do Arsenal")
-        match = title.match(/do\s+([\p{L}]+(?:\s[\p{L}]+)?)/u);
-        if (match) {
-          fromClub = match[1];
+        /* ===== Clube origem ===== */
+
+        let clubMatch =
+          title.match(/do\s+([\p{L}]+(?:\s[\p{L}]+)?)/u) ||
+          title.match(/com\s+o\s+([\p{L}]+(?:\s[\p{L}]+)?)/u);
+
+        if (clubMatch) {
+          fromClub = clubMatch[1];
         }
 
-        // Clube destino
-        if (title.includes("Sporting")) {
+        /* ===== Clube destino (Sporting apenas se for reforço real) ===== */
+
+        if (
+          lower.includes("reforço do sporting") ||
+          lower.includes("para o sporting") ||
+          lower.includes("no sporting")
+        ) {
           toClub = "Sporting CP";
         }
 
-        /* ================= ENTRADA / SAÍDA ================= */
+        /* ===== Normalização para Wikipedia ===== */
+
+        const clubAliases = {
+          "West Ham": "West Ham United F.C.",
+          "Arsenal": "Arsenal F.C.",
+          "Sporting CP": "Sporting Clube de Portugal",
+          "Granada": "Granada CF"
+        };
+
+        if (fromClub && clubAliases[fromClub]) {
+          fromClub = clubAliases[fromClub];
+        }
+
+        if (toClub && clubAliases[toClub]) {
+          toClub = clubAliases[toClub];
+        }
+
+        /* ===== Entrada / Saída ===== */
 
         const isSaida =
-          title.toLowerCase().includes("vend") ||
-          title.toLowerCase().includes("sai") ||
-          title.toLowerCase().includes("rumo");
+          lower.includes("a receber") ||
+          lower.includes("vend") ||
+          lower.includes("venda") ||
+          lower.includes("transferência para") ||
+          lower.includes("rumo a") ||
+          lower.includes("deixa o sporting") ||
+          lower.includes("acordo com");
 
         return {
           title,

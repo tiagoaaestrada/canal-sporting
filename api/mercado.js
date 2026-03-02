@@ -36,27 +36,33 @@ if (href) {
   if (slugMatch) {
     let slug = slugMatch[1];
 
-    // limpar prefixos estranhos
     slug = slug.replace(/^-/, "");
 
     const parts = slug.split("-");
 
     const stopWords = [
-      "to", "join", "zu", "vers", "al",
-      "interessato", "apontado",
-      "wechselt", "ssc", "jk",
-      "fc", "ile", "iquest"
+      "to","join","zu","vers","al",
+      "interessato","apontado",
+      "wechselt","ile","iquest",
+      "ssc","jk","fc"
     ];
 
-    const nameParts = [];
+    const clubWords = [
+      "newcastle","arsenal","crystal","palace",
+      "zska","moskau","besiktas",
+      "marseille","atletico","madrid",
+      "napoli","shabab"
+    ];
 
-    for (let part of parts) {
-      if (stopWords.includes(part.toLowerCase())) break;
-      nameParts.push(part);
-    }
+    const nameParts = parts.filter(word =>
+      word.length > 2 &&
+      !stopWords.includes(word.toLowerCase()) &&
+      !clubWords.includes(word.toLowerCase())
+    );
 
     if (nameParts.length >= 2) {
       playerName = nameParts
+        .slice(0, 3)
         .map(word =>
           word.charAt(0).toUpperCase() + word.slice(1)
         )

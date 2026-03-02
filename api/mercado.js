@@ -31,21 +31,37 @@ export default async function handler(req, res) {
 let playerName = null;
 
 if (href) {
-  const slugMatch = href.match(/\/([^\/]+)-\/thread/);
+  const slugMatch = href.match(/\/([^\/]+)\/thread/);
 
   if (slugMatch) {
-    const slug = slugMatch[1];
+    let slug = slugMatch[1];
+
+    // limpar prefixos estranhos
+    slug = slug.replace(/^-/, "");
 
     const parts = slug.split("-");
 
-    // manter apenas primeiras 2 ou 3 palavras
-    const nameParts = parts.slice(0, 3);
+    const stopWords = [
+      "to", "join", "zu", "vers", "al",
+      "interessato", "apontado",
+      "wechselt", "ssc", "jk",
+      "fc", "ile", "iquest"
+    ];
 
-    playerName = nameParts
-      .map(word =>
-        word.charAt(0).toUpperCase() + word.slice(1)
-      )
-      .join(" ");
+    const nameParts = [];
+
+    for (let part of parts) {
+      if (stopWords.includes(part.toLowerCase())) break;
+      nameParts.push(part);
+    }
+
+    if (nameParts.length >= 2) {
+      playerName = nameParts
+        .map(word =>
+          word.charAt(0).toUpperCase() + word.slice(1)
+        )
+        .join(" ");
+    }
   }
 }
 

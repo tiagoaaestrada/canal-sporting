@@ -172,6 +172,23 @@ body {
   display: none;
 }
 
+  /* ================= LOADING SPINNER ================= */
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+  
 /* ================= MOBILE ================= */
 
 @media (max-width: 900px) {
@@ -272,37 +289,61 @@ body {
 /* ================= FEED ================= */
 
 async function loadFeed() {
-  const res = await fetch("/api/feed");
-  const data = await res.json();
+
+  const btn = document.getElementById("refreshBtn");
   const container = document.getElementById("feed-container");
-  container.innerHTML = "";
 
-  const today = new Date();
+  try {
 
-  data.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "feed-item";
+    // 🔄 Ativar loading
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span>`;
 
-    const itemDate = new Date(item.timestamp);
+    const res = await fetch("/api/feed");
+    const data = await res.json();
 
-    const isToday =
-      itemDate.getDate() === today.getDate() &&
-      itemDate.getMonth() === today.getMonth() &&
-      itemDate.getFullYear() === today.getFullYear();
+    container.innerHTML = "";
 
-    if (!isToday) {
-      div.classList.add("hidden-news");
-    }
+    const today = new Date();
 
-    div.innerHTML = `
-      <div class="source">
-        ${item.source} • ${item.formattedDate}
-      </div>
-      <a href="${item.link}" target="_blank">${item.title}</a>
-    `;
+    data.forEach(item => {
 
-    container.appendChild(div);
-  });
+      const div = document.createElement("div");
+      div.className = "feed-item";
+
+      const itemDate = new Date(item.timestamp);
+
+      const isToday =
+        itemDate.getDate() === today.getDate() &&
+        itemDate.getMonth() === today.getMonth() &&
+        itemDate.getFullYear() === today.getFullYear();
+
+      if (!isToday) {
+        div.classList.add("hidden-news");
+      }
+
+      div.innerHTML = `
+        <div class="source">
+          ${item.source} • ${item.formattedDate}
+        </div>
+        <a href="${item.link}" target="_blank">${item.title}</a>
+      `;
+
+      container.appendChild(div);
+
+    });
+
+  } catch (err) {
+
+    container.innerHTML = "Erro ao carregar feed.";
+
+  } finally {
+
+    // ✅ Restaurar botão
+    btn.disabled = false;
+    btn.innerHTML = "Atualizar";
+
+  }
 }
 
 document.getElementById("refreshBtn").addEventListener("click", loadFeed);

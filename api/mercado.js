@@ -20,6 +20,7 @@ export default async function handler(req, res) {
     }
 
     const html = await response.text();
+return res.status(200).send(html);
     const $ = cheerio.load(html);
 
     const resultados = [];

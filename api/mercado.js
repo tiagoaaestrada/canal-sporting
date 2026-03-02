@@ -27,20 +27,20 @@ module.exports = async (req, res) => {
 
         const title = rawTitle.replace(/<!\[CDATA\[|\]\]>/g, "");
 
-        /* ===== EXTRAÇÃO DE JOGADOR (UNICODE CORRETO) ===== */
+        /* ================= EXTRAÇÃO INTELIGENTE ================= */
 
         let playerName = null;
         let fromClub = null;
-        let toClub = "Sporting CP";
+        let toClub = null;
 
         const stopWords = [
-          "Sporting","Liga","Transferência","Transferências","Mercado",
-          "Diretor","Negócios","Fecho","Se","As","Janela"
+          "Sporting","Liga","Transferência","Transferências",
+          "Mercado","Diretor","Negócios","Fecho","Se",
+          "As","Janela"
         ];
 
-        // 🔥 Regex universal que suporta Gyökeres, Luís, Diarra, etc
+        // Jogador (Unicode real)
         let match = title.match(/por\s+([\p{L}]+(?:\s[\p{L}]+)?)/u);
-
         if (match && !stopWords.includes(match[1])) {
           playerName = match[1];
         }
@@ -59,7 +59,18 @@ module.exports = async (req, res) => {
           }
         }
 
-        /* ===== DETEÇÃO DE SAÍDA ===== */
+        // Clube origem (ex: "do Arsenal")
+        match = title.match(/do\s+([\p{L}]+(?:\s[\p{L}]+)?)/u);
+        if (match) {
+          fromClub = match[1];
+        }
+
+        // Clube destino
+        if (title.includes("Sporting")) {
+          toClub = "Sporting CP";
+        }
+
+        /* ================= ENTRADA / SAÍDA ================= */
 
         const isSaida =
           title.toLowerCase().includes("vend") ||

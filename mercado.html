@@ -65,22 +65,36 @@ body {
 /* ================= SECTION TITLE ================= */
 
 .section-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+}
+
+.section-title.entradas {
   color: #0a5c2a;
-  border-bottom: 2px solid #0a5c2a;
-  padding-bottom: 5px;
+  border-bottom: 3px solid #0a5c2a;
+}
+
+.section-title.saidas {
+  color: #b30000;
+  border-bottom: 3px solid #b30000;
 }
 
 /* ================= CARD ================= */
 
 .mercado-card {
   background: white;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  margin-bottom: 25px;
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+  margin-bottom: 30px;
   overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.mercado-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 25px 45px rgba(0,0,0,0.15);
 }
 
 .card-top {
@@ -108,14 +122,14 @@ body {
   font-size: 13px;
   color: #666;
 }
-
 .badge {
   display: inline-block;
-  padding: 4px 8px;
+  padding: 5px 10px;
   font-size: 11px;
   font-weight: bold;
-  border-radius: 6px;
-  margin-top: 6px;
+  border-radius: 8px;
+  margin-top: 8px;
+  letter-spacing: 0.5px;
 }
 
 .badge.oficial {
@@ -124,7 +138,7 @@ body {
 }
 
 .badge.rumor {
-  background: #f5b400;
+  background: #ffb800;
   color: black;
 }
 
@@ -133,11 +147,7 @@ body {
 }
 
 .card-bottom {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 25px;
-  padding: 18px 0;
+  background: linear-gradient(to right, #f9f9f9, #f3f3f3);
 }
 
 .club-logo {
@@ -192,13 +202,17 @@ body {
 
 <div class="container">
 
-  <div>
-    <div class="section-title">Entradas</div>
+  <div class="mercado-coluna">
+    <div class="section-title entradas">
+      🟢 Entradas
+    </div>
     <div id="entradas"></div>
   </div>
 
-  <div>
-    <div class="section-title">Saídas</div>
+  <div class="mercado-coluna">
+    <div class="section-title saidas">
+      🔴 Saídas
+    </div>
     <div id="saidas"></div>
   </div>
 
@@ -232,30 +246,42 @@ async function loadMercado() {
     card.className = "mercado-card";
 
     card.innerHTML = `
-      <div class="card-top">
-        <img src="${item.playerPhoto || '/player-placeholder.png'}" class="player-photo">
+  <div class="card-top">
+    <img 
+      src="${item.playerPhoto || '/default-player.png'}" 
+      class="player-photo"
+      onerror="this.src='/default-player.png'"
+    >
 
-        <div class="player-info">
-          <h2>${item.title}</h2>
-          <div>${item.formattedDate}</div>
-          <span class="badge ${status}">
-            ${status === "oficial" ? "OFICIAL" : "RUMOR"}
-          </span>
-        </div>
-      </div>
+    <div class="player-info">
+      <h2>${item.title}</h2>
+      <div>${item.formattedDate}</div>
+      <span class="badge ${status}">
+        ${status === "oficial" ? "OFICIAL" : "RUMOR"}
+      </span>
+    </div>
+  </div>
 
-      <div class="card-divider"></div>
+  <div class="card-divider"></div>
 
-      <div class="card-bottom">
-        <img src="${item.fromLogo || '/club.png'}" class="club-logo">
-        <div class="transfer-arrow">➜</div>
-        <img src="${item.toLogo || '/scp.png'}" class="club-logo">
-      </div>
+  <div class="card-bottom">
+    <img 
+      src="${item.fromLogo || '/default-club.png'}" 
+      class="club-logo"
+      onerror="this.src='/default-club.png'"
+    >
+    <div class="transfer-arrow">➜</div>
+    <img 
+      src="${item.toLogo || '/scp.png'}" 
+      class="club-logo"
+      onerror="this.src='/default-club.png'"
+    >
+  </div>
 
-      <a href="${item.link}" target="_blank" class="card-link">
-        Ver notícia completa
-      </a>
-    `;
+  <a href="${item.link}" target="_blank" class="card-link">
+    Ver notícia completa
+  </a>
+`;
 
     if (tipo === "saida") {
       saidasContainer.appendChild(card);

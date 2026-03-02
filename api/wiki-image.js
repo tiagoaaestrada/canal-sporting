@@ -12,13 +12,13 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    if (data.thumbnail && data.thumbnail.source) {
+    if (data.thumbnail?.source) {
       return res.status(200).json({ image: data.thumbnail.source });
     }
 
     return res.status(200).json({ image: null });
 
   } catch (error) {
-    return res.status(500).json({ error: "Erro ao buscar imagem" });
+    return res.status(500).json({ error: "Erro Wikipedia" });
   }
 }

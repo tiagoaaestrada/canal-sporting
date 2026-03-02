@@ -26,38 +26,40 @@ module.exports = async (req, res) => {
 
         const title = rawTitle.replace(/<!\[CDATA\[|\]\]>/g, "");
 
-        /* ===== EXTRAÇÃO INTELIGENTE ===== */
+        /* ===== EXTRAÇÃO INTELIGENTE MELHORADA ===== */
 
-        let playerName = null;
-        let fromClub = null;
-        let toClub = null;
+let playerName = null;
+let fromClub = null;
+let toClub = "Sporting CP";
 
-        // Detectar jogador (palavras com maiúscula seguidas)
-        const playerMatch = title.match(/([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+)?)/);
-        if (playerMatch) {
-          playerName = playerMatch[1];
-        }
+// Lista de palavras para ignorar
+const stopWords = [
+  "Sporting","Liga","Transferência","Transferências","Mercado",
+  "Diretor","Negócios","Fecho","Se","As","Janela"
+];
 
-        // Detectar saída
-        const isSaida = title.toLowerCase().includes("vend") ||
-                        title.toLowerCase().includes("sai") ||
-                        title.toLowerCase().includes("rumo") ||
-                        title.toLowerCase().includes("arsenal") ||
-                        title.toLowerCase().includes("manchester");
+// 1️⃣ Procurar padrão "por NOME"
+let match = title.match(/por\s+([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+)?)/);
 
-        // Sporting como destino padrão
-        toClub = "Sporting CP";
+if (match && !stopWords.includes(match[1])) {
+  playerName = match[1];
+}
 
-        return {
-          title,
-          link,
-          formattedDate,
-          playerName,
-          fromClub,
-          toClub,
-          type: isSaida ? "saida" : "entrada",
-          status: "rumor"
-        };
+// 2️⃣ Procurar padrão "de NOME"
+if (!playerName) {
+  match = title.match(/de\s+([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+)?)/);
+  if (match && !stopWords.includes(match[1])) {
+    playerName = match[1];
+  }
+}
+
+// 3️⃣ Procurar padrão início do título (ex: "Faye é reforço...")
+if (!playerName) {
+  match = title.match(/^([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+)?)/);
+  if (match && !stopWords.includes(match[1])) {
+    playerName = match[1];
+  }
+}
 
       });
 

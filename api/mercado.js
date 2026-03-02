@@ -36,6 +36,12 @@ if (href) {
   if (slugMatch) {
     let slug = slugMatch[1].replace(/^-/, "");
 
+    // 🔧 LIMPEZA DE PREFIXOS ESTRANHOS
+    slug = slug.replace(/^wechselt-/, "");
+    slug = slug.replace(/^ssc-/, "");
+    slug = slug.replace(/^besiktas-jk-/, "");
+    slug = slug.replace(/^iquest-/, "");
+
     const separators = [
       "-to-",
       "-join-",

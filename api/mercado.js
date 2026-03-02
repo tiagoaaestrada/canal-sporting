@@ -11,7 +11,7 @@ module.exports = async (req, res) => {
       const xml = await response.text();
       const items = [...xml.matchAll(/<item>([\s\S]*?)<\/item>/g)];
 
-      return items.slice(0,5).map(item => {
+      return items.slice(0, 5).map(item => {
 
         const rawTitle = item[1].match(/<title>(.*?)<\/title>/)?.[1] || "";
         const link = item[1].match(/<link>(.*?)<\/link>/)?.[1] || "#";
@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
 
         const title = rawTitle.replace(/<!\[CDATA\[|\]\]>/g, "");
 
-        /* ===== EXTRAÇÃO MELHORADA ===== */
+        /* ===== EXTRAÇÃO DE JOGADOR (UNICODE CORRETO) ===== */
 
         let playerName = null;
         let fromClub = null;
@@ -38,29 +38,33 @@ module.exports = async (req, res) => {
           "Diretor","Negócios","Fecho","Se","As","Janela"
         ];
 
-        let match = title.match(/por\s+([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+)?)/);
+        // 🔥 Regex universal que suporta Gyökeres, Luís, Diarra, etc
+        let match = title.match(/por\s+([\p{L}]+(?:\s[\p{L}]+)?)/u);
 
         if (match && !stopWords.includes(match[1])) {
           playerName = match[1];
         }
 
         if (!playerName) {
-          match = title.match(/de\s+([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+)?)/);
+          match = title.match(/de\s+([\p{L}]+(?:\s[\p{L}]+)?)/u);
           if (match && !stopWords.includes(match[1])) {
             playerName = match[1];
           }
         }
 
         if (!playerName) {
-          match = title.match(/^([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+)?)/);
+          match = title.match(/^([\p{L}]+(?:\s[\p{L}]+)?)/u);
           if (match && !stopWords.includes(match[1])) {
             playerName = match[1];
           }
         }
 
-        const isSaida = title.toLowerCase().includes("vend") ||
-                        title.toLowerCase().includes("sai") ||
-                        title.toLowerCase().includes("rumo");
+        /* ===== DETEÇÃO DE SAÍDA ===== */
+
+        const isSaida =
+          title.toLowerCase().includes("vend") ||
+          title.toLowerCase().includes("sai") ||
+          title.toLowerCase().includes("rumo");
 
         return {
           title,

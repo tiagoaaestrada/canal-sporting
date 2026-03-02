@@ -1,9 +1,9 @@
 module.exports = async (req, res) => {
 
-  async function fetchRSS(query, tipoPadrao = "entrada") {
+  async function fetchRSS(query) {
     try {
       const response = await fetch(
-        `https://news.google.com/rss/search?q=${query}&hl=pt-PT&gl=PT&ceid=PT:pt`,
+        `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=pt-PT&gl=PT&ceid=PT:pt`,
         { headers: { "User-Agent": "Mozilla/5.0" } }
       );
 
@@ -13,7 +13,6 @@ module.exports = async (req, res) => {
       return items.slice(0,5).map(item => {
 
         const rawTitle = item[1].match(/<title>(.*?)<\/title>/)?.[1] || "";
-        const cleanTitle = rawTitle.replace(/<!\[CDATA\[|\]\]>/g, "");
         const link = item[1].match(/<link>(.*?)<\/link>/)?.[1] || "#";
         const pubDate = item[1].match(/<pubDate>(.*?)<\/pubDate>/)?.[1];
 
@@ -25,38 +24,41 @@ module.exports = async (req, res) => {
             dateObj.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" })
           : "";
 
-        /* ================= EXTRAÇÃO SIMPLES ================= */
+        const title = rawTitle.replace(/<!\[CDATA\[|\]\]>/g, "");
 
-        // Tenta extrair primeiro nome como jogador
-        const playerMatch = cleanTitle.match(/^([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+)*)/);
-        const playerName = playerMatch ? playerMatch[1] : null;
+        /* ===== EXTRAÇÃO INTELIGENTE ===== */
 
-        // Detectar tipo (entrada ou saída)
-        const tipo = cleanTitle.toLowerCase().includes("sai")
-          ? "saida"
-          : tipoPadrao;
+        let playerName = null;
+        let fromClub = null;
+        let toClub = null;
 
-        // Status (muito simples)
-        const status = cleanTitle.toLowerCase().includes("oficial")
-          ? "oficial"
-          : "rumor";
+        // Detectar jogador (palavras com maiúscula seguidas)
+        const playerMatch = title.match(/([A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+(?:\s[A-ZÁÉÍÓÚÂÊÔÃÕÇ][a-záéíóúâêôãõç]+)?)/);
+        if (playerMatch) {
+          playerName = playerMatch[1];
+        }
+
+        // Detectar saída
+        const isSaida = title.toLowerCase().includes("vend") ||
+                        title.toLowerCase().includes("sai") ||
+                        title.toLowerCase().includes("rumo") ||
+                        title.toLowerCase().includes("arsenal") ||
+                        title.toLowerCase().includes("manchester");
+
+        // Sporting como destino padrão
+        toClub = "Sporting CP";
 
         return {
-          title: cleanTitle,
+          title,
           link,
           formattedDate,
-
-          // NOVOS CAMPOS
           playerName,
-          fromClub: null,
-          toClub: "Sporting CP",
-          type: tipo,
-          status: status,
-
-          playerPhoto: null,
-          fromLogo: null,
-          toLogo: null
+          fromClub,
+          toClub,
+          type: isSaida ? "saida" : "entrada",
+          status: "rumor"
         };
+
       });
 
     } catch {
@@ -65,8 +67,9 @@ module.exports = async (req, res) => {
   }
 
   res.status(200).json({
-    sporting: await fetchRSS("Sporting transferência", "entrada"),
+    sporting: await fetchRSS("Sporting transferência"),
     nacional: await fetchRSS("Liga Portugal transferência"),
     internacional: await fetchRSS("transferência internacional futebol")
   });
+
 };

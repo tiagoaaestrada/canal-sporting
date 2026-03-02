@@ -41,6 +41,7 @@ if (href) {
     slug = slug.replace(/^ssc-/, "");
     slug = slug.replace(/^besiktas-jk-/, "");
     slug = slug.replace(/^iquest-/, "");
+    slug = slug.replace(/^will-/, "");
 
     // Caso especial italiano (nome vem depois de "-a-")
 
@@ -69,11 +70,12 @@ if (slug.includes("-interessato-a-")) {
     const nameParts = slug.split("-");
 
     if (nameParts.length >= 1) {
-      playerName = nameParts
-        .map(word =>
-          word.charAt(0).toUpperCase() + word.slice(1)
-        )
-        .join(" ");
+     playerName = nameParts
+  .map(word =>
+    word.charAt(0).toUpperCase() + word.slice(1)
+  )
+  .join(" ")
+  .trim();
     }
   }
 }

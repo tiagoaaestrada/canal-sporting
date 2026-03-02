@@ -215,7 +215,7 @@ body {
 
 <script>
 
-  async function buscarImagemWikipedia(nome, fallback) {
+async function buscarImagemWikipedia(nome, fallback) {
   try {
     const res = await fetch(`/api/wiki-image?name=${encodeURIComponent(nome)}`);
     const data = await res.json();
@@ -244,39 +244,37 @@ async function loadMercado() {
 
   for (const item of todos) {
 
+    /* ================= IMAGENS ================= */
+
     let playerPhoto = item.playerPhoto || "/default-player.png";
-let fromLogo = item.fromLogo || "/default-club.png";
-let toLogo = item.toLogo || "/scp.png";
+    let fromLogo = item.fromLogo || "/default-club.png";
+    let toLogo = item.toLogo || "/default-club.png";
 
-/* 🔎 Buscar imagem jogador automaticamente */
-if (!item.playerPhoto && item.playerName) {
-  playerPhoto = await buscarImagemWikipedia(
-    item.playerName,
-    "/default-player.png"
-  );
-}
-
-/* 🔎 Buscar logo clube origem */
-if (!item.fromLogo && item.fromClub) {
-  fromLogo = await buscarImagemWikipedia(
-    item.fromClub,
-    "/default-club.png"
-  );
-}
-
-/* 🔎 Buscar logo clube destino */
-if (!item.toLogo && item.toClub) {
-  toLogo = await buscarImagemWikipedia(
-    item.toClub,
-    "/default-club.png"
-  );
-}
-    if (
-      item.title.toLowerCase().includes("gyökeres") ||
-      item.title.toLowerCase().includes("gyokeres")
-    ) {
-      photo = await buscarImagemGyokeres();
+    // Buscar imagem jogador automaticamente
+    if (!item.playerPhoto && item.playerName) {
+      playerPhoto = await buscarImagemWikipedia(
+        item.playerName,
+        "/default-player.png"
+      );
     }
+
+    // Buscar logo clube origem automaticamente
+    if (!item.fromLogo && item.fromClub) {
+      fromLogo = await buscarImagemWikipedia(
+        item.fromClub,
+        "/default-club.png"
+      );
+    }
+
+    // Buscar logo clube destino automaticamente
+    if (!item.toLogo && item.toClub) {
+      toLogo = await buscarImagemWikipedia(
+        item.toClub,
+        "/default-club.png"
+      );
+    }
+
+    /* ================= DADOS ================= */
 
     const tipo = item.type || "entrada";
     const status = item.status || "rumor";

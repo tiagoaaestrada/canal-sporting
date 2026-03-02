@@ -81,100 +81,56 @@ body {
 
 /* ================= CARD ================= */
 
-.mercado-card {
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
-  margin-bottom: 30px;
-  overflow: hidden;
-  transition: transform 0.3s ease;
-}
-
-.mercado-card:hover {
-  transform: translateY(-6px);
-}
-
-.card-top {
+.transfer-card {
   display: flex;
-  gap: 18px;
-  padding: 20px;
+  justify-content: space-between;
   align-items: center;
+  background: #f3f3f3;
+  padding: 20px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  gap: 20px;
 }
 
 .player-photo {
-  width: 85px;
-  height: 85px;
-  border-radius: 16px;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
   object-fit: cover;
-  background: #eee;
 }
 
-.player-info h2 {
-  margin: 0 0 6px 0;
-  font-size: 18px;
-  color: #0a5c2a;
+.player-meta {
+  font-size: 14px;
+  color: #555;
 }
 
-.player-info div {
-  font-size: 13px;
-  color: #666;
+.transfer-line {
+  margin-top: 10px;
+  font-weight: bold;
 }
 
 .badge {
-  display: inline-block;
-  padding: 5px 10px;
-  font-size: 11px;
-  font-weight: bold;
+  padding: 6px 12px;
   border-radius: 8px;
-  margin-top: 8px;
-}
-
-.badge.oficial {
-  background: #0a5c2a;
-  color: white;
+  font-weight: bold;
+  display: inline-block;
+  margin-bottom: 10px;
 }
 
 .badge.rumor {
-  background: #ffb800;
-  color: black;
+  background: orange;
 }
 
-.card-divider {
-  border-top: 1px solid #eee;
-}
-
-.card-bottom {
-  padding: 18px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 30px;
-}
-
-.club-logo {
-  width: 55px;
-  height: 55px;
-  object-fit: contain;
-}
-
-.transfer-arrow {
-  font-size: 22px;
-  color: #0a5c2a;
-}
-
-.card-link {
-  display: block;
-  text-align: center;
-  padding: 12px;
-  background: #f7f7f7;
-  text-decoration: none;
-  font-weight: 600;
-  color: #333;
-}
-
-.card-link:hover {
-  background: #0a5c2a;
+.badge.oficial {
+  background: green;
   color: white;
+}
+
+.news-link {
+  display: block;
+  font-size: 14px;
+  text-decoration: none;
+  margin-top: 5px;
 }
 
 @media (max-width: 900px) {
@@ -215,28 +171,36 @@ body {
 
 <script>
 
-const imageCache = {};
+const playerCache = {};
 
-async function buscarImagemWikipedia(nome, fallback) {
+/* =========================
+   BUSCAR DADOS DO JOGADOR
+========================= */
 
-  if (imageCache[nome]) {
-    return imageCache[nome];
+async function buscarDadosJogador(nome) {
+
+  if (!nome) return null;
+
+  if (playerCache[nome]) {
+    return playerCache[nome];
   }
 
   try {
-    const res = await fetch(`/api/wiki-image?name=${encodeURIComponent(nome)}`);
+    const res = await fetch(`/api/player?name=${encodeURIComponent(nome)}`);
     const data = await res.json();
 
-    const image = data.image || fallback;
+    playerCache[nome] = data;
+    return data;
 
-    imageCache[nome] = image;
-
-    return image;
-
-  } catch {
-    return fallback;
+  } catch (error) {
+    return null;
   }
 }
+
+
+/* =========================
+   CARREGAR MERCADO
+========================= */
 
 async function loadMercado() {
 
@@ -257,60 +221,48 @@ async function loadMercado() {
 
   for (const item of todos) {
 
-    let playerPhoto = "/default-player.png";
-    let fromLogo = "/default-club.png";
-    let toLogo = "/default-club.png";
+    if (!item.playerName) continue;
 
-    if (item.playerName) {
-      playerPhoto = await buscarImagemWikipedia(
-        item.playerName,
-        "/default-player.png"
-      );
-    }
+    const jogador = await buscarDadosJogador(item.playerName);
 
-    if (item.fromClub) {
-      fromLogo = await buscarImagemWikipedia(
-        item.fromClub,
-        "/default-club.png"
-      );
-    }
-
-    if (item.toClub) {
-      toLogo = await buscarImagemWikipedia(
-        item.toClub,
-        "/default-club.png"
-      );
-    }
+    const playerImage = jogador?.image || "/default-player.png";
+    const age = jogador?.age || "-";
+    const nationality = jogador?.nationality || "-";
+    const position = jogador?.position || "-";
 
     const tipo = item.type || "entrada";
     const status = item.status || "rumor";
 
     const card = document.createElement("div");
-    card.className = "mercado-card";
+    card.className = "transfer-card";
 
     card.innerHTML = `
-      <div class="card-top">
-        <img src="${playerPhoto}" class="player-photo">
-        <div class="player-info">
-          <h2>${item.title}</h2>
-          <div>${item.formattedDate}</div>
-          <span class="badge ${status}">
-            ${status === "oficial" ? "OFICIAL" : "RUMOR"}
-          </span>
+      <div class="transfer-left">
+        <img src="${playerImage}" class="player-photo">
+      </div>
+
+      <div class="transfer-center">
+        <h2>${jogador?.name || item.playerName}</h2>
+        <p class="player-meta">
+          ${age} anos • ${nationality} • ${position}
+        </p>
+
+        <div class="transfer-line">
+          <span class="club">${item.fromClub || "?"}</span>
+          →
+          <span class="club">${item.toClub || "?"}</span>
         </div>
       </div>
 
-      <div class="card-divider"></div>
+      <div class="transfer-right">
+        <span class="badge ${status}">
+          ${status === "oficial" ? "OFICIAL" : "RUMOR"}
+        </span>
 
-      <div class="card-bottom">
-        <img src="${fromLogo}" class="club-logo">
-        <div class="transfer-arrow">➜</div>
-        <img src="${toLogo}" class="club-logo">
+        <a href="${item.link}" target="_blank" class="news-link">
+          Ver notícia
+        </a>
       </div>
-
-      <a href="${item.link}" target="_blank" class="card-link">
-        Ver notícia completa
-      </a>
     `;
 
     if (tipo === "saida") {

@@ -25,16 +25,31 @@ export default async function handler(req, res) {
         const clubeMatch = text.match(/Transferência para o\/a (.*)\?/);
         const clubeDestino = clubeMatch ? clubeMatch[1].trim() : null;
 
-        resultados.push({
-          title: text,
-          link: "https://www.transfermarkt.pt" + $(el).attr("href"),
-          formattedDate: "",
-          playerName: "Jogador do Sporting",
-          fromClub: "Sporting Clube de Portugal",
-          toClub: clubeDestino,
-          type: "saida",
-          status: "rumor"
-        });
+        const href = $(el).attr("href");
+
+// Extrair nome do jogador do slug
+let playerName = null;
+
+if (href) {
+  const slugMatch = href.match(/\/([^\/]+)-/);
+  if (slugMatch) {
+    playerName = slugMatch[1]
+      .split("-")
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }
+}
+
+resultados.push({
+  title: text,
+  link: "https://www.transfermarkt.pt" + href,
+  formattedDate: "",
+  playerName: playerName || "Desconhecido",
+  fromClub: "Sporting Clube de Portugal",
+  toClub: clubeDestino,
+  type: "saida",
+  status: "rumor"
+});
       }
     });
 

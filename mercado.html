@@ -215,11 +215,24 @@ body {
 
 <script>
 
+const imageCache = {};
+
 async function buscarImagemWikipedia(nome, fallback) {
+
+  if (imageCache[nome]) {
+    return imageCache[nome];
+  }
+
   try {
     const res = await fetch(`/api/wiki-image?name=${encodeURIComponent(nome)}`);
     const data = await res.json();
-    return data.image || fallback;
+
+    const image = data.image || fallback;
+
+    imageCache[nome] = image;
+
+    return image;
+
   } catch {
     return fallback;
   }
@@ -244,37 +257,30 @@ async function loadMercado() {
 
   for (const item of todos) {
 
-    /* ================= IMAGENS ================= */
+    let playerPhoto = "/default-player.png";
+    let fromLogo = "/default-club.png";
+    let toLogo = "/default-club.png";
 
-    let playerPhoto = item.playerPhoto || "/default-player.png";
-    let fromLogo = item.fromLogo || "/default-club.png";
-    let toLogo = item.toLogo || "/default-club.png";
-
-    // Buscar imagem jogador automaticamente
-    if (!item.playerPhoto && item.playerName) {
+    if (item.playerName) {
       playerPhoto = await buscarImagemWikipedia(
         item.playerName,
         "/default-player.png"
       );
     }
 
-    // Buscar logo clube origem automaticamente
-    if (!item.fromLogo && item.fromClub) {
+    if (item.fromClub) {
       fromLogo = await buscarImagemWikipedia(
         item.fromClub,
         "/default-club.png"
       );
     }
 
-    // Buscar logo clube destino automaticamente
-    if (!item.toLogo && item.toClub) {
+    if (item.toClub) {
       toLogo = await buscarImagemWikipedia(
         item.toClub,
         "/default-club.png"
       );
     }
-
-    /* ================= DADOS ================= */
 
     const tipo = item.type || "entrada";
     const status = item.status || "rumor";
@@ -284,12 +290,7 @@ async function loadMercado() {
 
     card.innerHTML = `
       <div class="card-top">
-        <img 
-          src="${playerPhoto}"
-          class="player-photo"
-          onerror="this.src='/default-player.png'"
-        >
-
+        <img src="${playerPhoto}" class="player-photo">
         <div class="player-info">
           <h2>${item.title}</h2>
           <div>${item.formattedDate}</div>
@@ -302,17 +303,9 @@ async function loadMercado() {
       <div class="card-divider"></div>
 
       <div class="card-bottom">
-        <img 
-          src="${fromLogo}"
-          class="club-logo"
-          onerror="this.src='/default-club.png'"
-        >
+        <img src="${fromLogo}" class="club-logo">
         <div class="transfer-arrow">➜</div>
-        <img 
-          src="${toLogo}"
-          class="club-logo"
-          onerror="this.src='/default-club.png'"
-        >
+        <img src="${toLogo}" class="club-logo">
       </div>
 
       <a href="${item.link}" target="_blank" class="card-link">
@@ -325,9 +318,7 @@ async function loadMercado() {
     } else {
       entradasContainer.appendChild(card);
     }
-
   }
-
 }
 
 loadMercado();

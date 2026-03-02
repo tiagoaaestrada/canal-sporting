@@ -31,11 +31,20 @@ export default async function handler(req, res) {
 let playerName = null;
 
 if (href) {
-  const slugMatch = href.match(/\/([^\/]+)-/);
+  const slugMatch = href.match(/\/([^\/]+)-\/thread/);
+
   if (slugMatch) {
-    playerName = slugMatch[1]
-      .split("-")
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    const slug = slugMatch[1];
+
+    const parts = slug.split("-");
+
+    // manter apenas primeiras 2 ou 3 palavras
+    const nameParts = parts.slice(0, 3);
+
+    playerName = nameParts
+      .map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1)
+      )
       .join(" ");
   }
 }

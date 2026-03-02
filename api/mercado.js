@@ -16,22 +16,38 @@ export default async function handler(req, res) {
     const html = await response.text();
     const $ = cheerio.load(html);
 
-    // Testar apenas títulos de links
-    const titles = [];
+    const resultados = [];
 
     $("a").each((i, el) => {
       const text = $(el).text().trim();
-      if (text.length > 20 && text.length < 120) {
-        titles.push(text);
+
+      if (text.startsWith("Transferência para o/a")) {
+        const clubeMatch = text.match(/Transferência para o\/a (.*)\?/);
+        const clubeDestino = clubeMatch ? clubeMatch[1].trim() : null;
+
+        resultados.push({
+          title: text,
+          link: "https://www.transfermarkt.pt" + $(el).attr("href"),
+          formattedDate: "",
+          playerName: "Jogador do Sporting",
+          fromClub: "Sporting Clube de Portugal",
+          toClub: clubeDestino,
+          type: "saida",
+          status: "rumor"
+        });
       }
     });
 
-    return res.status(200).json(titles.slice(0, 30));
+    return res.status(200).json({
+      sporting: resultados.slice(0, 10),
+      nacional: [],
+      internacional: []
+    });
 
   } catch (error) {
     return res.status(500).json({
-      error: "Debug failed",
-      details: error.message,
+      error: "Scraping failed",
+      details: error.message
     });
   }
 }

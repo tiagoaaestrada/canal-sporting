@@ -974,61 +974,75 @@ async function carregarTudo() {
 
     if (dataJogos && dataJogos.jogos) {
 
-      var proximos = dataJogos.jogos.porJogar
+      var porJogar = dataJogos.jogos.porJogar
         ? dataJogos.jogos.porJogar.slice()
         : [];
 
-      var anteriores = dataJogos.jogos.jogados
+      var jogados = dataJogos.jogos.jogados
         ? dataJogos.jogos.jogados.slice()
         : [];
-      
-      // 🔥 JUNTAR JOGOS EXTRA
-      anteriores = anteriores.concat(jogosExtra);
 
-      proximos.sort(function(a,b){
-        return new Date(a.date) - new Date(b.date);
+      // 🔥 JUNTAR JOGOS EXTRA AOS JOGADOS
+      jogados = jogados.concat(jogosExtra);
+
+      /* ================= SEPARAR POR ESTADO ================= */
+
+      const jogosLive = [];
+      const jogosFuturos = [];
+      const jogosTerminados = [];
+
+      porJogar.forEach(j => {
+        const estado = calcularEstadoJogo(j.date);
+
+        if (estado === "live") {
+          jogosLive.push(j);
+        } else {
+          jogosFuturos.push(j);
+        }
       });
 
-      anteriores.sort(function(a,b){
-        return new Date(b.date) - new Date(a.date);
+      jogados.forEach(j => {
+        const estado = calcularEstadoJogo(j.date);
+
+        if (estado === "live") {
+          // 🔥 Se por alguma razão vier como jogado mas está live,
+          // ainda assim forçamos para LIVE
+          jogosLive.push(j);
+        } else {
+          jogosTerminados.push(j);
+        }
       });
 
-      const hojeISO = new Date().toISOString().split("T")[0];
+      /* ================= ORDENAR ================= */
 
-      const jogosHoje = proximos.filter(j =>
-        j.date && j.date.startsWith(hojeISO)
-      );
-      
-      const jogosRestantes = proximos.filter(j =>
-        !j.date || !j.date.startsWith(hojeISO)
-      );
-      
-      const jogosLive = proximos.filter(j =>
-  calcularEstadoJogo(j.date) === "live"
-);
+      // Futuros -> mais próximo primeiro
+      jogosFuturos.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-const jogosNaoLive = proximos.filter(j =>
-  calcularEstadoJogo(j.date) !== "live"
-);
+      // Terminados -> mais recente primeiro
+      jogosTerminados.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-// 🔥 Mostrar secção Jogo do Dia se houver live
-if (jogosLive.length) {
-  document.getElementById("jogoDoDiaSection").style.display = "block";
-  render(jogosLive, "jogoDoDiaContainer", false);
-} else {
-  document.getElementById("jogoDoDiaSection").style.display = "none";
-}
+      /* ================= MOSTRAR JOGO DO DIA ================= */
 
-render(jogosNaoLive, "agendaContainer", false);
-render(anteriores, "resultadosContainer", true);
-      verificarDiaDeJogo(proximos);
+      if (jogosLive.length) {
+        document.getElementById("jogoDoDiaSection").style.display = "block";
+        render(jogosLive, "jogoDoDiaContainer", false);
+      } else {
+        document.getElementById("jogoDoDiaSection").style.display = "none";
+      }
 
-      // 🔥 CALCULAR ESTATÍSTICAS POR COMPETIÇÃO
-const todosJogosFinalizados = anteriores;
-const estatisticasPorComp = calcularEstatisticasPorCompeticao(todosJogosFinalizados);
+      /* ================= RENDER NORMAL ================= */
 
-renderEstatisticasSeparadas(estatisticasPorComp);
-    
+      render(jogosFuturos, "agendaContainer", false);
+      render(jogosTerminados, "resultadosContainer", true);
+
+      verificarDiaDeJogo(porJogar);
+
+      /* ================= ESTATÍSTICAS ================= */
+
+      const estatisticasPorComp =
+        calcularEstatisticasPorCompeticao(jogosTerminados);
+
+      renderEstatisticasSeparadas(estatisticasPorComp);
     }
 
   } catch (err) {

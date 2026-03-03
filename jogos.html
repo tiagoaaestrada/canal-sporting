@@ -147,6 +147,16 @@ body {
   border-radius: 6px;
 }
 
+  @keyframes piscarLive {
+  0% { opacity: 1; }
+  50% { opacity: 0.35; }
+  100% { opacity: 1; }
+}
+
+.live-badge {
+  animation: piscarLive 1s infinite;
+}
+  
 .countdown {
   position: absolute;
   top: 8px;
@@ -969,10 +979,17 @@ async function carregarTudo() {
         return new Date(b.date) - new Date(a.date);
       });
 
-      const jogosLive = proximos.filter(j => calcularEstadoJogo(j.date) === "live");
-      const jogosNormais = proximos.filter(j => calcularEstadoJogo(j.date) !== "live");
+      const hojeISO = new Date().toISOString().split("T")[0];
+
+      const jogosHoje = proximos.filter(j =>
+        j.date && j.date.startsWith(hojeISO)
+      );
       
-      const agendaFinal = [...jogosLive, ...jogosNormais];
+      const jogosRestantes = proximos.filter(j =>
+        !j.date || !j.date.startsWith(hojeISO)
+      );
+      
+      const agendaFinal = [...jogosHoje, ...jogosRestantes];
       
       render(agendaFinal, "agendaContainer", false);
       render(anteriores, "resultadosContainer", true);

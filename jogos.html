@@ -336,6 +336,10 @@ th, td {
 .hidden-stat {
   display: none;
 }
+
+#jogoDoDiaSection {
+  border: 2px solid #cc0000;
+}
   
 </style>
 </head>
@@ -370,6 +374,13 @@ th, td {
 
 <!-- JOGOS -->
 <div class="col-jogos tab-content" data-tab="jogos">
+
+    <!-- 🔥 JOGO DO DIA -->
+    <div class="section" id="jogoDoDiaSection" style="display:none;">
+      <h2>Jogo do Dia</h2>
+      <div id="jogoDoDiaContainer"></div>
+    </div>
+
     <div class="section">
       <h2>Agenda</h2>
       <div id="agendaContainer"></div>
@@ -463,15 +474,17 @@ function calcularEstadoJogo(dateStr) {
 
   const agora = new Date();
   const inicio = new Date(dateStr);
-  const fimEstimado = new Date(inicio.getTime() + 2 * 60 * 60 * 1000); // 2h duração
+  const fimEstimado = new Date(inicio.getTime() + 2 * 60 * 60 * 1000);
 
+  // LIVE
   if (agora >= inicio && agora <= fimEstimado) {
     return "live";
   }
 
+  // FUTURO
   if (agora < inicio) {
-    const diff = inicio - agora;
 
+    const diff = inicio - agora;
     const horas = Math.floor(diff / (1000 * 60 * 60));
     const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
@@ -481,6 +494,7 @@ function calcularEstadoJogo(dateStr) {
     };
   }
 
+  // TERMINADO
   return "finished";
 }
   
@@ -989,10 +1003,24 @@ async function carregarTudo() {
         !j.date || !j.date.startsWith(hojeISO)
       );
       
-      const agendaFinal = [...jogosHoje, ...jogosRestantes];
-      
-      render(agendaFinal, "agendaContainer", false);
-      render(anteriores, "resultadosContainer", true);
+      const jogosLive = proximos.filter(j =>
+  calcularEstadoJogo(j.date) === "live"
+);
+
+const jogosNaoLive = proximos.filter(j =>
+  calcularEstadoJogo(j.date) !== "live"
+);
+
+// 🔥 Mostrar secção Jogo do Dia se houver live
+if (jogosLive.length) {
+  document.getElementById("jogoDoDiaSection").style.display = "block";
+  render(jogosLive, "jogoDoDiaContainer", false);
+} else {
+  document.getElementById("jogoDoDiaSection").style.display = "none";
+}
+
+render(jogosNaoLive, "agendaContainer", false);
+render(anteriores, "resultadosContainer", true);
       verificarDiaDeJogo(proximos);
 
       // 🔥 CALCULAR ESTATÍSTICAS POR COMPETIÇÃO

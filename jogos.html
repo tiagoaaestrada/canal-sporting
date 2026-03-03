@@ -1070,8 +1070,8 @@ function verificarDiaDeJogo(listaProximos) {
 
   if (!listaProximos || !listaProximos.length) return;
 
-  const hoje = new Date();
-  const hojeISO = hoje.toISOString().split("T")[0];
+  const agora = new Date();
+  const hojeISO = agora.toISOString().split("T")[0];
 
   const jogoHoje = listaProximos.find(j =>
     j.date && j.date.startsWith(hojeISO)
@@ -1079,16 +1079,52 @@ function verificarDiaDeJogo(listaProximos) {
 
   if (!jogoHoje) return;
 
+  const horaJogo = new Date(jogoHoje.date);
+  const diffMs = horaJogo - agora;
+  const diffHoras = diffMs / (1000 * 60 * 60);
+
+  const jaMostradoHoje = localStorage.getItem("popupPrimeiraAbertura") === hojeISO;
+  const jaMostrado12h = localStorage.getItem("popupMeioDia") === hojeISO;
+  const jaMostrado1h = localStorage.getItem("popup1Hora") === hojeISO;
+
+  let mostrar = false;
+
+  /* ================= 1️⃣ PRIMEIRA ABERTURA DO DIA ================= */
+
+  if (!jaMostradoHoje) {
+    localStorage.setItem("popupPrimeiraAbertura", hojeISO);
+    mostrar = true;
+  }
+
+  /* ================= 2️⃣ MEIO-DIA ================= */
+
+  if (!mostrar && agora.getHours() === 12 && !jaMostrado12h) {
+    localStorage.setItem("popupMeioDia", hojeISO);
+    mostrar = true;
+  }
+
+  /* ================= 3️⃣ 1 HORA ANTES ================= */
+
+  if (!mostrar && diffHoras <= 1 && diffHoras > 0 && !jaMostrado1h) {
+    localStorage.setItem("popup1Hora", hojeISO);
+    mostrar = true;
+  }
+
+  if (!mostrar) return;
+
+  /* ================= CONTEÚDO POPUP ================= */
+
   const homeNormal = normalizarNomeEquipa(jogoHoje.homeTeam);
   const awayNormal = normalizarNomeEquipa(jogoHoje.awayTeam);
 
   const sportingCasa = homeNormal === "Sporting Clube de Portugal";
-
   const adversario = sportingCasa ? awayNormal : homeNormal;
   const local = sportingCasa ? "🏠 Em Casa" : "✈️ Fora";
 
-  const hora = new Date(jogoHoje.date)
-    .toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+  const hora = horaJogo.toLocaleTimeString("pt-PT", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 
   document.getElementById("popupContent").innerHTML = `
     <strong>${jogoHoje.competition}</strong><br><br>

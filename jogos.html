@@ -507,7 +507,10 @@ function render(lista, containerId, mostrarResultado) {
 
   jogosParaMostrar.forEach(j => {
 
-    const estado = calcularEstadoJogo(j.date);
+    const hojeISO = new Date().toISOString().split("T")[0];
+    const isToday = j.date && j.date.startsWith(hojeISO);
+    
+    const estado = isToday ? calcularEstadoJogo(j.date) : null;
 
     const homeName = normalizarNomeEquipa(j.homeTeam);
     const awayName = normalizarNomeEquipa(j.awayTeam);
@@ -525,12 +528,14 @@ function render(lista, containerId, mostrarResultado) {
       : "";
 
     container.innerHTML += `
-      <div class="match ${estado === "live" ? "match-live" : ""}">
+      <div class="match 
+        ${isToday ? "today" : ""} 
+        ${estado === "live" ? "match-live" : ""}">
         
         ${
-          estado === "live"
+          isToday && estado === "live"
             ? `<span class="live-badge">AO VIVO</span>`
-            : estado.tipo === "countdown"
+            : isToday && estado && estado.tipo === "countdown"
               ? `<span class="countdown">${estado.texto}</span>`
               : ""
         }
@@ -634,6 +639,10 @@ function renderTodos(lista, containerId, mostrarResultado) {
 
   lista.forEach(j => {
 
+    const hojeISO = new Date().toISOString().split("T")[0];
+    const isToday = j.date && j.date.startsWith(hojeISO);
+    const estado = isToday ? calcularEstadoJogo(j.date) : null;
+    
     const homeName = normalizarNomeEquipa(j.homeTeam);
     const awayName = normalizarNomeEquipa(j.awayTeam);
 
@@ -650,7 +659,17 @@ function renderTodos(lista, containerId, mostrarResultado) {
       : "";
 
     container.innerHTML += `
-      <div class="match">
+      <div class="match 
+          ${isToday ? "today" : ""} 
+          ${estado === "live" ? "match-live" : ""}">
+          
+          ${
+            isToday && estado === "live"
+              ? `<span class="live-badge">AO VIVO</span>`
+              : isToday && estado && estado.tipo === "countdown"
+                ? `<span class="countdown">${estado.texto}</span>`
+                : ""
+          }
         <div class="match-time">
           ${formatarData(j.date)}
         </div>

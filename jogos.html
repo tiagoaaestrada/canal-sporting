@@ -124,6 +124,40 @@ body {
   padding: 8px;
   background: #f0fbf5;
 }
+
+.match {
+  position: relative;
+}
+
+.match-live {
+  border: 2px solid #cc0000;
+  background: #fff5f5;
+  border-radius: 12px;
+}
+
+.live-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #cc0000;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+
+.countdown {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #0a5c2a;
+  color: white;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
   
 /* ===== COMPETIÇÕES ===== */
 
@@ -414,6 +448,31 @@ function normalizarNomeEquipa(nome) {
 
   return nome;
 }
+
+function calcularEstadoJogo(dateStr) {
+
+  const agora = new Date();
+  const inicio = new Date(dateStr);
+  const fimEstimado = new Date(inicio.getTime() + 2 * 60 * 60 * 1000); // 2h duração
+
+  if (agora >= inicio && agora <= fimEstimado) {
+    return "live";
+  }
+
+  if (agora < inicio) {
+    const diff = inicio - agora;
+
+    const horas = Math.floor(diff / (1000 * 60 * 60));
+    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    return {
+      tipo: "countdown",
+      texto: `${horas}h ${minutos}m`
+    };
+  }
+
+  return "finished";
+}
   
 function render(lista, containerId, mostrarResultado) {
 
@@ -425,22 +484,56 @@ function render(lista, containerId, mostrarResultado) {
     return;
   }
 
+  const agora = new Date();
+
+  /* ================= ORDENAR: LIVE PRIMEIRO ================= */
+
+  function calcularEstadoJogo(dateStr) {
+    const inicio = new Date(dateStr);
+    const fimEstimado = new Date(inicio.getTime() + 2 * 60 * 60 * 1000);
+  
+    if (agora >= inicio && agora <= fimEstimado) {
+      return "live";
+    }
+  
+    if (agora < inicio) {
+      const diff = inicio - agora;
+      const horas = Math.floor(diff / (1000 * 60 * 60));
+      const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  
+      return {
+        tipo: "countdown",
+        texto: `${horas}h ${minutos}m`
+      };
+    }
+  
+    return "finished";
+  }
+
+  const listaOrdenada = [...lista].sort((a, b) => {
+    const estadoA = calcularEstadoJogo(a.date);
+    const estadoB = calcularEstadoJogo(b.date);
+
+    if (estadoA === "live") return -1;
+    if (estadoB === "live") return 1;
+
+    return new Date(a.date) - new Date(b.date);
+  });
+
   const maxVisiveis = 3;
-  const precisaBotao = lista.length > maxVisiveis;
+  const precisaBotao = listaOrdenada.length > maxVisiveis;
 
   const jogosParaMostrar = precisaBotao
-    ? lista.slice(0, maxVisiveis)
-    : lista;
-  
-  const hojeISO = new Date().toISOString().split("T")[0];
-  
+    ? listaOrdenada.slice(0, maxVisiveis)
+    : listaOrdenada;
+
   jogosParaMostrar.forEach(j => {
-  
-    const isToday = j.date && j.date.startsWith(hojeISO);
+
+    const estado = calcularEstadoJogo(j.date);
 
     const homeName = normalizarNomeEquipa(j.homeTeam);
     const awayName = normalizarNomeEquipa(j.awayTeam);
-    
+
     const sportingHome = homeName === "Sporting Clube de Portugal";
     const sportingAway = awayName === "Sporting Clube de Portugal";
     const derby = isDerby(homeName, awayName);
@@ -454,10 +547,20 @@ function render(lista, containerId, mostrarResultado) {
       : "";
 
     container.innerHTML += `
-      <div class="match ${isToday ? "today" : ""}">
+      <div class="match ${estado === "live" ? "match-live" : ""}">
+        
+        ${
+          estado === "live"
+            ? `<span class="live-badge">AO VIVO</span>`
+            : estado.tipo === "countdown"
+              ? `<span class="countdown">${estado.texto}</span>`
+              : ""
+        }
+
         <div class="match-time">
           ${formatarData(j.date)}
         </div>
+
         <div class="match-main">
 
           <div>
@@ -503,8 +606,7 @@ function render(lista, containerId, mostrarResultado) {
     `;
   }
 
-  // Guardar lista completa no elemento
-  container.dataset.lista = JSON.stringify(lista);
+  container.dataset.lista = JSON.stringify(listaOrdenada);
   container.dataset.mostrarResultado = mostrarResultado;
 }
 
@@ -870,7 +972,12 @@ async function carregarTudo() {
         return new Date(b.date) - new Date(a.date);
       });
 
-      render(proximos, "agendaContainer", false);
+      const jogosLive = proximos.filter(j => calcularEstadoJogo(j.date) === "live");
+      const jogosNormais = proximos.filter(j => calcularEstadoJogo(j.date) !== "live");
+      
+      const agendaFinal = [...jogosLive, ...jogosNormais];
+      
+      render(agendaFinal, "agendaContainer", false);
       render(anteriores, "resultadosContainer", true);
       verificarDiaDeJogo(proximos);
 
@@ -929,7 +1036,7 @@ function mostrarTab(tab) {
 /* ================= INIT ================= */
 
 carregarTudo();
-setInterval(carregarTudo, 300000);
+setInterval(carregarTudo, 60000);
 
 function renderEstatisticasSeparadas(stats) {
 

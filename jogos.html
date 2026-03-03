@@ -966,77 +966,41 @@ function calcularEstatisticasPorCompeticao(listaJogos) {
 
 async function carregarTudo() {
 
-  /* ================= JOGOS ================= */
-
   try {
-    var resJogos = await fetch("/api/sporting");
-    var dataJogos = await resJogos.json();
+    const resJogos = await fetch("/api/sporting");
+    const dataJogos = await resJogos.json();
 
     if (dataJogos && dataJogos.jogos) {
-    
+
       const todosJogos = [
-      ...(dataJogos.jogos.porJogar || []),
-      ...(dataJogos.jogos.jogados || []),
-      ...jogosExtra
-    ];
-    
-    const jogosLive = [];
-    const jogosFuturos = [];
-    const jogosTerminados = [];
-    
-    todosJogos.forEach(j => {
-      const estado = calcularEstadoJogo(j.date);
-    
-      if (estado === "live") {
-        jogosLive.push(j);
-      } else if (estado === "finished") {
-        jogosTerminados.push(j);
-      } else {
-        jogosFuturos.push(j);
-      }
-    });
-
-      // 🔥 JUNTAR JOGOS EXTRA AOS JOGADOS
-      jogados = jogados.concat(jogosExtra);
-
-      /* ================= SEPARAR POR ESTADO ================= */
+        ...(dataJogos.jogos.porJogar || []),
+        ...(dataJogos.jogos.jogados || []),
+        ...jogosExtra
+      ];
 
       const jogosLive = [];
       const jogosFuturos = [];
       const jogosTerminados = [];
 
-      porJogar.forEach(j => {
+      todosJogos.forEach(j => {
         const estado = calcularEstadoJogo(j.date);
 
         if (estado === "live") {
           jogosLive.push(j);
-        } else {
+        } 
+        else if (estado === "finished") {
+          jogosTerminados.push(j);
+        } 
+        else {
           jogosFuturos.push(j);
         }
       });
 
-      jogados.forEach(j => {
-        const estado = calcularEstadoJogo(j.date);
-
-        if (estado === "live") {
-          // 🔥 Se por alguma razão vier como jogado mas está live,
-          // ainda assim forçamos para LIVE
-          jogosLive.push(j);
-        } else {
-          jogosTerminados.push(j);
-        }
-      });
-
-      /* ================= ORDENAR ================= */
-
-      // Futuros -> mais próximo primeiro
+      // Ordenar
       jogosFuturos.sort((a, b) => new Date(a.date) - new Date(b.date));
-
-      // Terminados -> mais recente primeiro
       jogosTerminados.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      /* ================= MOSTRAR JOGO DO DIA ================= */
-
+      // Mostrar LIVE acima da Agenda
       if (jogosLive.length) {
         document.getElementById("jogoDoDiaSection").style.display = "block";
         render(jogosLive, "jogoDoDiaContainer", false);
@@ -1044,14 +1008,10 @@ async function carregarTudo() {
         document.getElementById("jogoDoDiaSection").style.display = "none";
       }
 
-      /* ================= RENDER NORMAL ================= */
-
       render(jogosFuturos, "agendaContainer", false);
       render(jogosTerminados, "resultadosContainer", true);
 
-      verificarDiaDeJogo(porJogar);
-
-      /* ================= ESTATÍSTICAS ================= */
+      verificarDiaDeJogo(jogosFuturos);
 
       const estatisticasPorComp =
         calcularEstatisticasPorCompeticao(jogosTerminados);
@@ -1063,11 +1023,9 @@ async function carregarTudo() {
     console.error("Erro jogos:", err);
   }
 
-  /* ================= CLASSIFICAÇÃO ================= */
-
   try {
-    var resClass = await fetch("/api/classificacao");
-    var dataClass = await resClass.json();
+    const resClass = await fetch("/api/classificacao");
+    const dataClass = await resClass.json();
 
     if (dataClass && dataClass["Primeira Liga"]) {
       renderClassificacao(dataClass["Primeira Liga"]);

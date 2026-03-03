@@ -973,14 +973,28 @@ async function carregarTudo() {
     var dataJogos = await resJogos.json();
 
     if (dataJogos && dataJogos.jogos) {
-
-      var porJogar = dataJogos.jogos.porJogar
-        ? dataJogos.jogos.porJogar.slice()
-        : [];
-
-      var jogados = dataJogos.jogos.jogados
-        ? dataJogos.jogos.jogados.slice()
-        : [];
+    
+      const todosJogos = [
+      ...(dataJogos.jogos.porJogar || []),
+      ...(dataJogos.jogos.jogados || []),
+      ...jogosExtra
+    ];
+    
+    const jogosLive = [];
+    const jogosFuturos = [];
+    const jogosTerminados = [];
+    
+    todosJogos.forEach(j => {
+      const estado = calcularEstadoJogo(j.date);
+    
+      if (estado === "live") {
+        jogosLive.push(j);
+      } else if (estado === "finished") {
+        jogosTerminados.push(j);
+      } else {
+        jogosFuturos.push(j);
+      }
+    });
 
       // 🔥 JUNTAR JOGOS EXTRA AOS JOGADOS
       jogados = jogados.concat(jogosExtra);

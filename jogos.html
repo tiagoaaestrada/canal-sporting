@@ -273,6 +273,11 @@ th, td {
   cursor: pointer;
 }
 
+.popup-box {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+  
 @keyframes popupFade {
   from { transform: translateY(15px); opacity:0; }
   to { transform: translateY(0); opacity:1; }
@@ -1063,10 +1068,6 @@ function verificarDiaDeJogo(listaProximos) {
 
   if (!jogoHoje) return;
 
-  // Evitar repetir no mesmo dia
-  const jaMostrado = localStorage.getItem("popupJogo");
-  if (jaMostrado === hojeISO) return;
-
   const homeNormal = normalizarNomeEquipa(jogoHoje.homeTeam);
   const awayNormal = normalizarNomeEquipa(jogoHoje.awayTeam);
 
@@ -1086,8 +1087,6 @@ function verificarDiaDeJogo(listaProximos) {
   `;
 
   document.getElementById("matchPopup").style.display = "flex";
-
-  localStorage.setItem("popupJogo", hojeISO);
 }
 
 function fecharPopup() {

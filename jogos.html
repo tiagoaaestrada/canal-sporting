@@ -512,15 +512,23 @@ function render(lista, containerId, mostrarResultado) {
 
   /* ================= ORDENAR: LIVE PRIMEIRO ================= */
 
-  const listaOrdenada = [...lista].sort((a, b) => {
-    const estadoA = calcularEstadoJogo(a.date);
-    const estadoB = calcularEstadoJogo(b.date);
+const listaOrdenada = [...lista].sort((a, b) => {
 
-    if (estadoA === "live") return -1;
-    if (estadoB === "live") return 1;
+  const estadoA = calcularEstadoJogo(a.date);
+  const estadoB = calcularEstadoJogo(b.date);
 
-    return new Date(a.date) - new Date(b.date);
-  });
+  // LIVE sempre no topo
+  if (estadoA === "live") return -1;
+  if (estadoB === "live") return 1;
+
+  // 🔥 Se for resultados (mostrarResultado = true)
+  if (mostrarResultado) {
+    return new Date(b.date) - new Date(a.date); // mais recente primeiro
+  }
+
+  // 🔥 Se for agenda
+  return new Date(a.date) - new Date(b.date); // mais próximo primeiro
+});
 
   const maxVisiveis = 3;
   const precisaBotao = listaOrdenada.length > maxVisiveis;

@@ -488,28 +488,6 @@ function render(lista, containerId, mostrarResultado) {
 
   /* ================= ORDENAR: LIVE PRIMEIRO ================= */
 
-  function calcularEstadoJogo(dateStr) {
-    const inicio = new Date(dateStr);
-    const fimEstimado = new Date(inicio.getTime() + 2 * 60 * 60 * 1000);
-  
-    if (agora >= inicio && agora <= fimEstimado) {
-      return "live";
-    }
-  
-    if (agora < inicio) {
-      const diff = inicio - agora;
-      const horas = Math.floor(diff / (1000 * 60 * 60));
-      const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  
-      return {
-        tipo: "countdown",
-        texto: `${horas}h ${minutos}m`
-      };
-    }
-  
-    return "finished";
-  }
-
   const listaOrdenada = [...lista].sort((a, b) => {
     const estadoA = calcularEstadoJogo(a.date);
     const estadoB = calcularEstadoJogo(b.date);

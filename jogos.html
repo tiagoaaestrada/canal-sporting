@@ -136,15 +136,15 @@ body {
 }
 
 .live-badge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+  display: inline-block;
   background: #cc0000;
   color: white;
   font-size: 10px;
   font-weight: bold;
-  padding: 4px 6px;
+  padding: 3px 6px;
   border-radius: 6px;
+  margin-top: 4px;
+  animation: piscarLive 1s infinite;
 }
 
   @keyframes piscarLive {
@@ -497,6 +497,24 @@ function calcularEstadoJogo(dateStr) {
   // TERMINADO
   return "finished";
 }
+
+  function calcularMinutoJogo(dateStr) {
+
+  const inicio = new Date(dateStr);
+  const agora = new Date();
+
+  const diffMin = Math.floor((agora - inicio) / 60000);
+
+  if (diffMin < 0) return "";
+
+  if (diffMin <= 45) return `${diffMin}'`;
+
+  if (diffMin <= 60) return "Intervalo";
+
+  if (diffMin <= 105) return `${diffMin - 15}'`;
+
+  return "FT";
+}
   
 function render(lista, containerId, mostrarResultado) {
 
@@ -565,8 +583,8 @@ const listaOrdenada = [...lista].sort((a, b) => {
         ${estado === "live" ? "match-live" : ""}">
         
         ${
-          isToday && estado === "live"
-            ? `<span class="live-badge">AO VIVO</span>`
+        isToday && estado === "live"
+          ? `<span class="live-badge">AO VIVO ${calcularMinutoJogo(j.date)}</span>`
             : isToday && estado && estado.tipo === "countdown"
               ? `<span class="countdown">${estado.texto}</span>`
               : ""
@@ -697,7 +715,7 @@ function renderTodos(lista, containerId, mostrarResultado) {
           
           ${
             isToday && estado === "live"
-              ? `<span class="live-badge">AO VIVO</span>`
+              ? `<span class="live-badge">AO VIVO ${calcularMinutoJogo(j.date)}</span>`
               : isToday && estado && estado.tipo === "countdown"
                 ? `<span class="countdown">${estado.texto}</span>`
                 : ""

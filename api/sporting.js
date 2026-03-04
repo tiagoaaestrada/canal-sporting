@@ -125,7 +125,22 @@ export default async function handler(req, res) {
       console.log("Erro ao carregar Taças ICS:", err.message);
     }
 
-
+    for (const j of jogos) {
+    
+      if (j.score.home !== null) continue;
+    
+      const match = jogos.find(apiGame =>
+        apiGame.score.home !== null &&
+        apiGame.homeTeam.includes("Sporting") &&
+        apiGame.awayTeam === j.awayTeam
+      );
+    
+      if (match) {
+        j.score = match.score;
+      }
+    
+    }
+    
     /* =========================
        3️⃣ ORDENAR
     ========================== */

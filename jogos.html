@@ -602,7 +602,7 @@ const listaOrdenada = [...lista].sort((a, b) => {
     
       ${
         isToday && estado === "live"
-          <div class="live-status">🔴 AO VIVO ${calcularMinutoJogo(j.date)}</div>
+          ? `<div class="live-status">🔴 AO VIVO ${calcularMinutoJogo(j.date)}</div>`
           : ""
       }
     

@@ -166,11 +166,19 @@ body {
 
 .live-status {
   text-align: center;
+  margin-top: 6px;
+}
+
+.live-label {
   font-weight: 700;
   color: #e11d48;
-  margin-top: 6px;
   font-size: 13px;
-  letter-spacing: 0.3px;
+}
+
+.live-minute {
+  font-weight: 700;
+  font-size: 14px;
+  margin-top: 2px;
 }
   
 .countdown {
@@ -603,7 +611,12 @@ const listaOrdenada = [...lista].sort((a, b) => {
     
       ${
         isToday && estado === "live"
-          ? `<div class="live-status">🔴 AO VIVO • ${calcularMinutoJogo(j.date)}</div>`
+          ? `
+          <div class="live-status">
+            <div class="live-label">🔴 AO VIVO</div>
+            <div class="live-minute">${calcularMinutoJogo(j.date)}</div>
+          </div>
+          `
           : ""
       }
     
@@ -736,7 +749,12 @@ function renderTodos(lista, containerId, mostrarResultado) {
           
           ${
             isToday && estado === "live"
-              ? `<div class="live-status">🔴 AO VIVO • ${calcularMinutoJogo(j.date)}</div>`
+              ? `
+              <div class="live-status">
+                <div class="live-label">🔴 AO VIVO</div>
+                <div class="live-minute">${calcularMinutoJogo(j.date)}</div>
+              </div>
+              `
               : isToday && estado && estado.tipo === "countdown"
                 ? `<span class="countdown">${estado.texto}</span>`
                 : ""

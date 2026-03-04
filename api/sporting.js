@@ -125,21 +125,41 @@ export default async function handler(req, res) {
       console.log("Erro ao carregar Taças ICS:", err.message);
     }
 
-    for (const j of jogos) {
-    
-      if (j.score.home !== null) continue;
-    
-      const match = jogos.find(apiGame =>
-        apiGame.score.home !== null &&
-        apiGame.homeTeam.includes("Sporting") &&
-        apiGame.awayTeam === j.awayTeam
-      );
-    
-      if (match) {
-        j.score = match.score;
-      }
-    
-    }
+/* =========================
+   FIX RESULTADOS JOGOS ICS
+========================== */
+
+for (const j of jogos) {
+
+  // Só tentar corrigir jogos das Taças
+  if (!j.competition.includes("Taça")) continue;
+
+  // Se já tiver resultado, não mexer
+  if (j.score.home !== null) continue;
+
+  const jogoIcsData = new Date(j.date);
+
+  const match = jogos.find(apiGame => {
+
+    if (apiGame.score.home === null) return false;
+
+    const apiData = new Date(apiGame.date);
+
+    const diff = Math.abs(apiData - jogoIcsData);
+
+    const mesmaEquipa =
+      apiGame.homeTeam === j.homeTeam &&
+      apiGame.awayTeam === j.awayTeam;
+
+    return mesmaEquipa && diff < 1000 * 60 * 60 * 24;
+
+  });
+
+  if (match) {
+    j.score = match.score;
+  }
+
+}
     
     /* =========================
        3️⃣ ORDENAR

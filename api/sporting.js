@@ -160,7 +160,36 @@ for (const j of jogos) {
   }
 
 }
-    
+  /* =========================
+   RESULTADOS MANUAIS TAÇAS
+========================== */
+
+const resultadosManuais = [
+
+  {
+    homeTeam: "Sporting CP",
+    awayTeam: "FC Porto",
+    date: "2026-03-03",
+    score: { home: 1, away: 0 }
+  }
+
+];
+
+resultadosManuais.forEach(r => {
+
+  const jogo = jogos.find(j =>
+
+    j.homeTeam.includes("Sporting") &&
+    j.awayTeam.includes("Porto") &&
+    j.date.startsWith(r.date)
+
+  );
+
+  if (jogo) {
+    jogo.score = r.score;
+  }
+
+});  
     /* =========================
        3️⃣ ORDENAR
     ========================== */

@@ -118,6 +118,64 @@ body {
   border-radius: 6px;
 }
 
+.match.today {
+  border: 2px solid #0a5c2a;
+  border-radius: 12px;
+  padding: 8px;
+  background: #f0fbf5;
+}
+
+.match {
+  position: relative;
+}
+
+.match-live {
+  border: 2px solid #cc0000;
+  background: #fff5f5;
+  border-radius: 12px;
+}
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #cc0000;
+  margin-top: 3px;
+}
+
+.live-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  background: #cc0000;
+  border-radius: 50%;
+  animation: piscarLive 1s infinite;
+}
+
+  @keyframes piscarLive {
+  0% { opacity: 1; }
+  50% { opacity: 0.35; }
+  100% { opacity: 1; }
+}
+
+.live-badge {
+  animation: piscarLive 1s infinite;
+}
+  
+.countdown {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #0a5c2a;
+  color: white;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+  
 /* ===== COMPETIÇÕES ===== */
 
 .comp-badge {
@@ -273,12 +331,21 @@ th, td {
   cursor: pointer;
 }
 
+.popup-box {
+  max-height: 90vh;
+  overflow-y: auto;
+}
+  
 @keyframes popupFade {
   from { transform: translateY(15px); opacity:0; }
   to { transform: translateY(0); opacity:1; }
 }
 .hidden-stat {
   display: none;
+}
+
+#jogoDoDiaSection .team-row {
+  font-size: 16px;
 }
   
 </style>
@@ -314,6 +381,13 @@ th, td {
 
 <!-- JOGOS -->
 <div class="col-jogos tab-content" data-tab="jogos">
+
+    <!-- 🔥 JOGO DO DIA -->
+    <div class="section" id="jogoDoDiaSection" style="display:none;">
+      <h2>Jogo do Dia</h2>
+      <div id="jogoDoDiaContainer"></div>
+    </div>
+
     <div class="section">
       <h2>Agenda</h2>
       <div id="agendaContainer"></div>
@@ -402,6 +476,52 @@ function normalizarNomeEquipa(nome) {
 
   return nome;
 }
+
+function calcularEstadoJogo(dateStr) {
+
+  const agora = new Date();
+  const inicio = new Date(dateStr);
+  const fimEstimado = new Date(inicio.getTime() + 2 * 60 * 60 * 1000);
+
+  // LIVE
+  if (agora >= inicio && agora <= fimEstimado) {
+    return "live";
+  }
+
+  // FUTURO
+  if (agora < inicio) {
+
+    const diff = inicio - agora;
+    const horas = Math.floor(diff / (1000 * 60 * 60));
+    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    return {
+      tipo: "countdown",
+      texto: `${horas}h ${minutos}m`
+    };
+  }
+
+  // TERMINADO
+  return "finished";
+}
+
+  function calcularMinutoJogo(dateStr) {
+
+  const inicio = new Date(dateStr);
+  const agora = new Date();
+
+  const diffMin = Math.floor((agora - inicio) / 60000);
+
+  if (diffMin < 0) return "";
+
+  if (diffMin <= 45) return `${diffMin}'`;
+
+  if (diffMin <= 60) return "Intervalo";
+
+  if (diffMin <= 105) return `${diffMin - 15}'`;
+
+  return "FT";
+}
   
 function render(lista, containerId, mostrarResultado) {
 
@@ -413,18 +533,45 @@ function render(lista, containerId, mostrarResultado) {
     return;
   }
 
+  const agora = new Date();
+
+  /* ================= ORDENAR: LIVE PRIMEIRO ================= */
+
+const listaOrdenada = [...lista].sort((a, b) => {
+
+  const estadoA = calcularEstadoJogo(a.date);
+  const estadoB = calcularEstadoJogo(b.date);
+
+  // LIVE sempre no topo
+  if (estadoA === "live") return -1;
+  if (estadoB === "live") return 1;
+
+  // 🔥 Se for resultados (mostrarResultado = true)
+  if (mostrarResultado) {
+    return new Date(b.date) - new Date(a.date); // mais recente primeiro
+  }
+
+  // 🔥 Se for agenda
+  return new Date(a.date) - new Date(b.date); // mais próximo primeiro
+});
+
   const maxVisiveis = 3;
-  const precisaBotao = lista.length > maxVisiveis;
+  const precisaBotao = listaOrdenada.length > maxVisiveis;
 
   const jogosParaMostrar = precisaBotao
-    ? lista.slice(0, maxVisiveis)
-    : lista;
+    ? listaOrdenada.slice(0, maxVisiveis)
+    : listaOrdenada;
 
   jogosParaMostrar.forEach(j => {
 
+    const hojeISO = new Date().toISOString().split("T")[0];
+    const isToday = j.date && j.date.startsWith(hojeISO);
+    
+    const estado = isToday ? calcularEstadoJogo(j.date) : null;
+
     const homeName = normalizarNomeEquipa(j.homeTeam);
     const awayName = normalizarNomeEquipa(j.awayTeam);
-    
+
     const sportingHome = homeName === "Sporting Clube de Portugal";
     const sportingAway = awayName === "Sporting Clube de Portugal";
     const derby = isDerby(homeName, awayName);
@@ -438,11 +585,28 @@ function render(lista, containerId, mostrarResultado) {
       : "";
 
     container.innerHTML += `
-      <div class="match">
-        <div class="match-time">
-          ${formatarData(j.date)}
-        </div>
-        <div class="match-main">
+  <div class="match 
+    ${isToday ? "today" : ""} 
+    ${estado === "live" ? "match-live" : ""}">
+    
+    <div class="match-time">
+      ${formatarData(j.date)}
+    
+      ${
+        isToday && estado === "live"
+          ? `<div class="live-badge">AO VIVO ${calcularMinutoJogo(j.date)}</div>`
+          : ""
+      }
+    
+      ${
+        isToday && estado && estado.tipo === "countdown"
+          ? `<div class="countdown">${estado.texto}</div>`
+          : ""
+      }
+    
+    </div>
+
+    <div class="match-main">
 
           <div>
             <span class="comp-badge ${getCompetitionClass(j.competition)}">
@@ -487,8 +651,7 @@ function render(lista, containerId, mostrarResultado) {
     `;
   }
 
-  // Guardar lista completa no elemento
-  container.dataset.lista = JSON.stringify(lista);
+  container.dataset.lista = JSON.stringify(listaOrdenada);
   container.dataset.mostrarResultado = mostrarResultado;
 }
 
@@ -538,6 +701,10 @@ function renderTodos(lista, containerId, mostrarResultado) {
 
   lista.forEach(j => {
 
+    const hojeISO = new Date().toISOString().split("T")[0];
+    const isToday = j.date && j.date.startsWith(hojeISO);
+    const estado = isToday ? calcularEstadoJogo(j.date) : null;
+    
     const homeName = normalizarNomeEquipa(j.homeTeam);
     const awayName = normalizarNomeEquipa(j.awayTeam);
 
@@ -554,7 +721,17 @@ function renderTodos(lista, containerId, mostrarResultado) {
       : "";
 
     container.innerHTML += `
-      <div class="match">
+      <div class="match 
+          ${isToday ? "today" : ""} 
+          ${estado === "live" ? "match-live" : ""}">
+          
+          ${
+            isToday && estado === "live"
+              ? `<span class="live-badge">AO VIVO ${calcularMinutoJogo(j.date)}</span>`
+              : isToday && estado && estado.tipo === "countdown"
+                ? `<span class="countdown">${estado.texto}</span>`
+                : ""
+          }
         <div class="match-time">
           ${formatarData(j.date)}
         </div>
@@ -660,6 +837,16 @@ function renderClassificacao(lista) {
 /* ================= JOGOS HISTÓRICOS MANUAIS ================= */
 
 const jogosExtra = [
+
+  /* ================= JOGO TESTE ================= */
+  
+{
+  date: new Date(Date.now() - 30*60000).toISOString(),
+  homeTeam: "Sporting Clube de Portugal",
+  awayTeam: "Teste FC",
+  competition: "Teste",
+  score: { home: 2, away: 1 }
+},
 
   /* ================= SUPERTAÇA ================= */
 
@@ -827,54 +1014,66 @@ function calcularEstatisticasPorCompeticao(listaJogos) {
 
 async function carregarTudo() {
 
-  /* ================= JOGOS ================= */
-
   try {
-    var resJogos = await fetch("/api/sporting");
-    var dataJogos = await resJogos.json();
+    const resJogos = await fetch("/api/sporting");
+    const dataJogos = await resJogos.json();
 
     if (dataJogos && dataJogos.jogos) {
 
-      var proximos = dataJogos.jogos.porJogar
-        ? dataJogos.jogos.porJogar.slice()
-        : [];
+      const todosJogos = [
+        ...(dataJogos.jogos.porJogar || []),
+        ...(dataJogos.jogos.jogados || []),
+        ...jogosExtra
+      ];
 
-      var anteriores = dataJogos.jogos.jogados
-        ? dataJogos.jogos.jogados.slice()
-        : [];
-      
-      // 🔥 JUNTAR JOGOS EXTRA
-      anteriores = anteriores.concat(jogosExtra);
+      const jogosLive = [];
+      const jogosFuturos = [];
+      const jogosTerminados = [];
 
-      proximos.sort(function(a,b){
-        return new Date(a.date) - new Date(b.date);
+      todosJogos.forEach(j => {
+        const estado = calcularEstadoJogo(j.date);
+
+        if (estado === "live") {
+          jogosLive.push(j);
+        } 
+        else if (estado === "finished") {
+          jogosTerminados.push(j);
+        } 
+        else {
+          jogosFuturos.push(j);
+        }
       });
 
-      anteriores.sort(function(a,b){
-        return new Date(b.date) - new Date(a.date);
-      });
+      // Ordenar
+      jogosFuturos.sort((a, b) => new Date(a.date) - new Date(b.date));
+      jogosTerminados.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-      render(proximos, "agendaContainer", false);
-      render(anteriores, "resultadosContainer", true);
-      verificarDiaDeJogo(proximos);
+      // Mostrar LIVE acima da Agenda
+      if (jogosLive.length) {
+        document.getElementById("jogoDoDiaSection").style.display = "block";
+        render(jogosLive, "jogoDoDiaContainer", false);
+      } else {
+        document.getElementById("jogoDoDiaSection").style.display = "none";
+      }
 
-      // 🔥 CALCULAR ESTATÍSTICAS POR COMPETIÇÃO
-const todosJogosFinalizados = anteriores;
-const estatisticasPorComp = calcularEstatisticasPorCompeticao(todosJogosFinalizados);
+      render(jogosFuturos, "agendaContainer", false);
+      render(jogosTerminados, "resultadosContainer", true);
 
-renderEstatisticasSeparadas(estatisticasPorComp);
-    
+      verificarDiaDeJogo(jogosFuturos);
+
+      const estatisticasPorComp =
+        calcularEstatisticasPorCompeticao(jogosTerminados);
+
+      renderEstatisticasSeparadas(estatisticasPorComp);
     }
 
   } catch (err) {
     console.error("Erro jogos:", err);
   }
 
-  /* ================= CLASSIFICAÇÃO ================= */
-
   try {
-    var resClass = await fetch("/api/classificacao");
-    var dataClass = await resClass.json();
+    const resClass = await fetch("/api/classificacao");
+    const dataClass = await resClass.json();
 
     if (dataClass && dataClass["Primeira Liga"]) {
       renderClassificacao(dataClass["Primeira Liga"]);
@@ -913,7 +1112,7 @@ function mostrarTab(tab) {
 /* ================= INIT ================= */
 
 carregarTudo();
-setInterval(carregarTudo, 300000);
+setInterval(carregarTudo, 60000);
 
 function renderEstatisticasSeparadas(stats) {
 
@@ -1054,8 +1253,8 @@ function verificarDiaDeJogo(listaProximos) {
 
   if (!listaProximos || !listaProximos.length) return;
 
-  const hoje = new Date();
-  const hojeISO = hoje.toISOString().split("T")[0];
+  const agora = new Date();
+  const hojeISO = agora.toISOString().split("T")[0];
 
   const jogoHoje = listaProximos.find(j =>
     j.date && j.date.startsWith(hojeISO)
@@ -1063,20 +1262,52 @@ function verificarDiaDeJogo(listaProximos) {
 
   if (!jogoHoje) return;
 
-  // Evitar repetir no mesmo dia
-  const jaMostrado = localStorage.getItem("popupJogo");
-  if (jaMostrado === hojeISO) return;
+  const horaJogo = new Date(jogoHoje.date);
+  const diffMs = horaJogo - agora;
+  const diffHoras = diffMs / (1000 * 60 * 60);
+
+  const jaMostradoHoje = localStorage.getItem("popupPrimeiraAbertura") === hojeISO;
+  const jaMostrado12h = localStorage.getItem("popupMeioDia") === hojeISO;
+  const jaMostrado1h = localStorage.getItem("popup1Hora") === hojeISO;
+
+  let mostrar = false;
+
+  /* ================= 1️⃣ PRIMEIRA ABERTURA DO DIA ================= */
+
+  if (!jaMostradoHoje) {
+    localStorage.setItem("popupPrimeiraAbertura", hojeISO);
+    mostrar = true;
+  }
+
+  /* ================= 2️⃣ MEIO-DIA ================= */
+
+  if (!mostrar && agora.getHours() === 12 && !jaMostrado12h) {
+    localStorage.setItem("popupMeioDia", hojeISO);
+    mostrar = true;
+  }
+
+  /* ================= 3️⃣ 1 HORA ANTES ================= */
+
+  if (!mostrar && diffHoras <= 1 && diffHoras > 0 && !jaMostrado1h) {
+    localStorage.setItem("popup1Hora", hojeISO);
+    mostrar = true;
+  }
+
+  if (!mostrar) return;
+
+  /* ================= CONTEÚDO POPUP ================= */
 
   const homeNormal = normalizarNomeEquipa(jogoHoje.homeTeam);
   const awayNormal = normalizarNomeEquipa(jogoHoje.awayTeam);
 
   const sportingCasa = homeNormal === "Sporting Clube de Portugal";
-
   const adversario = sportingCasa ? awayNormal : homeNormal;
   const local = sportingCasa ? "🏠 Em Casa" : "✈️ Fora";
 
-  const hora = new Date(jogoHoje.date)
-    .toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+  const hora = horaJogo.toLocaleTimeString("pt-PT", {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
 
   document.getElementById("popupContent").innerHTML = `
     <strong>${jogoHoje.competition}</strong><br><br>
@@ -1086,8 +1317,6 @@ function verificarDiaDeJogo(listaProximos) {
   `;
 
   document.getElementById("matchPopup").style.display = "flex";
-
-  localStorage.setItem("popupJogo", hojeISO);
 }
 
 function fecharPopup() {

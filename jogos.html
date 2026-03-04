@@ -163,6 +163,14 @@ body {
 .live-badge {
   animation: piscarLive 1s infinite;
 }
+
+.live-status {
+  text-align: center;
+  font-weight: 600;
+  color: #e11d48;
+  margin-top: 4px;
+  font-size: 13px;
+}
   
 .countdown {
   position: absolute;
@@ -594,7 +602,7 @@ const listaOrdenada = [...lista].sort((a, b) => {
     
       ${
         isToday && estado === "live"
-          ? `<div class="live-badge">AO VIVO ${calcularMinutoJogo(j.date)}</div>`
+          <div class="live-status">🔴 AO VIVO ${calcularMinutoJogo(j.date)}</div>
           : ""
       }
     
@@ -727,7 +735,7 @@ function renderTodos(lista, containerId, mostrarResultado) {
           
           ${
             isToday && estado === "live"
-              ? `<span class="live-badge">AO VIVO ${calcularMinutoJogo(j.date)}</span>`
+              ? `<div class="live-status">🔴 AO VIVO ${calcularMinutoJogo(j.date)}</div>`
               : isToday && estado && estado.tipo === "countdown"
                 ? `<span class="countdown">${estado.texto}</span>`
                 : ""

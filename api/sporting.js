@@ -165,8 +165,9 @@ for (const j of jogos) {
 ========================== */
 
 const resultadosManuais = [
-
+  
   {
+    competition: "Taça de Portugal",
     homeTeam: "Sporting CP",
     awayTeam: "FC Porto",
     date: "2026-03-03",

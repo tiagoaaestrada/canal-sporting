@@ -5,6 +5,8 @@ export default async function handler(req, res) {
     const API_KEY = process.env.FOOTBALL_DATA_KEY;
     const agora = new Date();
 
+    let jogos = [];
+
     /* =========================
        1️⃣ FOOTBALL-DATA (Base)
     ========================== */
@@ -24,100 +26,117 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: "Sem jogos disponíveis" });
     }
 
-    let jogos = data.matches.map(m => ({
+    jogos = data.matches.map(m => ({
+
       date: m.utcDate,
-      competition: m.competition.name,
-      homeTeam: m.homeTeam.name,
-      awayTeam: m.awayTeam.name,
+
+      competition: m.competition?.name ?? "Desconhecida",
+
+      homeTeam: m.homeTeam?.name ?? "",
+      awayTeam: m.awayTeam?.name ?? "",
+
+      status: m.status ?? "SCHEDULED",
+
       score: {
-        home: m.score.fullTime.home,
-        away: m.score.fullTime.away
+        home: m.score?.fullTime?.home ?? null,
+        away: m.score?.fullTime?.away ?? null
       }
+
     }));
 
 
-/* =========================
-   2️⃣ TAÇAS VIA ICS (FIX REAL)
-========================== */
+    /* =========================
+       2️⃣ TAÇAS VIA ICS
+    ========================== */
 
-try {
+    try {
 
-  const icsUrl = "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics";
+      const icsUrl =
+        "https://ics.ecal.com/ecal-sub/65579626831e20000d568cec/Sporting%20CP.ics";
 
-  const resIcs = await fetch(icsUrl);
-  const icsText = await resIcs.text();
+      const resIcs = await fetch(icsUrl);
+      const icsText = await resIcs.text();
 
-  const eventos = icsText.split("BEGIN:VEVENT");
+      const eventos = icsText.split("BEGIN:VEVENT");
 
-  for (const evento of eventos) {
+      for (const evento of eventos) {
 
-    if (!evento.includes("SUMMARY") || !evento.includes("DTSTART") || !evento.includes("DESCRIPTION"))
-      continue;
+        if (!evento.includes("SUMMARY") || !evento.includes("DTSTART"))
+          continue;
 
-    const summaryMatch = evento.match(/SUMMARY:(.*)/);
-    const dtMatch = evento.match(/DTSTART:(.*)/);
-    const descMatch = evento.match(/DESCRIPTION:(.*)/);
+        const summaryMatch = evento.match(/SUMMARY:(.*)/);
+        const dtMatch = evento.match(/DTSTART:(.*)/);
+        const descMatch = evento.match(/DESCRIPTION:(.*)/);
 
-    if (!summaryMatch || !dtMatch || !descMatch) continue;
+        if (!summaryMatch || !dtMatch) continue;
 
-    const summary = summaryMatch[1].trim();
-    const description = descMatch[1].toLowerCase();
+        const summary = summaryMatch[1].trim();
+        const description = descMatch ? descMatch[1].toLowerCase() : "";
 
-    // 🎯 AQUI ESTÁ A DIFERENÇA
-    if (
-      !description.includes("taça de portugal") &&
-      !description.includes("taca de portugal") &&
-      !description.includes("taça da liga") &&
-      !description.includes("taca da liga")
-    ) continue;
+        if (
+          !description.includes("taça") &&
+          !description.includes("taca")
+        ) continue;
 
-    // Converter data
-    const formatted = dtMatch[1].trim().replace(
-      /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
-      "$1-$2-$3T$4:$5:$6Z"
-    );
+        const formatted = dtMatch[1].trim().replace(
+          /(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z/,
+          "$1-$2-$3T$4:$5:$6Z"
+        );
 
-    const date = new Date(formatted);
+        const date = new Date(formatted);
 
-    // Separar equipas
-    let teams = null;
+        let teams = null;
 
-    if (summary.includes(" vs "))
-      teams = summary.split(" vs ");
-    else if (summary.includes(" - "))
-      teams = summary.split(" - ");
-    else continue;
+        if (summary.includes(" vs "))
+          teams = summary.split(" vs ");
+        else if (summary.includes(" - "))
+          teams = summary.split(" - ");
+        else continue;
 
-    if (!teams || teams.length !== 2) continue;
+        if (!teams || teams.length !== 2) continue;
 
-    const competitionName = description.includes("liga")
-      ? "Taça da Liga"
-      : "Taça de Portugal";
+        const homeTeam = teams[0].replace(/[\u{1F300}-\u{1FAFF}]/gu, "").trim();
+        const awayTeam = teams[1].replace(/[\u{1F300}-\u{1FAFF}]/gu, "").trim();
 
-    jogos.push({
-      date,
-      competition: competitionName,
-      homeTeam: teams[0].replace(/[\u{1F300}-\u{1FAFF}]/gu, "").trim(),
-      awayTeam: teams[1].replace(/[\u{1F300}-\u{1FAFF}]/gu, "").trim(),
-      score: { home: null, away: null }
-    });
+        const jaExiste = jogos.some(j =>
+          j.homeTeam === homeTeam &&
+          j.awayTeam === awayTeam &&
+          Math.abs(new Date(j.date) - date) < 86400000
+        );
 
-  }
+        if (jaExiste) continue;
 
-} catch (err) {
-  console.log("Erro ao carregar Taças ICS:", err.message);
-}
+        const competitionName = description.includes("liga")
+          ? "Taça da Liga"
+          : "Taça de Portugal";
+
+        jogos.push({
+          date,
+          competition: competitionName,
+          homeTeam,
+          awayTeam,
+          status: "SCHEDULED",
+          score: { home: null, away: null }
+        });
+
+      }
+
+    } catch (err) {
+      console.log("Erro ao carregar Taças ICS:", err.message);
+    }
+
+
     /* =========================
        3️⃣ ORDENAR
     ========================== */
 
     const porJogar = jogos
       .filter(j => new Date(j.date) >= agora)
-      .sort((a,b) => new Date(a.date) - new Date(b.date));
+      .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const jogados = jogos
       .filter(j => new Date(j.date) < agora)
-      .sort((a,b) => new Date(b.date) - new Date(a.date));
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
 
 
     /* =========================
@@ -173,4 +192,5 @@ try {
     });
 
   }
+
 }

@@ -136,14 +136,21 @@ body {
 }
 
 .live-badge {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #cc0000;
+  margin-top: 3px;
+}
+
+.live-badge::before {
+  content: "";
+  width: 7px;
+  height: 7px;
   background: #cc0000;
-  color: white;
-  font-size: 10px;
-  font-weight: bold;
-  padding: 3px 6px;
-  border-radius: 6px;
-  margin-top: 4px;
+  border-radius: 50%;
   animation: piscarLive 1s infinite;
 }
 
@@ -337,8 +344,8 @@ th, td {
   display: none;
 }
 
-#jogoDoDiaSection {
-  border: 2px solid #cc0000;
+#jogoDoDiaSection .team-row {
+  font-size: 16px;
 }
   
 </style>
@@ -583,15 +590,26 @@ const listaOrdenada = [...lista].sort((a, b) => {
         ${estado === "live" ? "match-live" : ""}">
         
         ${
-        isToday && estado === "live"
-          ? `<span class="live-badge">AO VIVO ${calcularMinutoJogo(j.date)}</span>`
             : isToday && estado && estado.tipo === "countdown"
               ? `<span class="countdown">${estado.texto}</span>`
               : ""
         }
-
+        
         <div class="match-time">
           ${formatarData(j.date)}
+        
+          ${
+            isToday && estado === "live"
+              ? `<div class="live-badge">AO VIVO ${calcularMinutoJogo(j.date)}</div>`
+              : ""
+          }
+        
+          ${
+            isToday && estado && estado.tipo === "countdown"
+              ? `<div class="countdown">${estado.texto}</div>`
+              : ""
+          }
+        
         </div>
 
         <div class="match-main">

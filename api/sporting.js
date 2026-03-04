@@ -27,21 +27,15 @@ export default async function handler(req, res) {
     }
 
     jogos = data.matches.map(m => ({
-
-      date: m.utcDate,
-
+      date: new Date(m.utcDate),
       competition: m.competition?.name ?? "Desconhecida",
-
       homeTeam: m.homeTeam?.name ?? "",
       awayTeam: m.awayTeam?.name ?? "",
-
       status: m.status ?? "SCHEDULED",
-
       score: {
         home: m.score?.fullTime?.home ?? null,
         away: m.score?.fullTime?.away ?? null
       }
-
     }));
 
 
@@ -125,72 +119,43 @@ export default async function handler(req, res) {
       console.log("Erro ao carregar Taças ICS:", err.message);
     }
 
-/* =========================
-   FIX RESULTADOS JOGOS ICS
-========================== */
 
-for (const j of jogos) {
+    /* =========================
+       RESULTADOS MANUAIS TAÇAS
+    ========================== */
 
-  // Só tentar corrigir jogos das Taças
-  if (!j.competition.includes("Taça")) continue;
+    const resultadosManuais = [
+      {
+        competition: "Taça de Portugal",
+        homeTeam: "Sporting CP",
+        awayTeam: "FC Porto",
+        date: "2026-03-03",
+        score: { home: 1, away: 0 }
+      }
+    ];
 
-  // Se já tiver resultado, não mexer
-  if (j.score.home !== null) continue;
+    resultadosManuais.forEach(r => {
 
-  const jogoIcsData = new Date(j.date);
+      const jogo = jogos.find(j => {
 
-  const match = jogos.find(apiGame => {
+        const mesmaEquipa =
+          j.homeTeam.includes("Sporting") &&
+          j.awayTeam.includes("Porto");
 
-    if (apiGame.score.home === null) return false;
+        const mesmaData =
+          new Date(j.date).toISOString().slice(0,10) === r.date;
 
-    const apiData = new Date(apiGame.date);
+        return mesmaEquipa && mesmaData;
 
-    const diff = Math.abs(apiData - jogoIcsData);
+      });
 
-    const mesmaEquipa =
-      apiGame.homeTeam === j.homeTeam &&
-      apiGame.awayTeam === j.awayTeam;
+      if (jogo) {
+        jogo.score = r.score;
+      }
 
-    return mesmaEquipa && diff < 1000 * 60 * 60 * 24;
+    });
 
-  });
 
-  if (match) {
-    j.score = match.score;
-  }
-
-}
-  /* =========================
-   RESULTADOS MANUAIS TAÇAS
-========================== */
-
-const resultadosManuais = [
-  
-  {
-    competition: "Taça de Portugal",
-    homeTeam: "Sporting CP",
-    awayTeam: "FC Porto",
-    date: "2026-03-03",
-    score: { home: 1, away: 0 }
-  }
-
-];
-
-resultadosManuais.forEach(r => {
-
-  const jogo = jogos.find(j =>
-
-    j.homeTeam.includes("Sporting") &&
-    j.awayTeam.includes("Porto") &&
-    j.date.startsWith(r.date)
-
-  );
-
-  if (jogo) {
-    jogo.score = r.score;
-  }
-
-});  
     /* =========================
        3️⃣ ORDENAR
     ========================== */

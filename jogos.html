@@ -585,34 +585,28 @@ const listaOrdenada = [...lista].sort((a, b) => {
       : "";
 
     container.innerHTML += `
-      <div class="match 
-        ${isToday ? "today" : ""} 
-        ${estado === "live" ? "match-live" : ""}">
-        
-        ${
-            : isToday && estado && estado.tipo === "countdown"
-              ? `<span class="countdown">${estado.texto}</span>`
-              : ""
-        }
-        
-        <div class="match-time">
-          ${formatarData(j.date)}
-        
-          ${
-            isToday && estado === "live"
-              ? `<div class="live-badge">AO VIVO ${calcularMinutoJogo(j.date)}</div>`
-              : ""
-          }
-        
-          ${
-            isToday && estado && estado.tipo === "countdown"
-              ? `<div class="countdown">${estado.texto}</div>`
-              : ""
-          }
-        
-        </div>
+  <div class="match 
+    ${isToday ? "today" : ""} 
+    ${estado === "live" ? "match-live" : ""}">
+    
+    <div class="match-time">
+      ${formatarData(j.date)}
+    
+      ${
+        isToday && estado === "live"
+          ? `<div class="live-badge">AO VIVO ${calcularMinutoJogo(j.date)}</div>`
+          : ""
+      }
+    
+      ${
+        isToday && estado && estado.tipo === "countdown"
+          ? `<div class="countdown">${estado.texto}</div>`
+          : ""
+      }
+    
+    </div>
 
-        <div class="match-main">
+    <div class="match-main">
 
           <div>
             <span class="comp-badge ${getCompetitionClass(j.competition)}">
